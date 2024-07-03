@@ -1,3 +1,11 @@
+<script>
+    function handleClick() {
+        /*--put log in logic here--*/
+        window.location.href = "/dashboard";
+        
+    }
+</script>
+
 <section class="bg-gray-200 min-h-screen flex items-center justify-center p-3">
     <div class="bg-gray-100 flex rounded-xl max-w-3xl drop-shadow-xl">
         <div class="sm:w-1/2 ps-3 pe-3 pb-6">
@@ -66,6 +74,7 @@
                         
                         <div>
                             <button
+                            on:click={() => {handleClick()}}
                                 type="submit"
                                 class="flex w-full justify-center rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
                                 >Sign in</button
@@ -80,9 +89,10 @@
                     </div>
                     <div>
                         <button
+                            on:click={() => {handleClick()}}
                             type="submit"
                             class="items-center mt-6 flex w-full justify-center rounded-md bg-gray-100 px-3 py-1.5 text-sm font-semibold leading-6 text-gray-600 shadow-sm hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600 border-2 border-gray-300"
-                            > <img class="h-5 w-5 mr-2" src="https://img.icons8.com/?size=100&id=17949&format=png&color=000000"> Log in with Google</button
+                            > <img class="h-5 w-5 mr-2" src="https://img.icons8.com/?size=100&id=17949&format=png&color=000000" alt="Google"> Log in with Google</button
                         >
                     </div>
                     <p class="mt-10 text-center text-sm text-gray-500">
