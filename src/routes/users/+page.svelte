@@ -1,9 +1,29 @@
+
 <script>
-    let data;
-    let form; 
+  let data;
+  let form; 
+
+  async function handleSubmit(event) {
+    try {
+      const formData = new FormData(event.target);
+      const response = await fetch('?/register', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.ok) {
+        alert('User created successfully!');
+      }
+      else throw new Error('Failed to create user');
+      // Optionally, redirect or perform another action upon success
+    } catch (error) {
+      console.error('Error creating user:', error);
+      alert('Failed to create user');
+    }
+  }
 </script>
   
-<form method="POST" action="?/register">
+<form method="POST" action="?/register" on:submit|preventDefault={handleSubmit}>
   <label>
     First Name:
     <input name="first_name" type="text" required />
@@ -56,7 +76,3 @@
 
   <button type="submit">Create User</button>
 </form>
-  
-{#if form?.status === "201"}
-	<p>Successfully logged in, {data.user}!</p>
-{/if}
