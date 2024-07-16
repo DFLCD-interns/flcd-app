@@ -45,7 +45,7 @@
   
       <div class="flex items-center justify-between pb-3">
         <h1 class="font-semibold text-gray-700">Pending Requests</h1>
-        <a href="/requests-history" class="text-gray-500"> View Requests History</a>
+        <a href="/dashboard/requests-history" class="text-gray-500"> View Requests History</a>
       </div>
     
       <div class="bg-white rounded-lg shadow-lg p-6">
@@ -55,7 +55,7 @@
             <p class="mt-2 text-gray-400">for August 24, 2024</p>
             <p class="mt-2 text-yellow-600">Pending</p>
           </div>
-          <a href="/request-details" class="flex items-center overflow-hidden relative w-50 h-10 text-white p-4 rounded-md bg-gradient-to-r from-green-600 to-lime-300 hover:from-lime-300 hover:to-green-600">
+          <a href="/dashboard/request-details" class="flex items-center overflow-hidden relative w-50 h-10 text-white p-4 rounded-md bg-gradient-to-r from-green-600 to-lime-300 hover:from-lime-300 hover:to-green-600">
             View
           </a>
           </div>
