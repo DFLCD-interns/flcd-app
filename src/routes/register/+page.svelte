@@ -34,7 +34,7 @@
                                 <Button size="xl" class="w-full" href="/register/student">Student</Button>
                             </div>
                             <div class="sm:w-1/2 w-full mt-3 space-y-3 sm:pl-1.5">
-                                <Button size="xl" class="w-full" color="red">Teacher</Button>
+                                <Button size="xl" class="w-full" href="/register/teacher" color="red">Teacher</Button>
                             </div>
                         </div>
                         <div class="mt-5 grid grid-cols-3 items-center mb-5">
