@@ -38,7 +38,7 @@
                             <Label for="password" class="mb-2">Password</Label>
                             <Input type="password" id="password" required />
                           </div>
-                          <Button on:click={() => {handleClick()}} type="submit" class="w-full">Submit</Button>
+                          <Button on:click={() => {handleClick()}} type="submit" class="w-full">Login</Button>
                     </form>
 
                     <div class="mt-5 grid grid-cols-3 items-center mb-5">
