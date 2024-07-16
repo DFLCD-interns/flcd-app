@@ -6,6 +6,10 @@
         goto("/dashboard", true)
         
     }
+    async function handleSubmit(){
+        /*--put log in logic here--*/
+        goto(`/dashboard`)
+    }
 </script>
 
 <section class="bg-gray-200 min-h-screen flex items-center justify-center p-5">
@@ -27,7 +31,7 @@
                 </div>
                 <!--form-->
                 <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form class="space-y-5" action="#" method="POST">
+                    <form on:submit|preventDefault={handleSubmit} class="space-y-5" action="#" method="POST">
                         <div class="mb-5">
                             <Label for="email" class="mb-2">Email address</Label>
                             <Input type="email" id="email" autocomplete="email" required />
@@ -36,7 +40,7 @@
                             <Label for="password" class="mb-2">Password</Label>
                             <Input type="password" id="password" required />
                           </div>
-                          <Button on:click={() => {handleClick()}} type="submit" class="w-full">Submit</Button>
+                          <Button type="submit" class="w-full">Submit</Button>
                     </form>
 
                     <div class="mt-5 grid grid-cols-3 items-center mb-5">
