@@ -9,6 +9,24 @@ const pool = new Pool({ //store this in an env file!
   port: 5432, // Default PostgreSQL port
 });
 
+const table_names = [
+  'admin_types',
+  'approvals',
+  'base_requests',
+  'batches',
+  'childs',
+  'child_requests',
+  'classes',
+  'class_requests',
+  'equipments',
+  'equipment_requests',
+  'preferred_times_child',
+  'preferred_times_class',
+  'users',
+  'venues',
+  'venue_requests'
+]
+
 export async function connectToDB() {
   try {
     const client = await pool.connect();
@@ -39,6 +57,20 @@ export async function getUsersDB() {
 
 export async function createUserDB(first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, access_level) {
   const qText = `INSERT INTO users (first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) VALUES ('${first_name}', '${last_name}', '${email}', '${pw_hash}', '${phone}', '${student_number}', '${course}', '${department}', ${superior_id}, ${access_level})`;
+  console.log(qText);
+  const result = await query(qText);
+  return result;
+}
+
+export async function insertIntoTableDB(table_name, dataDictionary) {
+  console.log(table_names.includes(table_name));
+  if (!table_names.includes(table_name)) {
+    throw new Error('Trying to insert to non-existent table (possibly misidentified/mispelled)');
+  }
+
+  const attributesText = [...dataDictionary.keys()].map((val) => val).join(", ");
+  const valuesText = [...dataDictionary.values()].map((val) => Number.isInteger(val) ? val : "\'" + val + "\'").join(", ");
+  const qText = `INSERT INTO ${table_name} (${attributesText}) VALUES (${valuesText})`;
   console.log(qText);
   const result = await query(qText);
   return result;
