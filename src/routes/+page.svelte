@@ -1,3 +1,5 @@
+<!-- current login page -->
+
 <script>
     import { goto, onNavigate } from '$app/navigation';
     import { Input, Label, Helper, Button, Checkbox, A } from 'flowbite-svelte';
@@ -49,7 +51,7 @@
                         <hr>
                     </div>
                     <div>
-                        <Button color="light" class="w-full"><img class="h-5 w-5 mr-2" src="https://img.icons8.com/?size=100&id=17949&format=png&color=000000" alt="Google"> Log in with Google</Button>
+                        <Button on:click={() => {handleClick()}} color="light" class="w-full"><img class="h-5 w-5 mr-2" src="https://img.icons8.com/?size=100&id=17949&format=png&color=000000" alt="Google"> Log in with Google</Button>
                     </div>
                     <p class="mt-5 text-center text-sm text-gray-500">
                         Don't have an account?
