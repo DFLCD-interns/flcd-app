@@ -1,10 +1,10 @@
 import { insertIntoTableDB } from '$lib/db';
 
 export const actions = {
-    createChildRequest: async ({cookies, request}) => {
+    createAdminType: async ({cookies, request}) => {
         try {
             const data = await request.formData();
-            const response = await insertIntoTableDB("child_requests", data);
+            const response = await insertIntoTableDB("admin_types", data);
             return response.ok;
         } catch (error) {   
             console.error("Action failed:", error.message);

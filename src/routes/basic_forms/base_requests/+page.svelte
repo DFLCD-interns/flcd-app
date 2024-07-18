@@ -62,5 +62,16 @@
     <input name="requester_id" type="number" required />
   </label>
 
-  <button type="submit">Create Base Request</button>
+  <button type="submit" class="button-style">Create Base Request</button>
 </form>
+
+<style>
+  .button-style {
+    border-radius: 20px;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+</style>

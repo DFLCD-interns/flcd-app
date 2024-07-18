@@ -5,7 +5,7 @@
   async function handleSubmit(event) {
     try {
       const formData = new FormData(event.target);
-      const response = await fetch('?/registerChild', {
+      const response = await fetch('?/createAdminType', {
         method: 'POST',
         body: formData
       });
@@ -14,40 +14,35 @@
       const success = body.data.includes('true');
 
       if (success) {
-        alert('Child registered successfully!');
+        alert('Admin type created successfully!');
       }
       else {
-        alert('Failed to register child.');
+        alert('Failed to create admin type.');
       }
     } catch (error) {
-      console.error('Error registering child:', error);
-      alert('Failed to register child.');
+      console.error('Error creating admin type:', error);
+      alert('Failed to create admin type.');
     }
   }
 </script>
   
 <form on:submit|preventDefault={handleSubmit}>
   <label>
-    Child Name:
-    <input name="name" type="text" placeholder="Prinz Zedric" required />
+    Admin Type Name:
+    <input name="name" type="text" required />
   </label>
 
   <label>
-    Birthdate:
-    <input name="birthdate" type="date" />
+    Description:
+    <input name="description" type="text" />
   </label>
 
   <label>
-    Tracking ID:
-    <input name="tracking_id" type="text" placeholder="(from the Excel Database)" required />
+    Access Level:
+    <input name="access_level" type="number" required />
   </label>
 
-  <label>
-    Class ID:
-    <input name="class_id" type="number" placeholder="12" />
-  </label>
-
-  <button type="submit" class="button-style">Create Child</button>
+  <button type="submit" class="button-style">Create Admin Type</button>
 </form>
 
 <style>

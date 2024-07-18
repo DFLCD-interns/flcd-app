@@ -78,7 +78,6 @@ export async function insertIntoTableDB(table_name, dataDictionary) {
     await query(qText);    
   }
   catch (err) {
-    console.error('Query failed:', err.message)
     status = 400;
   }
   return json({}, {status: status}); // returns a response with OK:true

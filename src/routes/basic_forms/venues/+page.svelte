@@ -38,5 +38,16 @@
     <input name="description" type="text" placeholder="1st floor, 4th room leftwards" />
   </label>
 
-  <button type="submit">Create Venue</button>
+  <button type="submit" class="button-style">Create Venue</button>
 </form>
+
+<style>
+  .button-style {
+    border-radius: 20px;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+</style>
