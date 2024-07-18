@@ -62,7 +62,7 @@
     <input name="description" type="text" placeholder="(eg, 1st semester, began July)" />
   </label>
 
-  <button type="submit">Create Batch</button>
+  <button type="submit" class="button-style">Create Batch</button>
 </form>
 
 # Class Creation
@@ -87,5 +87,16 @@
     <input name="description" type="text" placeholder="(eg, Section 1)" size="lg" />
   </label>
   
-  <button type="submit">Create Class</button>
+  <button type="submit" class="button-style">Create Class</button>
 </form>
+
+<style>
+  .button-style {
+    border-radius: 20px;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+</style>
