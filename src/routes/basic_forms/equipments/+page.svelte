@@ -42,5 +42,16 @@
     <input name="count" type="text" placeholder="2" required />
   </label>
 
-  <button type="submit">Create Equipment</button>
+  <button type="submit" class="button-style">Create Equipment</button>
 </form>
+
+<style>
+  .button-style {
+    border-radius: 20px;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+</style>

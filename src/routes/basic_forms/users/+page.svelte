@@ -78,5 +78,16 @@
     <input name="workgroup" type="number" />
   </label>
 
-  <button type="submit">Create User</button>
+  <button type="submit" class="button-style">Create User</button>
 </form>
+
+<style>
+  .button-style {
+    border-radius: 20px;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+</style>
