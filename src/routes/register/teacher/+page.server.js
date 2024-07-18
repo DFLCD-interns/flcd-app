@@ -6,10 +6,11 @@ export const actions = {
         try {
             const data = await request.formData();
             const args = [...data.values()];
-            const newUser = await createUserDB(...args.map((val) => val === '' ? null : val));
+            const response = await createUserDB(...args.map((val) => val === '' ? null : val));
+            return response.ok;
         } catch (error) {
-            return { status: 503 }
+            console.error("Action failed:", error.message);
+            return response.ok;
         }
-        throw redirect(303, '/dashboard'); // idk how to make this work
     }
 }

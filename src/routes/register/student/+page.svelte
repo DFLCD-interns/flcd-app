@@ -36,6 +36,10 @@
 
         console.log([...formData.values()]);
 
+        // Remove '-' from the student number in preparation for insertion in database 
+        const noDash = formData.get('student_number').split('-').join('');
+        formData.set('student_number', noDash);
+
         // Iterate through FormData to check for empty values
         for (let [key, value] of formData.entries()) {
             if (!value) {
@@ -50,7 +54,10 @@
                 body: formData
             });
 
-            if (response.ok) {
+            const body = await response.json();
+            const success = body.data.includes('true');
+
+            if (success) {
                 alert('User created successfully!');
                 goto(`/dashboard`);
             } else {
@@ -110,7 +117,7 @@
                       </Alert>
                     {/if}
 
-                    <form method="POST" action="?/register" on:submit|preventDefault={handleSubmit} class="space-y-3">
+                    <form on:submit|preventDefault={handleSubmit} class="space-y-3">
                         <div class="flex flex-wrap align-center">
                             <div class="sm:w-1/2 w-full mt-3 space-y-4 sm:pr-1.5">
                                 <div class="flex items-center space-x-2">

@@ -1,3 +1,4 @@
+import { json } from '@sveltejs/kit'
 import pkg from 'pg';
 const { Pool } = pkg;
 
@@ -63,7 +64,6 @@ export async function createUserDB(first_name, last_name, email, pw_hash, phone,
 }
 
 export async function insertIntoTableDB(table_name, dataDictionary) {
-  console.log(table_names.includes(table_name));
   if (!table_names.includes(table_name)) {
     throw new Error('Trying to insert to non-existent table (possibly misidentified/mispelled)');
   }
@@ -72,6 +72,14 @@ export async function insertIntoTableDB(table_name, dataDictionary) {
   const valuesText = [...dataDictionary.values()].map((val) => Number.isInteger(val) ? val : "\'" + val + "\'").join(", ");
   const qText = `INSERT INTO ${table_name} (${attributesText}) VALUES (${valuesText})`;
   console.log(qText);
-  const result = await query(qText);
-  return result;
+
+  let status = 200;
+  try {
+    await query(qText);    
+  }
+  catch (err) {
+    console.error('Query failed:', err.message)
+    status = 400;
+  }
+  return json({}, {status: status}); // returns a response with OK:true
 }
