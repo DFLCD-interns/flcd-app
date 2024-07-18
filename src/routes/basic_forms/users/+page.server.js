@@ -5,10 +5,11 @@ export const actions = {
     register: async ({cookies, request}) => {
         try {
             const data = await request.formData();
-            const newUser = await insertIntoTableDB("users", data);
+            const response = await insertIntoTableDB("users", data);
+            return response.ok;
         } catch (error) {   
-            return { status: 503 }
+            console.error("Action failed:", error.message);
+            return response.ok;
         }
-        throw redirect(303, '/dashboard'); // idk how to make this work
     }
 }
