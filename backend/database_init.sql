@@ -89,7 +89,7 @@ CREATE TABLE equipments (
 CREATE TABLE childs (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
-    birthdate TIME,
+    birthdate DATE,
     tracking_id VARCHAR(128),
     class_id INT,
     FOREIGN KEY (class_id) REFERENCES classes(id)
@@ -101,8 +101,8 @@ VALUES ('Joshua', 'Tester', 'jt@testmail.com', '5E884898DA28047151D0E56F8DC62927
 
 CREATE TABLE base_requests (
     id SERIAL PRIMARY KEY,
-    request_time TIME NOT NULL,
-    completion_time TIME NOT NULL,
+    request_time TIMESTAMP NOT NULL,
+    completion_time TIMESTAMP NOT NULL,
     faculty_id INT,
     FOREIGN KEY (faculty_id) REFERENCES users(id),
     office VARCHAR(128),
@@ -133,10 +133,10 @@ CREATE TABLE class_requests (
 
 CREATE TABLE venue_requests (
     id SERIAL PRIMARY KEY,
-    start_time TIME,
-    end_time TIME,
-    promised_return_time TIME,
-    return_time TIME,
+    start_time TIMESTAMP,
+    end_time TIMESTAMP,
+    promised_return_time TIMESTAMP,
+    return_time TIMESTAMP,
     venue_id INT,
     FOREIGN KEY (venue_id) REFERENCES venues(id),
     request_id INT,
@@ -146,10 +146,10 @@ CREATE TABLE venue_requests (
 CREATE TABLE equipment_requests (
     id SERIAL PRIMARY KEY,
     count INT,
-    start_time TIME,
-    end_time TIME,
-    promised_return_time TIME,
-    return_time TIME,
+    start_time TIMESTAMP,
+    end_time TIMESTAMP,
+    promised_return_time TIMESTAMP,
+    return_time TIMESTAMP,
     equipment_id INT,
     FOREIGN KEY (equipment_id) REFERENCES equipments(id),
     request_id INT,
@@ -158,16 +158,16 @@ CREATE TABLE equipment_requests (
 
 CREATE TABLE preferred_times_child (
     id SERIAL PRIMARY KEY,
-    start_time TIME,
-    end_time TIME,
+    start_time TIMESTAMP,
+    end_time TIMESTAMP,
     request_id INT,
     FOREIGN KEY (request_id) REFERENCES child_requests(id)
 );
 
 CREATE TABLE preferred_times_class (
     id SERIAL PRIMARY KEY,
-    start_time TIME,
-    end_time TIME,
+    start_time TIMESTAMP,
+    end_time TIMESTAMP,
     request_id INT,
     FOREIGN KEY (request_id) REFERENCES class_requests(id)
 );
