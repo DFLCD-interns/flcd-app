@@ -35,7 +35,7 @@
 
   <label>
     Description:
-    <input name="description" type="text" placeholder="1st floor, 4th room leftwards" required />
+    <input name="description" type="text" placeholder="1st floor, 4th room leftwards" />
   </label>
 
   <button type="submit">Create Venue</button>
