@@ -155,7 +155,7 @@
                                         type="text"
                                         id="snum"
                                         placeholder={`20XX-XXXXX`}
-                                        pattern={"[0-9]{4}-[0-9]{5}"}
+                                        pattern={"[0-9]{4}-*[0-9]{5}"}
                                         required
                                     />
                                 </div>
