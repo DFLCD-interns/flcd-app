@@ -5,19 +5,21 @@ export const actions = {
     createBatch: async ({cookies, request}) => {
         try {
             const data = await request.formData();
-            const newBatch = await insertIntoTableDB("batches", data);
+            const response = await insertIntoTableDB("batches", data);
+            return response.ok;
         } catch (error) {   
-            return { status: 503 }
+            console.error("Action failed:", error.message);
+            return response.ok;
         }
     },
     createClass: async ({cookies, request}) => {
         try {
             const data = await request.formData();
-            // handler id is from cookies
-            // batch id is dropdown or the latest one (?)
-            const newBatch = await insertIntoTableDB("classes", data);
+            const response = await insertIntoTableDB("classes", data);
+            return response.ok;
         } catch (error) {   
-            return { status: 503 }
+            console.error("Action failed:", error.message);
+            return response.ok;
         }
     }
 }

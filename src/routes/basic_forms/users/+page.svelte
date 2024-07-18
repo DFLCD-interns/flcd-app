@@ -11,19 +11,23 @@
         body: formData
       });
       
-      if (response.ok) {
+      const body = await response.json();
+      const success = body.data.includes('true');
+
+      if (success) {
         alert('User created successfully!');
       }
-      else throw new Error('Failed to create user');
-      // Optionally, redirect or perform another action upon success
+      else {
+        alert('Failed to create user.');
+      }
     } catch (error) {
       console.error('Error creating user:', error);
-      alert('Failed to create user');
+      alert('Failed to create user.');
     }
   }
 </script>
   
-<form method="POST" action="?/register" on:submit|preventDefault={handleSubmit}>
+<form on:submit|preventDefault={handleSubmit}>
   <label>
     First Name:
     <input name="first_name" type="text" required />
