@@ -158,7 +158,7 @@
                     <p class="mt-5 text-center text-sm text-gray-500">
                         Already have an account?
                         <a
-                            href="/"
+                            href="/login"
                             class="font-semibold leading-6 text-emerald-600 hover:text-emerald-500"
                             >Sign in</a
                         >

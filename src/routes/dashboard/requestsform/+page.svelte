@@ -1,7 +1,20 @@
 <script>
+    /** @type {import('./$types').PageData} */
+	export let data;
     import { browser } from "$app/environment";
     import { Button, Card, GradientButton, Input, Label, MultiSelect, Select, Textarea, Tabs, TabItem, } from "flowbite-svelte";
     import { AddressBookOutline, ArrowLeftOutline, BuildingSolid, ChevronLeftOutline, ComputerSpeakerSolid, UserAddSolid, } from "flowbite-svelte-icons";
+    let equipmentList = data.equipment;
+    function renameKey ( obj, oldKey, newKey ) {
+        obj[newKey] = obj[oldKey];
+        
+    }
+    console.log(equipmentList)
+    //const arr = JSON.parse(equipmentList);
+    //console.log(arr)
+    equipmentList.forEach( obj => renameKey( obj, 'id', 'value' ) );
+    console.log(equipmentList)
+    console.log(equipmentList[0])
     function navBack() {
         if (browser) window.history.back();
     }
@@ -76,7 +89,7 @@
                         <MultiSelect
                         tabindex=0
                             class="mt-2"
-                            items={equipment}
+                            items={equipmentList}
                             bind:value={selectedEq}
                             required
                         />
@@ -84,12 +97,11 @@
                     <div class="grid gap-6 mb-6 md:grid-cols-4">
                         {#each selectedEq as eq}
                             <Label>
-                                <span
-                                    >Quantity of {equipment.find(
-                                        (x) => x.value == eq,
-                                    ).name}</span
-                                >
-                                <Input type="number" name={eq} autocomplete={`1`} required />
+                                <span>Quantity of {equipmentList.find(
+                                    (x) => x.value == eq,
+                                ).name}</span
+                            >
+                            <Input type="number" name={eq} min=1 max={equipmentList.find((x) => x.value == eq, ).count} required />
                             </Label>
                         {/each}
                     </div>

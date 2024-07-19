@@ -43,3 +43,8 @@ export async function createUserDB(first_name, last_name, email, pw_hash, phone,
   const result = await query(qText);
   return result;
 }
+
+export async function getEquipmentDB() {
+  const result = await query("SELECT * FROM equipments");
+  return result;
+}
