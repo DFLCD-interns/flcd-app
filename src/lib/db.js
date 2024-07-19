@@ -1,3 +1,4 @@
+import { json } from '@sveltejs/kit'
 import pkg from 'pg';
 const { Pool } = pkg;
 
@@ -8,6 +9,24 @@ const pool = new Pool({ //store this in an env file!
   password: 'password',
   port: 5432, // Default PostgreSQL port
 });
+
+const table_names = [
+  'admin_types',
+  'approvals',
+  'base_requests',
+  'batches',
+  'childs',
+  'child_requests',
+  'classes',
+  'class_requests',
+  'equipments',
+  'equipment_requests',
+  'preferred_times_child',
+  'preferred_times_class',
+  'users',
+  'venues',
+  'venue_requests'
+]
 
 export async function connectToDB() {
   try {
@@ -42,4 +61,24 @@ export async function createUserDB(first_name, last_name, email, pw_hash, phone,
   console.log(qText);
   const result = await query(qText);
   return result;
+}
+
+export async function insertIntoTableDB(table_name, dataDictionary) {
+  if (!table_names.includes(table_name)) {
+    throw new Error('Trying to insert to non-existent table (possibly misidentified/mispelled)');
+  }
+
+  const attributesText = [...dataDictionary.keys()].map((val) => val).join(", ");
+  const valuesText = [...dataDictionary.values()].map((val) => Number.isInteger(val) ? val : "\'" + val + "\'").join(", ");
+  const qText = `INSERT INTO ${table_name} (${attributesText}) VALUES (${valuesText})`;
+  console.log(qText);
+
+  let status = 200;
+  try {
+    await query(qText);    
+  }
+  catch (err) {
+    status = 400;
+  }
+  return json({}, {status: status}); // returns a response with OK:true
 }

@@ -3,28 +3,84 @@
     import { browser } from "$app/environment";
     import { Input, Label, Button, Select, Alert } from "flowbite-svelte";
     import { ArrowLeftOutline } from "flowbite-svelte-icons";
-    let selected = "";
+    let selectedDept = "";
+    let selectedCourse = "";
     let password, confirm_password;
     let match = true;
+
+    let data;
+    let form; 
+
+    let workgroup = 4;
+    let superior_id = 3;
+    let pw_hash = "hash"
+
+    async function handleSubmit(event) {
+        event.preventDefault(); // Prevent the default form submission behavior
+
+        // Check if password and confirm password match
+        if (!password || password !== confirm_password) {
+            alert('Passwords do not match');
+            return;
+        }
+
+        // Create FormData object from the form
+        const formData = new FormData(event.target);
+
+        // Manually append superior_id and workgroup to the FormData
+        formData.append('workgroup', workgroup);
+        formData.append('superior_id', superior_id);
+
+        // placeholder for password hashing logic
+        formData.append('pw_hash', pw_hash);
+
+        console.log([...formData.values()]);
+
+        // Remove '-' from the student number in preparation for insertion in database 
+        const noDash = formData.get('student_number').split('-').join('');
+        formData.set('student_number', noDash);
+
+        // Iterate through FormData to check for empty values
+        for (let [key, value] of formData.entries()) {
+            if (!value) {
+                alert(`Please fill out the ${key} field.`);
+                return;
+            }
+        }
+
+        try {
+            const response = await fetch('?/register', {
+                method: 'POST',
+                body: formData
+            });
+
+            const body = await response.json();
+            const success = body.data.includes('true');
+
+            if (success) {
+                alert('User created successfully!');
+                goto(`/dashboard`);
+            } else {
+                throw new Error('Failed to create user');
+            }
+        } catch (error) {
+            console.error('Error creating user:', error);
+            alert('Failed to create user');
+        }
+    }
     
     let depts = [
-        {
-            value: "dflcd",
-            name: "Department of Family Life and Child Development",
-        },
-        {
-            value: "dctid",
-            name: "Department of Clothing, Textiles, and Interior Design",
-        },
+        { value: "dflcd", name: "Department of Family Life and Child Development" },
+        { value: "dctid", name: "Department of Clothing, Textiles, and Interior Design" },
         { value: "dfsn", name: "Department of Food Science and Nutrition" },
     ];
-    async function handleSubmit(){
-        if(!password  || password != confirm_password) {
-            match = false;
-            return
-        }
-        goto(`/dashboard`)
-    }
+
+    let courses = [
+        { value: "c1", name: "Example Course 1" },
+        { value: "c2", name: "Example Course 2" },
+        { value: "c3", name: "Example Course 3" },
+    ];
+
     function navBack() {
         if (browser) window.history.back();
     }
@@ -33,25 +89,22 @@
 <section class="bg-gray-200 min-h-screen flex items-center justify-center p-5">
     <div class="bg-gray-100 w-full flex rounded-xl max-w-4xl drop-shadow-xl">
         <div class="w-full ps-3 pe-3 pb-6">
-            <div
-                class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8 w-full"
-            >
+            <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8 w-full" >
                 <div class="sm:w-full sm:mx-auto w-full relative">
                     <Button
                         color="alternative"
                         class="!p-2 absolute top-0 left-0"
                         on:click={() => {
                             navBack();
-                        }}><ArrowLeftOutline class="w-6 h-6" /></Button
-                    >
+                        }}><ArrowLeftOutline class="w-6 h-6" />
+                    </Button>
                     <img
                         class="mx-auto h-10 w-auto"
                         src="https://che.upd.edu.ph/wp-content/uploads/2022/10/DFLCD-Logo.png"
                         alt="DFLCD"
                     />
                     <h2
-                        class="mt-5 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900"
-                    >
+                        class="mt-5 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900" >
                         Make a new account
                     </h2>
                 </div>
@@ -63,18 +116,17 @@
                         Please try again.
                       </Alert>
                     {/if}
-                    <form on:submit|preventDefault={handleSubmit} class="space-y-3" method="POST">
+
+                    <form on:submit|preventDefault={handleSubmit} class="space-y-3">
                         <div class="flex flex-wrap align-center">
-                            <div
-                                class="sm:w-1/2 w-full mt-3 space-y-4 sm:pr-1.5"
-                            >
+                            <div class="sm:w-1/2 w-full mt-3 space-y-4 sm:pr-1.5">
                                 <div class="flex items-center space-x-2">
-                                    <!--names-->
                                     <div class="w-1/2">
-                                        <Label for="first_name" class="mb-2"
-                                            >First name</Label
-                                        >
+                                        <Label for="first_name" class="mb-2">
+                                            First Name
+                                        </Label>
                                         <Input
+                                            name="first_name"
                                             type="text"
                                             id="first_name"
                                             placeholder="Juan"
@@ -82,10 +134,11 @@
                                         />
                                     </div>
                                     <div class="w-1/2">
-                                        <Label for="last_name" class="mb-2"
-                                            >Last name</Label
-                                        >
+                                        <Label for="last_name" class="mb-2">
+                                            Last Name
+                                        </Label>
                                         <Input
+                                            name="last_name"
                                             type="text"
                                             id="last_name"
                                             placeholder="Dela Cruz"
@@ -94,14 +147,15 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <Label for="snum" class="mb-2"
-                                        >Student number</Label
-                                    >
+                                    <Label for="snum" class="mb-2">
+                                        Student Number
+                                    </Label>
                                     <Input
+                                        name="student_number"
                                         type="text"
                                         id="snum"
                                         placeholder={`20XX-XXXXX`}
-                                        pattern={"[0-9]{4}-[0-9]{5}"}
+                                        pattern={"[0-9]{4}-*[0-9]{5}"}
                                         required
                                     />
                                 </div>
@@ -109,23 +163,35 @@
                                     <Label>
                                         Department
                                         <Select
+                                            name="department"
                                             class="mt-2"
                                             items={depts}
-                                            bind:value={selected}
+                                            bind:value={selectedDept}
+                                            required
+                                        />
+                                    </Label>
+                                </div>
+                                <div>
+                                    <Label>
+                                        Course
+                                        <Select
+                                            name="course"
+                                            class="mt-2"
+                                            items={courses}
+                                            bind:value={selectedCourse}
                                             required
                                         />
                                     </Label>
                                 </div>
                             </div>
-                            <div
-                                class="sm:w-1/2 w-full mt-3 space-y-4 sm:pl-1.5"
-                            >
-                                <!--names-->
+
+                            <div class="sm:w-1/2 w-full mt-3 space-y-4 sm:pl-1.5">
                                 <div>
                                     <Label for="phone" class="mb-2"
-                                        >Phone number</Label
+                                        >Phone Number</Label
                                     >
                                     <Input
+                                        name="phone"
                                         type="tel"
                                         id="phone"
                                         placeholder="09xxxxxxxxx"
@@ -135,13 +201,14 @@
                                 </div>
                                 <div>
                                     <Label for="email" class="mb-2"
-                                        >Email address</Label
+                                        >Email Address</Label
                                     >
                                     <Input
+                                        name="email"
                                         type="email"
                                         id="email"
                                         autocomplete="email"
-                                        placeholder="myemail@email.ph"
+                                        placeholder="myemail@up.edu.ph"
                                         required
                                     />
                                 </div>
@@ -163,7 +230,7 @@
                                   </div>
                             </div>
                         </div>
-                            <Button on:click={() =>{handleSubmit()}} type="submit" class="w-full">Submit</Button>
+                            <Button on:click={() =>{handleSubmit()}} type="submit" class="w-full">Sign Up</Button>
                     </form>
 
                     <p class="mt-5 text-center text-sm text-gray-500">
