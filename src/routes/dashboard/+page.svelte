@@ -1,7 +1,7 @@
 <script>
     import AdminView from "./admin-view.svelte";
     import NonAdminView from "./non-admin-view.svelte";
-    let isAdmin = false;
+    let isAdmin = true;
     function handleClick() {
         window.location.href = "/";
     }

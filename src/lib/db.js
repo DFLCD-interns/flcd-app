@@ -63,13 +63,13 @@ export async function createUserDB(first_name, last_name, email, pw_hash, phone,
   return result;
 }
 
-export async function insertIntoTableDB(table_name, dataDictionary) {
+export async function insertIntoTableDB(table_name, formData) {
   if (!table_names.includes(table_name)) {
-    throw new Error('Trying to insert to non-existent table (possibly misidentified/mispelled)');
+    throw new Error('Trying to insert to non-existent table (possibly misidentified/mispelled)', table_name);
   }
 
-  const attributesText = [...dataDictionary.keys()].map((val) => val).join(", ");
-  const valuesText = [...dataDictionary.values()].map((val) => Number.isInteger(val) ? val : "\'" + val + "\'").join(", ");
+  const attributesText = [...formData.keys()].map((val) => val).join(", ");
+  const valuesText = [...formData.values()].map((val) => Number.isInteger(val) ? val : "\'" + val + "\'").join(", ");
   const qText = `INSERT INTO ${table_name} (${attributesText}) VALUES (${valuesText})`;
   console.log(qText);
 
@@ -81,4 +81,62 @@ export async function insertIntoTableDB(table_name, dataDictionary) {
     status = 400;
   }
   return json({}, {status: status}); // returns a response with OK:true
+}
+
+// Finds the table entry where all values from searchFormData matches with the corresponding attribute values
+export async function getFromTableDB(table_name, searchFormData, limit = 100) {
+  if (!table_names.includes(table_name)) {
+    throw new Error('Trying to insert to non-existent table (possibly misidentified/mispelled):', table_name);
+  }
+
+  const whereText = [...searchFormData.entries()].map((pair) => {
+    pair[1] = '\'' + pair[1] + '\'';
+    return '(' + pair.join(' = ') + ')'
+  }).join(' AND ')
+  const qText = `SELECT \* FROM ${table_name} WHERE (${whereText}) ORDER BY (id) asc LIMIT ${limit} `;
+  console.log(qText);
+
+  let status = 200;
+  let result;
+  try {
+    result = await query(qText);    
+  }
+  catch (err) {
+    status = 400;
+  }
+  return json({result: result}, {status: status});
+}
+
+// Provide updateFormData for all values that you want updating
+// Provide searchFormData for to specify which row/s you want updating
+export async function updateTableDB(table_name, searchFormData, updateFormData) { 
+  if (!table_names.includes(table_name)) {
+    throw new Error('Trying to insert to non-existent table (possibly misidentified/mispelled):', table_name);
+  }
+
+  const setText = [...updateFormData.entries()].map((pair) => {
+    pair[1] = '\'' + pair[1] + '\'';
+    return pair.join(' = ')
+  }).join(', ')
+  const whereText = [...searchFormData.entries()].map((pair) => {
+    pair[1] = '\'' + pair[1] + '\'';
+    return '(' + pair.join(' = ') + ')'
+  }).join(' AND ')
+
+  const qText = 
+    `UPDATE ${table_name}
+    SET ${setText}
+    WHERE ${whereText}`
+
+  console.log(qText);
+
+  let status = 200;
+  try {
+    await query(qText);    
+  }
+  catch (err) {
+    status = 400;
+  }
+  return json({}, {status: status});
+
 }

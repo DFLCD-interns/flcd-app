@@ -1,8 +1,37 @@
 <script>
     import { ChevronLeftOutline } from 'flowbite-svelte-icons';
+    
+    let data;
+    let form;
+
     function handleClick() {
         window.location.href = "/";
     }
+
+    async function handleSubmitApproval(event) {
+        try {
+            const formData = new FormData(event.target);
+            const response = await fetch('?/approve', {
+                method: 'POST',
+                body: formData
+            });
+
+            const body = await response.json();
+            console.log(body);
+            const success = [];
+
+            if (success) {
+                alert('Approval done successfully!');
+            }
+            else {
+                alert('Failed to approve form.');
+            }
+        } catch (error) {
+            console.error('Error approving form:', error);
+            alert('Failed to approve.');
+        }
+    }
+
 </script>
 
 
@@ -112,22 +141,31 @@
             <h2 class="text-gray-600 text-lg mb-1 font-medium title-font">Approval History</h2>
             <p class="text-gray-600" >Approved by jgtaluban@up.edu.ph</p>
             <p class="text-gray-600">Approved by cheflcd.upd@up.edu.ph</p>
-            </div>
-            <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
-            <h2 class="text-gray-600 text-lg mb-1 font-medium title-font">Comment</h2>
-            <div class="relative mb-4">
-            <textarea id="message" name="message" class="w-full bg-white rounded border border-gray-300 focus:border-green-600 focus:ring-2 focus:ring-green-600 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"></textarea>
         </div>
-        <div class="flex justify-center">
-          <a href="\requests-history" class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">Approve</a>
-          <button class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">Decline</button>
-        </div>
+        <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
+            <h1 class="text-gray-600 text-lg mb-1 font-medium title-font">Form Approval</h1>
+            <form on:submit|preventDefault={handleSubmitApproval}>
+                <div class="relative mb-4">
+                    <input 
+                        id="remarks" 
+                        name="remarks" 
+                        placeholder="Remarks and comments."
+                        class="w-full bg-white rounded border border-gray-300 focus:border-green-600 focus:ring-2 focus:ring-green-600 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"/>
+                </div>
+                <div class="flex justify-center">
+                    <button 
+                        type="submit" 
+                        class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
+                        Approve
+                    </button>
+                    <button 
+                        type="submit" 
+                        class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
+                        Decline
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
   </div>
-  
-  
-
-    </div>
-
-    
+</div>
