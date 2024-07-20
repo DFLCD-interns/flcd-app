@@ -13,12 +13,15 @@ export const actions = {
     }, 
     approve: async ({cookies, request}) => {
         try {
+            // note that the updateFormData is more of a superset of the searchFormData
             const updateFormData = await request.formData(); // user input
-            updateFormData.append('status', 'approved'); 
-            
+
+            updateFormData.append('request_id', 1); // debug, must come from page (parameters?)
+            updateFormData.append('approver_id', 1); // debug, must come from cookies
+
             const searchFormData = new FormData();
-            searchFormData.append('request_id', 1); // debug, must come from page (parameters?)
-            searchFormData.append('approver_id', 1); // debug, must come from cookies
+            searchFormData.append('request_id', updateFormData.get('request_id')); 
+            searchFormData.append('approver_id', updateFormData.get('approver_id')); 
 
             const response = await updateTableDB("approvals", searchFormData, updateFormData);
             return response.ok;

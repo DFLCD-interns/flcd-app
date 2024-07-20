@@ -34,9 +34,6 @@
 
 </script>
 
-
-
-
 <div class = "min-h-screen  p-10">
     <div class="w-full flex items-center justify-between">
         <a href="\dashboard"><ChevronLeftOutline class="size-10 text-gray-600"></ChevronLeftOutline></a>
@@ -144,7 +141,7 @@
         </div>
         <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
             <h1 class="text-gray-600 text-lg mb-1 font-medium title-font">Form Approval</h1>
-            <form on:submit|preventDefault={handleSubmitApproval}>
+            <form bind:this={form} on:submit|preventDefault={handleSubmitApproval}>
                 <div class="relative mb-4">
                     <input 
                         id="remarks" 
@@ -153,12 +150,16 @@
                         class="w-full bg-white rounded border border-gray-300 focus:border-green-600 focus:ring-2 focus:ring-green-600 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"/>
                 </div>
                 <div class="flex justify-center">
+                    <!-- Hidden input field to store the status -->
+                    <input type="hidden" name="status" />
                     <button 
+                        on:click={() => form.querySelector('input[name="status"]').value = "Approved"}
                         type="submit" 
                         class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
                         Approve
                     </button>
-                    <button 
+                    <button
+                        on:click={() => form.querySelector('input[name="status"]').value = "Declined"}
                         type="submit" 
                         class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
                         Decline
