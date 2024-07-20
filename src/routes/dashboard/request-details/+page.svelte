@@ -1,6 +1,6 @@
 <script>
     import { ChevronLeftOutline } from 'flowbite-svelte-icons';
-    
+
     let data;
     let form;
 
@@ -17,18 +17,17 @@
             });
 
             const body = await response.json();
-            console.log(body);
-            const success = [];
+            const success = body.data.includes('true');
 
             if (success) {
-                alert('Approval done successfully!');
+                alert('Approval/decline done successfully!');
             }
             else {
-                alert('Failed to approve form.');
+                alert('Failed to approve/decline form.');
             }
         } catch (error) {
-            console.error('Error approving form:', error);
-            alert('Failed to approve.');
+            console.error('Error approving/declining form:', error);
+            alert('Failed to approve/decline.');
         }
     }
 
@@ -135,9 +134,11 @@
     </div>
     <div class="space-y-10 relative">
         <div class="bg-white rounded-lg p-8 shadow-md">
-            <h2 class="text-gray-600 text-lg mb-1 font-medium title-font">Approval History</h2>
-            <p class="text-gray-600" >Approved by jgtaluban@up.edu.ph</p>
-            <p class="text-gray-600">Approved by cheflcd.upd@up.edu.ph</p>
+            <h2 class="text-gray-600 text-lg mb-1 font-medium title-font">Approval Status</h2>
+            <p class="text-gray-600" >✔️ Approved by Prof@up.edu.ph</p>
+            <p class="text-gray-600" >⌛ Pending with Staff@up.edu.ph</p>
+            <p class="text-gray-600" >(⌛) Invisible to FIC@up.edu.ph</p>
+            <p class="text-gray-600" >(⌛) Invisible to Chair@up.edu.ph</p>
         </div>
         <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
             <h1 class="text-gray-600 text-lg mb-1 font-medium title-font">Form Approval</h1>
