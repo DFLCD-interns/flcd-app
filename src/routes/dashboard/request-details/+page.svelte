@@ -1,5 +1,7 @@
 <script>
-    import { ChevronLeftOutline } from 'flowbite-svelte-icons';
+    import { ChevronLeftOutline, ComputerSpeakerOutline } from 'flowbite-svelte-icons';
+	import { onMount } from 'svelte';
+    import * as devalue from 'devalue';
 
     let data;
     let form;
@@ -7,6 +9,48 @@
     function handleClick() {
         window.location.href = "/";
     }
+
+    let totalStatus = "";
+    let approvalForms = [];
+    onMount(async () => {
+        console.log('Component mounted.');
+        try {
+            const formData = new FormData();
+            formData.append('request_id', 1); // debug, must come from page (params?)
+
+            const response = await fetch('?/getApprovalForms', {
+                method: 'POST',
+                body: formData
+            });
+
+            const body = await response.json();
+            const responseObj = devalue.parse(body.data);
+            approvalForms = responseObj.body;
+
+            const statuses = approvalForms.map((elem) => elem.status); 
+            if (statuses.includes("Declined"))
+                totalStatus = "Declined";
+            else if (statuses.includes("Pending"))
+                totalStatus = "Pending";
+            else if (statuses.every((elem) => elem === "Approved"))
+                totalStatus = "Approved";
+            else {
+                totalStatus = "Cannot be determined";
+                console.error("Total status of form cannot be determined.")
+            } 
+
+            if (responseObj.status === 200) {                
+                console.log('Retrieved approval forms.');
+            }
+            else {
+                console.log('Failed to retrieve approval forms.');
+            }
+        } catch (error) {
+            console.error('Error retrieving approval forms:', error);
+        }
+
+        return () => approvalForms = [];
+    })
 
     async function handleSubmitApproval(event) {
         try {
@@ -37,7 +81,7 @@
     <div class="w-full flex items-center justify-between">
         <a href="\dashboard"><ChevronLeftOutline class="size-10 text-gray-600"></ChevronLeftOutline></a>
         <h2 class="text-2xl font-semibold text-gray-600">Equipment Request</h2>
-        <h2 class="text-xl font-semibold text-yellow-600">Pending</h2>
+        <h2 class="text-xl font-semibold text-yellow-600">{totalStatus}</h2>
     </div>
     <div class="md:flex pt-10 gap-10 justify-center">
         <div class="bg-white flex items-center justify-center rounded-lg shadow-lg p-6">
@@ -135,10 +179,15 @@
     <div class="space-y-10 relative">
         <div class="bg-white rounded-lg p-8 shadow-md">
             <h2 class="text-gray-600 text-lg mb-1 font-medium title-font">Approval Status</h2>
-            <p class="text-gray-600" >✔️ Approved by Prof@up.edu.ph</p>
-            <p class="text-gray-600" >⌛ Pending with Staff@up.edu.ph</p>
-            <p class="text-gray-600" >(⌛) Invisible to FIC@up.edu.ph</p>
-            <p class="text-gray-600" >(⌛) Invisible to Chair@up.edu.ph</p>
+            {#each approvalForms as approvalForm} 
+                <p class="text-gray-600" >
+                    {approvalForm.status === 'Approved' ? '✔️ Approved by' : 
+                     approvalForm.status === 'Declined' ? '❌ Declined by' : 
+                     approvalForm.status === 'Pending' ?  '⌛ Pending with' :
+                                                          'Status unknown with'}
+                    {approvalForm.approver_id}
+                </p>
+            {/each}
         </div>
         <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
             <h1 class="text-gray-600 text-lg mb-1 font-medium title-font">Form Approval</h1>

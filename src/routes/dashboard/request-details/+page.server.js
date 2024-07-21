@@ -32,19 +32,17 @@ export const actions = {
     },
     getApprovalForms: async ({cookies, request}) => {
         try {
-            const data = await request.formData(); // user input
-            data.append('request_id', 1); // debug, must come from page
-            data.append('approver_id', 1);  // debug, must come from cookies
+            const searchFormData = await request.formData(); // user input
 
             const response = await getFromTableDB("approvals", searchFormData); 
             const queryResults = (await response.json()).result;
 
             console.log(queryResults);
 
-            return response.ok;
+            return {status: 200, body: queryResults}; // note that form actions return DEVALUEd json objects
         } catch (error) {   
             console.error("Action failed:", error.message);
-            return response.ok;
+            return {status: 500, body: queryResults};
         }
     }
 }
