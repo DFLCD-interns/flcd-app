@@ -1,4 +1,5 @@
 <script>
+    
     /** @type {import('./$types').PageData} */
 	export let data;
     import { browser } from "$app/environment";
@@ -9,12 +10,35 @@
         obj[newKey] = obj[oldKey];
         
     }
-    console.log(equipmentList)
-    //const arr = JSON.parse(equipmentList);
-    //console.log(arr)
+    let selectedEq = [];
+    let start_time = "";
+    let return_time = "";
+    const handleSubmit = async (event) => {
+        console.log('submitting');
+        event.preventDefault();
+        const formData = {
+            selectedEq,
+            start_time,
+            return_time
+        };
+        console.log(formData);
+        // try {
+        //     const response = await fetch('/api/submit-form', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify(formData)
+        //     });
+        //     const result = await response.json();
+        //     console.log('Server response:', result);
+        // } catch (error) {
+        //     console.error('Error submitting form:', error);
+        // }
+    };
     equipmentList.forEach( obj => renameKey( obj, 'id', 'value' ) );
-    console.log(equipmentList)
-    console.log(equipmentList[0])
+    //console.log(equipmentList)
+    //console.log(equipmentList[0])
     function navBack() {
         if (browser) window.history.back();
     }
@@ -33,7 +57,7 @@
             }
         });
     };
-    let selectedEq = [];
+    
     let equipment = [
         { value: "l_microphone", name: "Lapel Microphone" },
         { value: "speaker", name: "Bluetooth Speaker" },
@@ -77,7 +101,7 @@
         <TabItem open>
             <span slot="title" class="flex gap-2"><ComputerSpeakerSolid/>Equipment</span>
             <Card class="max-w-full">
-                <form class="flex flex-col space-y-6" action="/">
+                <form on:submit|preventDefault={handleSubmit} class="flex flex-col space-y-6" method="POST">
                     <h3
                         class="text-xl font-medium text-gray-900 dark:text-white"
                     >
@@ -109,7 +133,7 @@
                     <div class="grid gap-6 mb-6 md:grid-cols-2">
                         <Label class="space-y-2">
                             <span>Use Date</span>
-                            <Input type="date" name="dateneeded" required />
+                            <Input type="date" name="start_time" bind:value={start_time} required />
                         </Label>
                         <Label class="space-y-2">
                             <span>Use Time</span>
@@ -121,7 +145,7 @@
                         </Label>
                         <Label class="space-y-2">
                             <span>Return Time</span>
-                            <Input type="time" name="timmeneeded" required />
+                            <Input type="time" name="return_time" bind:value={return_time} required />
                         </Label>
                         <Label class="space-y-2">
                             <span>Venue</span>
