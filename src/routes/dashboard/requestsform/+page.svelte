@@ -1,26 +1,26 @@
 <script>
+    
+    /** @type {import('./$types').PageData} */
+	export let data;
     import { browser } from "$app/environment";
     import { Button, Card, GradientButton, Input, Label, MultiSelect, Select, Textarea, Tabs, TabItem, } from "flowbite-svelte";
     import { AddressBookOutline, ArrowLeftOutline, BuildingSolid, ChevronLeftOutline, ComputerSpeakerSolid, UserAddSolid, } from "flowbite-svelte-icons";
+    let equipmentList = data.equipment;
+    function renameKey ( obj, oldKey, newKey ) {
+        obj[newKey] = obj[oldKey];
+        
+    }
+    let selectedEq = [];
+    let start_time = "";
+    let return_time = "";
+   
+    equipmentList.forEach( obj => renameKey( obj, 'id', 'value' ) );
+    //console.log(equipmentList)
+    //console.log(equipmentList[0])
     function navBack() {
         if (browser) window.history.back();
     }
 
-    let waiting = 0;
-    const notifyLoaded = () => {
-        window.location.reload();
-    };
-
-    const onload = (el) => {
-        waiting++;
-        el.addEventListener("load", () => {
-            waiting--;
-            if (waiting === 0) {
-                notifyLoaded();
-            }
-        });
-    };
-    let selectedEq = [];
     let equipment = [
         { value: "l_microphone", name: "Lapel Microphone" },
         { value: "speaker", name: "Bluetooth Speaker" },
@@ -64,7 +64,7 @@
         <TabItem open>
             <span slot="title" class="flex gap-2"><ComputerSpeakerSolid/>Equipment</span>
             <Card class="max-w-full">
-                <form class="flex flex-col space-y-6" action="/">
+                <form class="flex flex-col space-y-6" method="POST">
                     <h3
                         class="text-xl font-medium text-gray-900 dark:text-white"
                     >
@@ -75,8 +75,9 @@
                         <span>Equipment</span>
                         <MultiSelect
                         tabindex=0
+                            name="selectedEq"
                             class="mt-2"
-                            items={equipment}
+                            items={equipmentList}
                             bind:value={selectedEq}
                             required
                         />
@@ -84,32 +85,23 @@
                     <div class="grid gap-6 mb-6 md:grid-cols-4">
                         {#each selectedEq as eq}
                             <Label>
-                                <span
-                                    >Quantity of {equipment.find(
-                                        (x) => x.value == eq,
-                                    ).name}</span
-                                >
-                                <Input type="number" name={eq} autocomplete={`1`} required />
+                                <span>Quantity of {equipmentList.find(
+                                    (x) => x.value == eq,
+                                ).name}</span
+                            >
+                            <Input type="number" name={eq} min=1 max={equipmentList.find((x) => x.value == eq, ).count} required />
                             </Label>
                         {/each}
                     </div>
                     <hr />
                     <div class="grid gap-6 mb-6 md:grid-cols-2">
                         <Label class="space-y-2">
-                            <span>Use Date</span>
-                            <Input type="date" name="dateneeded" required />
-                        </Label>
-                        <Label class="space-y-2">
                             <span>Use Time</span>
-                            <Input type="time" name="timmeneeded" required />
-                        </Label>
-                        <Label class="space-y-2">
-                            <span>Return Date</span>
-                            <Input type="date" name="dateneeded" required />
+                            <Input type="datetime-local" name="start_time" bind:value={start_time} required />
                         </Label>
                         <Label class="space-y-2">
                             <span>Return Time</span>
-                            <Input type="time" name="timmeneeded" required />
+                            <Input type="datetime-local" name="return_time" bind:value={return_time} required />
                         </Label>
                         <Label class="space-y-2">
                             <span>Venue</span>
@@ -120,7 +112,7 @@
                             <Textarea
                                 rows="1"
                                 type="text"
-                                name="venue"
+                                name="purpose"
                                 required
                             />
                         </Label>

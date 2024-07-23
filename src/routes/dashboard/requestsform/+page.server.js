@@ -1,26 +1,52 @@
+import { insertIntoTableDB } from '../../../lib/db';
+
 /** @type {import('./$types').Actions} */
 export const actions = {
-	// default: async ({ request }) => {
-	// 	const data = await request.formData();
-    //     const idk = data.get('start_time')
-	// 	console.log(idk);
-	// 	return { success: true };
-	// }
     default: async ({ request }) => {
-        const formData = await request.json();
-        const { selectedEq, start_time, return_time } = formData;
+        const data = await request.formData();
+        const selectedEq = data.getAll('selectedEq');
+        const start_time = data.get('start_time');
+        const promised_return_time = data.get('return_time');
+        console.log(selectedEq);
+        for (let i = 0; i < selectedEq.length; i++) {
+            var fd = {
+                count: data.get(selectedEq[i]),
+                start_time: start_time,
+                promised_return_time: promised_return_time,
+                equipment_id: selectedEq[i]
+            };
 
-        console.log('server side');
-        console.log({ selectedEq, start_time, return_time });
+            var form_data = new FormData();
+            for ( var key in fd ) {
+                form_data.append(key, fd[key]);
+            }
+            console.log([...form_data.keys()]);
+            console.log([...form_data.values()]);
 
-        // Handle the form data (e.g., save to a database)
-        // You can add validation and error handling as needed
+            // console.log('server side');
+            // console.log({ start_time, return_time });
 
+            try {
+                // Insert the form data into the database
+                insertIntoTableDB('equipment_requests', form_data);
+                
+            } 
+            catch (error) {
+                console.error('Error writing to database:', error);
+                return {
+                    status: 500,
+                    body: {
+                        message: 'Error writing to database',
+                        error: error.message
+                    }
+                };
+            }
+        }
         return {
             status: 200,
             body: {
                 message: 'Form submitted successfully!',
-                data: { equipmentId, quantity, dateOfUse, returnDate }
+                data: {selectedEq, start_time, promised_return_time}
             }
         };
     }

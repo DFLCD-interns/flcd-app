@@ -56,6 +56,11 @@ export async function getUsersDB() {
   return result;
 }
 
+export async function getEquipmentDB() {
+  const result = await query("SELECT * FROM equipments");
+  return result;
+}
+
 export async function createUserDB(first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, access_level) {
   const qText = `INSERT INTO users (first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) VALUES ('${first_name}', '${last_name}', '${email}', '${pw_hash}', '${phone}', '${student_number}', '${course}', '${department}', ${superior_id}, ${access_level})`;
   console.log(qText);
