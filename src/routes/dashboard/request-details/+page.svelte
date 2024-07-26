@@ -1,32 +1,26 @@
 <script>
-    import { ChevronLeftOutline, ComputerSpeakerOutline } from 'flowbite-svelte-icons';
+    import { ChevronLeftOutline, ClipboardSolid, ComputerSpeakerOutline } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
-    import * as devalue from 'devalue';
 
-    let data;
-    let form;
+    export let data;
+    export let form;
 
     function handleClick() {
         window.location.href = "/";
     }
 
     let totalStatus = "";
-    let approvalForms = [];
+    $: approvalForms = data?.body.result;
+    
     onMount(async () => {
         console.log('Component mounted.');
         try {
-            const formData = new FormData();
-            formData.append('request_id', 1); // debug, must come from page (params?)
-
-            const response = await fetch('?/getApprovalForms', {
-                method: 'POST',
-                body: formData
-            });
-
-            const body = await response.json();
-            const responseObj = devalue.parse(body.data);
-            approvalForms = responseObj.body;
-
+            approvalForms = data.body.result;            
+            if (approvalForms == undefined || approvalForms.length == 0) {
+                console.error('ERROR');
+                throw new Error('no retrieved forms for the time being');
+            }
+            
             const statuses = approvalForms.map((elem) => elem.status); 
             if (statuses.includes("Declined"))
                 totalStatus = "Declined";
@@ -39,42 +33,15 @@
                 console.error("Total status of form cannot be determined.")
             } 
 
-            if (responseObj.status === 200) {                
+            if (data?.success)
                 console.log('Retrieved approval forms.');
-            }
-            else {
-                console.log('Failed to retrieve approval forms.');
-            }
+            else throw new Error('failed to retrieve approval forms.');
         } catch (error) {
             console.error('Error retrieving approval forms:', error);
         }
 
         return () => approvalForms = [];
     })
-
-    async function handleSubmitApproval(event) {
-        try {
-            const formData = new FormData(event.target);
-            const response = await fetch('?/approve', {
-                method: 'POST',
-                body: formData
-            });
-
-            const body = await response.json();
-            const success = body.data.includes('true');
-
-            if (success) {
-                alert('Approval/decline done successfully!');
-            }
-            else {
-                alert('Failed to approve/decline form.');
-            }
-        } catch (error) {
-            console.error('Error approving/declining form:', error);
-            alert('Failed to approve/decline.');
-        }
-    }
-
 </script>
 
 <div class = "min-h-screen  p-10">
@@ -191,7 +158,7 @@
         </div>
         <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
             <h1 class="text-gray-600 text-lg mb-1 font-medium title-font">Form Approval</h1>
-            <form bind:this={form} on:submit|preventDefault={handleSubmitApproval}>
+            <form bind:this={form} action="?/approve" method="POST">
                 <div class="relative mb-4">
                     <input 
                         id="remarks" 
@@ -201,7 +168,7 @@
                 </div>
                 <div class="flex justify-center">
                     <!-- Hidden input field to store the status -->
-                    <input type="hidden" name="status" />
+                    <input type="hidden" id="status" name="status" />
                     <button 
                         on:click={() => form.querySelector('input[name="status"]').value = "Approved"}
                         type="submit" 
