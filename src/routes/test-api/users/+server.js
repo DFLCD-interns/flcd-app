@@ -5,7 +5,7 @@
 //     return new Response('Hello from api get');
 // }
 import { json } from '@sveltejs/kit';
-import { createUserDB, getUsersDB } from '$lib/db';
+import { createUserDB, getUsersDB } from '$lib/server/dbjoshua.js';
 
 // export const GET = async (request) => {
 //   try {

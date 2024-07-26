@@ -1,0 +1,1 @@
+place the routes that need level 2 (high) protection - i.e. must only be accessible by the fic/staff.
