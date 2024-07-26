@@ -77,7 +77,7 @@ export function validatePassword(password) {
 }
 
 export async function createUser(first_name, last_name, email, password, phone, student_number, course, department, superior_id, workgroup) {
-    // console.log("auth.js - createUser start.");
+    console.log("auth.js - createUser start.");
 
     // const emailValidationResult = validateEmail(email);
 
@@ -98,17 +98,18 @@ export async function createUser(first_name, last_name, email, password, phone, 
     //     password,
     //     id: uuid(),
     // };
+
     const new_uuid = uuid();
 
-    // console.log(new_uuid);
+    console.log(new_uuid);
 
     const pw_hash_response = await resolvePW(password, null);
 
-    // console.log(pw_hash_response);
+    console.log(pw_hash_response);
 
     const pw_hash = pw_hash_response.body.finalHash.concat(pw_hash_response.body.salt);
 
-    // console.log("auth.js - createUser before newuser.");
+    console.log("auth.js - createUser before newuser.");
 
     const newUser = await createUserDB(new_uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup);
 
@@ -254,7 +255,7 @@ export async function signOut(id) {
 }
 
 async function resolvePW(password, email) {
-    // console.log("auth.js - password and email", password, email);
+    console.log("auth.js - password and email", password, email);
     let salt;
     let pw_hash;
     const user = await authUserDB(email);
@@ -266,13 +267,16 @@ async function resolvePW(password, email) {
         // console.log("auth.js - pw_hash in resolvePW", pw_hash);
         salt = pw_hash.slice(128, 256);
     }
+    
     // console.log("auth.js -- salt", salt);
     let finalkey = scryptSync(password, salt, 64).toString("hex"); // salting first
     // console.log("auth.js -- prefinal key",finalkey);
     // console.log("auth.js -- peppa", PEPPA_PIG);
     finalkey = scryptSync(finalkey, PEPPA_PIG, 64).toString("hex");
-    // console.log("auth.js -- final key",finalkey);
+    console.log("auth.js -- final key",finalkey);
+    console.log("hii")
     const correctHash = pw_hash.slice(0,128);
+    
     if (email) {
         if (finalkey !== pw_hash.slice(0,128)) {
             return {
@@ -288,7 +292,7 @@ async function resolvePW(password, email) {
             }
         }
     }
-    return { 
+    return {
         success: true,
         message: "Successfully authenticated.",
         body: {

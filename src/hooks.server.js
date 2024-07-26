@@ -19,7 +19,7 @@ export async function handle({ event, resolve }) {
 	// Stage 1
 	event.locals.user = await authenticateUser(event);
 
-  console.log("Hookie - ", event.url.pathname, event.locals.user.workgroup);
+  //console.log("Hookie - ", event.url.pathname, event.locals.user.workgroup);
 
 	if (event.url.pathname.startsWith("/p")) {
 		if (!event.locals.user) { // a user must be logged in

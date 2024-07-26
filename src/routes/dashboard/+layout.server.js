@@ -1,4 +1,4 @@
-import * as db from '$lib/db';
+import * as db from '../../lib/server/db.js';
 
 /** @type {import('./$types').LayoutServerLoad} */
 export async function load() {

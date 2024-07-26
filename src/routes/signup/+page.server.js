@@ -20,6 +20,7 @@ export const actions = {
 
 		try {
             // console.log("signup+page.server.js - before sessionresult");
+			console.log('creating user...')
 			const createUserResult = await createUser(first_name, last_name, email, password, phone, student_number, course, department, 1, 1);
 
             console.log("signup+page.server.js", createUserResult);

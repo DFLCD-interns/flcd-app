@@ -1,4 +1,4 @@
-import { insertIntoTableDB } from '../../../lib/db';
+import { insertIntoTableDB } from '../../../lib/server/db.js';
 
 /** @type {import('./$types').Actions} */
 export const actions = {
