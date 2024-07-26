@@ -100,15 +100,15 @@ export async function createUser(first_name, last_name, email, password, phone, 
     // };
     const new_uuid = uuid();
 
-    // console.log(new_uuid);
+    console.log("newuuid", new_uuid);
 
     const pw_hash_response = await resolvePW(password, null);
 
-    // console.log(pw_hash_response);
+    console.log("hashresponse", pw_hash_response);
 
     const pw_hash = pw_hash_response.body.finalHash.concat(pw_hash_response.body.salt);
 
-    // console.log("auth.js - createUser before newuser.");
+    console.log("auth.js - createUser before newuser.");
 
     const newUser = await createUserDB(new_uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup);
 
@@ -120,7 +120,10 @@ export async function createUser(first_name, last_name, email, password, phone, 
     //     return [...previousUsers, newUser];
     // });
 
-    return createSessionById(newUser.id);
+    // return createSessionById(newUser.id);
+    return { success: true,
+        message: "User created.",
+    }
 }
 
 async function createSessionById(userId) {
@@ -260,7 +263,7 @@ async function resolvePW(password, email) {
     const user = await authUserDB(email);
     if (!email) {
         salt = randomBytes(64).toString('hex');
-        // console.log("auth.js - salt inside if", salt);
+        console.log("auth.js - salt inside if", salt);
     } else {
         pw_hash = user.pw_hash; //await authUserDB(email);
         // console.log("auth.js - pw_hash in resolvePW", pw_hash);
@@ -272,30 +275,44 @@ async function resolvePW(password, email) {
     // console.log("auth.js -- peppa", PEPPA_PIG);
     finalkey = scryptSync(finalkey, PEPPA_PIG, 64).toString("hex");
     // console.log("auth.js -- final key",finalkey);
-    const correctHash = pw_hash.slice(0,128);
+    // console.log("correct hash", correctHash);
     if (email) {
         if (finalkey !== pw_hash.slice(0,128)) {
+            console.log("resolve fail");
             return {
                 success: false,
                 message: "Authentication failed, incorrect password?",
                 body: {
                     userid: null,
                     useruuid: null,
-                    // finalHash: finalkey,
-                    // salt: salt,
+                    finalHash: finalkey,
+                    salt: salt,
                     // correctHash: correctHash
                 }
             }
         }
     }
-    return { 
+    console.log("resolve success");
+    if (user)
+    {return { 
         success: true,
         message: "Successfully authenticated.",
         body: {
             userid: user.id,
             useruuid: user.uuid,
-            // finalHash: finalkey,
-            // salt: salt,
+            finalHash: finalkey,
+            salt: salt,
         }
+     }} else {
+        return { 
+            success: true,
+            message: "Successfully authenticated.",
+            body: {
+                userid: null,
+                useruuid: null,
+                finalHash: finalkey,
+                salt: salt,
+            }
+         }
      }
 }
