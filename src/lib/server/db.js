@@ -2,6 +2,8 @@ import { json } from '@sveltejs/kit'
 import pkg from 'pg';
 const { Pool } = pkg;
 
+// TODO: `$(variable)` substitutions must NOT be done on queries! (vulnerble to sql injects)
+
 const pool = new Pool({ //store this in an env file!
   user: 'postgres',
   host: 'localhost',
