@@ -39,8 +39,10 @@ export const actions = {
 			}
 		}
 
-		throw redirect(303, "/");
+		throw redirect(303, "/signout");
 	},
+
+
 };
 
 // import { SESSION_COOKIE_NAME } from '$lib/constants.js';
