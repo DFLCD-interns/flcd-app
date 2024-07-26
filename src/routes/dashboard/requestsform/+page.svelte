@@ -44,21 +44,21 @@
     ];
 </script>
 
-<div class="px-10 py-10" use:onload>
+<div class="px-10 py-10">
     <!--header-->
     <div class="flex items-center gap-4 mb-5">
         <Button
-            on:click={() => {
+            on:click={() => {   
                 navBack();
             }}
             color="alternative"
             class="w-auto p-0"><ChevronLeftOutline size="xl" /></Button
         >
-        <h5
+        <h4
             class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
         >
             Request Form
-        </h5>
+        </h4>
     </div>
     <Tabs tabStyle="pill">
         <TabItem open>

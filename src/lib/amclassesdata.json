@@ -1,0 +1,26 @@
+[
+    {
+        "name": "Infant Development Program Younger Age Group",
+        "value": "AM-IDP"
+    },
+    {
+        "name": "Toddlers' Class Younger Age Group",
+        "value": "AM-TC"
+    },
+    {
+        "name": "2s Class",
+        "value": "AM-2S"
+    },
+    {
+        "name": "3s Class",
+        "value": "AM-3S"
+    },
+    {
+        "name": "4s and 5s Class",
+        "value": "AM-4-5S"
+    },
+    {
+        "name": "Vertical Class",
+        "value": "AM-VC"
+    }
+]

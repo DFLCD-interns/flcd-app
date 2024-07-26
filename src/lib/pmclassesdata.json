@@ -1,0 +1,26 @@
+[
+    {
+        "name": "Infant Development Program Older Age Group",
+        "value": "PM-IDP"
+    },
+    {
+        "name": "Toddlers' Class Older Age Group",
+        "value": "PM-TC"
+    },
+    {
+        "name": "2s and 3s Class",
+        "value": "PM-2-3S"
+    },
+    {
+        "name": "3s and 4s Class",
+        "value": "PM-3-4S"
+    },
+    {
+        "name": "4s Class",
+        "value": "PM-4S"
+    },
+    {
+        "name": "5s Class",
+        "value": "PM-5S"
+    }
+]
