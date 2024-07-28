@@ -13,7 +13,8 @@ DROP TABLE IF EXISTS "equipment_requests" CASCADE;
 DROP TABLE IF EXISTS "preferred_times_class" CASCADE;
 DROP TABLE IF EXISTS "preferred_times_child" CASCADE;
 DROP TABLE IF EXISTS "approvals" CASCADE;
-
+DROP TABLE IF EXISTS "sessions" CASCADE;
+DROP TABLE IF EXISTS "transaction_log" CASCADE;
 
 CREATE TABLE admin_types (
     id SERIAL PRIMARY KEY,
@@ -32,18 +33,20 @@ VALUES ('admin 0', 'DA', 0),
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
+    uuid VARCHAR(128),
     first_name VARCHAR(128),
     last_name VARCHAR(128),
     email VARCHAR(128),
     pw_hash VARCHAR(512),
     phone VARCHAR(32),
-    student_number VARCHAR(9),
+    student_number VARCHAR(12),
     course VARCHAR(128),
     department VARCHAR(128),
     superior_id INT,
     FOREIGN KEY (superior_id) REFERENCES users(id),
     workgroup INT,
-    FOREIGN KEY (workgroup) REFERENCES admin_types(id)
+    FOREIGN KEY (workgroup) REFERENCES admin_types(id),
+    created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
 INSERT INTO users (first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup)
@@ -53,7 +56,8 @@ VALUES ('Joshua', 'Tester', 'testerjoshua@gmail.com', '5E884898DA28047151D0E56F8
 CREATE TABLE batches (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
-    description VARCHAR(128)
+    description VARCHAR(128),
+    created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
 INSERT INTO batches (name, description)
@@ -66,7 +70,8 @@ CREATE TABLE classes (
     FOREIGN KEY (handler_id) REFERENCES users(id),
     batch_id INT,
     FOREIGN KEY (batch_id) REFERENCES batches(id),
-    description VARCHAR(512)
+    description VARCHAR(512),
+    created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
 INSERT INTO classes (name, description, handler_id, batch_id)
@@ -75,33 +80,33 @@ VALUES ('Section A', 'Section A', 2, 1);
 CREATE TABLE venues (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
-    description VARCHAR(512)
+    description VARCHAR(512),
+    created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
 CREATE TABLE equipments (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
     description VARCHAR(512),
-    count INT
+    count INT,
+    created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
 
 CREATE TABLE childs (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
-    birthdate DATE,
+    birthdate TIMESTAMP,
     tracking_id VARCHAR(128),
     class_id INT,
-    FOREIGN KEY (class_id) REFERENCES classes(id)
+    FOREIGN KEY (class_id) REFERENCES classes(id),
+    created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
 
-INSERT INTO users (first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) 
-VALUES ('Joshua', 'Tester', 'jt@testmail.com', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', '+639451234567', '202300001', 'BS Computer Science', 'DCS', NULL, 1);
-
 CREATE TABLE base_requests (
     id SERIAL PRIMARY KEY,
-    request_time TIMESTAMP NOT NULL,
+    request_time TIMESTAMP DEFAULT NOW(),
     completion_time TIMESTAMP NOT NULL,
     faculty_id INT,
     FOREIGN KEY (faculty_id) REFERENCES users(id),
@@ -110,7 +115,8 @@ CREATE TABLE base_requests (
     admin_approve_layer INT,
     FOREIGN KEY (admin_approve_layer) REFERENCES admin_types(id),
     requester_id INT,
-    FOREIGN KEY (requester_id) REFERENCES users(id) 
+    FOREIGN KEY (requester_id) REFERENCES users(id),
+    created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
 CREATE TABLE child_requests (
@@ -181,5 +187,23 @@ CREATE TABLE approvals (
     staff_assistant_id INT,
     FOREIGN KEY (staff_assistant_id) REFERENCES users(id),
     request_id INT,
-    FOREIGN KEY (request_id) REFERENCES base_requests(id)
+    FOREIGN KEY (request_id) REFERENCES base_requests(id),
+    created TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE sessions (
+	id SERIAL PRIMARY KEY,
+	created TIMESTAMP DEFAULT NOW(),
+	last_used TIMESTAMP,
+	session_id VARCHAR(128) NOT NULL,
+	user_id INT NOT NULL,
+	FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE transaction_log (
+	id SERIAL PRIMARY KEY,
+	user_id INT NOT NULL,
+	FOREIGN KEY (user_id) REFERENCES users(id),
+	log_time TIMESTAMP DEFAULT NOW(),
+	transaction_description VARCHAR(1024)
 );
