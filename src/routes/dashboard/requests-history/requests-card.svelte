@@ -9,9 +9,9 @@
     <div class="mb-2">
       <h5 class="text-xl font-semibold text-black">Equipment Request: {info.material}</h5>
       <p class="mt-2 text-gray-400">for August 24, 2024</p>
-      <Badge class="mt-2" large border color='yellow'> Pending </Badge>
+      <Badge class="mt-2" large border color='green'> Accepted </Badge>
     </div>
-    <GradientButton color="green" href="/dashboard/request-details/{info.reqid}">
+    <GradientButton color="green" href="/dashboard/request-details-{info.reqid}">
         View
     </GradientButton>
   </div>
