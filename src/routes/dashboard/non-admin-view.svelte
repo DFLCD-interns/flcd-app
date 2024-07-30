@@ -55,7 +55,7 @@
         <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Book an observation</h5>
         <p class="mb-3 font-normal text-gray-700 dark:text-gray-400 leading-tight">Book an available observation schedule.</p>
         <div class="flex sm:justify-normal justify-end">
-          <GradientButton color="purple" shadow href="/dashboard/requestsform" class="w-fit align-self-end">
+          <GradientButton color="purple" shadow href="/dashboard/observationform" class="w-fit align-self-end">
             Book <ArrowRightOutline class="w-6 h-6 ms-2 text-white" />
           </GradientButton>
         </div>

@@ -1,9 +1,13 @@
-import { insertIntoTableDB } from '../../../lib/db';
+import { insertIntoTableDB } from '../../../lib/server/db.js';
 
 /** @type {import('./$types').Actions} */
 export const actions = {
     default: async ({ request }) => {
         const data = await request.formData();
+        //base-requests insert
+        
+        
+        //equipment-tables insert
         const selectedEq = data.getAll('selectedEq');
         const start_time = data.get('start_time');
         const promised_return_time = data.get('return_time');
@@ -22,9 +26,6 @@ export const actions = {
             }
             console.log([...form_data.keys()]);
             console.log([...form_data.values()]);
-
-            // console.log('server side');
-            // console.log({ start_time, return_time });
 
             try {
                 // Insert the form data into the database

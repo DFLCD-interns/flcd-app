@@ -21,6 +21,7 @@ export async function handle({ event, resolve }) {
 
 //   console.log("Hookie - ", event.url.pathname, event.locals.user.workgroup);
 
+
 	if (event.url.pathname.startsWith("/p")) {
 		console.log("pathmatch");
 		if (!event.locals.user) { // a user must be logged in

@@ -77,7 +77,7 @@ export function validatePassword(password) {
 }
 
 export async function createUser(first_name, last_name, email, password, phone, student_number, course, department, superior_id, workgroup) {
-    // console.log("auth.js - createUser start.");
+    console.log("auth.js - createUser start.");
 
     // const emailValidationResult = validateEmail(email);
 
@@ -98,13 +98,16 @@ export async function createUser(first_name, last_name, email, password, phone, 
     //     password,
     //     id: uuid(),
     // };
+
     const new_uuid = uuid();
+
 
     console.log("newuuid", new_uuid);
 
     const pw_hash_response = await resolvePW(password, null);
 
     console.log("hashresponse", pw_hash_response);
+
 
     const pw_hash = pw_hash_response.body.finalHash.concat(pw_hash_response.body.salt);
 
@@ -257,7 +260,7 @@ export async function signOut(id) {
 }
 
 async function resolvePW(password, email) {
-    // console.log("auth.js - password and email", password, email);
+    console.log("auth.js - password and email", password, email);
     let salt;
     let pw_hash;
     const user = await authUserDB(email);
@@ -269,6 +272,7 @@ async function resolvePW(password, email) {
         // console.log("auth.js - pw_hash in resolvePW", pw_hash);
         salt = pw_hash.slice(128, 256);
     }
+    
     // console.log("auth.js -- salt", salt);
     let finalkey = scryptSync(password, salt, 64).toString("hex"); // salting first
     // console.log("auth.js -- prefinal key",finalkey);
@@ -279,6 +283,7 @@ async function resolvePW(password, email) {
     if (email) {
         if (finalkey !== pw_hash.slice(0,128)) {
             console.log("resolve fail");
+
             return {
                 success: false,
                 message: "Authentication failed, incorrect password?",
@@ -295,6 +300,7 @@ async function resolvePW(password, email) {
     console.log("resolve success");
     if (user)
     {return { 
+
         success: true,
         message: "Successfully authenticated.",
         body: {
