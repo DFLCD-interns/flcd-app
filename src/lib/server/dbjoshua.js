@@ -5,9 +5,9 @@ import { json } from '@sveltejs/kit';
 const pool = new Pool({ //store this in an env file!
   user: 'postgres',
   host: 'localhost',
-  database: 'flcdtest',
+  database: 'postgres',
   password: 'password',
-  port: 5432, // Default PostgreSQL port
+  port: 5433, // Default PostgreSQL port
 });
 
 export async function connectToDB() {
@@ -84,4 +84,8 @@ export async function getUserFromSessionDB(sessionuuid) {
   return res.body.result.rows[0];
 }
 
-// TODO transfer all of this and rename query into db.js
+export async function getEquipmentRequestsDB() {
+  const res = await query('SELECT * FROM equipment_requests');
+  // console.log(res);
+  return res.body.result.rows[0];
+}// TODO transfer all of this and rename query into db.js

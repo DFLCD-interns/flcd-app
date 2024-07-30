@@ -4,9 +4,9 @@ const { Pool } = pkg;
 const pool = new Pool({ //store this in an env file!
   user: 'postgres',
   host: 'localhost',
-  database: 'flcdtest',
+  database: 'postgres',
   password: 'password',
-  port: 5432, // Default PostgreSQL port
+  port: 5433, // Default PostgreSQL port
 });
 
 const table_names = [
