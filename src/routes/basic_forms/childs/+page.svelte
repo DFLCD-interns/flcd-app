@@ -1,32 +1,4 @@
-<script>
-  let data;
-  let form; 
-
-  async function handleSubmit(event) {
-    try {
-      const formData = new FormData(event.target);
-      const response = await fetch('?/registerChild', {
-        method: 'POST',
-        body: formData
-      });
-
-      const body = await response.json();
-      const success = body.data.includes('true');
-
-      if (success) {
-        alert('Child registered successfully!');
-      }
-      else {
-        alert('Failed to register child.');
-      }
-    } catch (error) {
-      console.error('Error registering child:', error);
-      alert('Failed to register child.');
-    }
-  }
-</script>
-  
-<form on:submit|preventDefault={handleSubmit}>
+<form action="?/createChild" method="POST">
   <label>
     Child Name:
     <input name="name" type="text" placeholder="Prinz Zedric" required />
@@ -47,7 +19,7 @@
     <input name="class_id" type="number" placeholder="12" />
   </label>
 
-  <button type="submit" class="button-style">Create Child</button>
+  <button type="submit" class="button-style">Register Child</button>
 </form>
 
 <style>

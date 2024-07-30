@@ -1,102 +1,5 @@
-<script>
-  let data;
-  let form; 
-
-  async function handleSubmitChild(event) {
-    try {
-      const formData = new FormData(event.target);
-      const response = await fetch('?/createChildRequest', {
-        method: 'POST',
-        body: formData
-      });
-
-      const body = await response.json();
-      const success = body.data.includes('true');
-
-      if (success) {
-        alert('Child request created successfully!');
-      }
-      else {
-        alert('Failed to create child request.');
-      }
-    } catch (error) {
-      console.error('Error creating child request:', error);
-      alert('Failed to create child request.');
-    }
-  }
-
-  async function handleSubmitPreferredTimeChild(event) {
-    try {
-      const formData = new FormData(event.target);
-      const response = await fetch('?/createPreferredTimeChild', {
-        method: 'POST',
-        body: formData
-      });
-
-      const body = await response.json();
-      const success = body.data.includes('true');
-
-      if (success) {
-        alert('Preferred time chosen successfully!');
-      }
-      else {
-        alert('Failed to choose preferred time.');
-      }
-    } catch (error) {
-      console.error('Error choosing preferred class:', error);
-      alert('Failed to choose preferred time.');
-    }
-  }
-
-  async function handleSubmitClass(event) {
-    try {
-      const formData = new FormData(event.target);
-      const response = await fetch('?/createClassRequest', {
-        method: 'POST',
-        body: formData
-      });
-
-      const body = await response.json();
-      const success = body.data.includes('true');
-
-      if (success) {
-        alert('Class request created successfully!');
-      }
-      else {
-        alert('Failed to create class request.');
-      }
-    } catch (error) {
-      console.error('Error creating class request:', error);
-      alert('Failed to create class request.');
-    }
-  }
-
-  async function handleSubmitPreferredTimeClass(event) {
-    try {
-      const formData = new FormData(event.target);
-      const response = await fetch('?/createPreferredTimeClass', {
-        method: 'POST',
-        body: formData
-      });
-
-      const body = await response.json();
-      const success = body.data.includes('true');
-
-      if (success) {
-        alert('Preferred time chosen successfully!');
-      }
-      else {
-        alert('Failed to choose preferred time.');
-      }
-    } catch (error) {
-      console.error('Error choosing preferred class:', error);
-      alert('Failed to choose preferred time.');
-    }
-  }
-</script>
-
 # Child Observation Request
-<form on:submit|preventDefault={handleSubmitChild}>
+<form action="?/createChildRequest" method="POST">
   <label>
     Preferred Age Group Low:
     <input name="preferred_age_group_low" type="number" placeholder="4" />
@@ -121,7 +24,7 @@
 </form>
 
 # Preferred Times (in Child Observation)
-<form on:submit|preventDefault={handleSubmitPreferredTimeChild}>
+<form action="?/createPreferredTimeChild" method="POST">
   <label>
     Start Time:
     <input name="start_time" type="datetime-local" required />
@@ -141,7 +44,7 @@
 </form>
 
 # Class Observation Request
-<form on:submit|preventDefault={handleSubmitClass}>
+<form action="?/createClassRequest" method="POST">
   <label>
     Class ID:
     <input name="class_id" type="number" required />
@@ -156,7 +59,7 @@
 </form>
 
 # Preferred Times (in Class Observation)
-<form on:submit|preventDefault={handleSubmitPreferredTimeClass}>
+<form action="?/createPreferredTimeClass" method="POST">
   <label>
     Start Time:
     <input name="start_time" type="datetime-local" required />

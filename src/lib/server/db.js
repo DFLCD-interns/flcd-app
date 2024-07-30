@@ -23,7 +23,7 @@ const table_names = [
   'preferred_times_child',
   'preferred_times_class',
   'sessions',
-  'transaction_logs',
+  'transaction_log',
   'users',
   'venues',
   'venue_requests'
@@ -103,7 +103,7 @@ export async function insertIntoTableDB(table_name, formData) {
   const qText = `INSERT INTO ${table_name} (${attributesText}) VALUES (${[...values.map((_, index) => '$' + (index+1))]})`; 
   
   console.log(qText, values);
-  const res = await query(qText, values);    
+  const res = await query(qText, values);
   return res;
 }
 
@@ -111,7 +111,7 @@ export async function insertIntoTableDB(table_name, formData) {
 export async function getFromTableDB(table_name, searchFormData, limit = 100) {
   // sanitize input; error detection
   if (!table_names.includes(table_name)) {
-    throw new Error('Trying to insert to non-existent table (possibly misidentified/mispelled/malicious injection)', table_name);
+    throw new Error('Trying to get from non-existent table (possibly misidentified/mispelled/malicious injection)', table_name);
   }
   else if (limit < 0 || !Number.isInteger(limit)) {
     throw new Error('Trying to get negative or non-Integer number of rows (possibly mistyped/malicious injection)', limit);
@@ -121,7 +121,7 @@ export async function getFromTableDB(table_name, searchFormData, limit = 100) {
   const values = [...searchFormData.values()].map((val) => val); // will be for parametrization
 
   const whereText = attributes.map((attributeName, index) => `(${attributeName} = \$${index+1})`).join(' AND ')
-  const qText = `SELECT \* FROM ${table_name} WHERE ${whereText} ORDER BY (id) asc LIMIT \$${attributes.length+1}`;
+  const qText = `SELECT \* FROM ${table_name} WHERE ${whereText} ORDER BY (id) asc LIMIT \$${limit}`;
 
   console.log(qText, values.concat(limit));
   const res = await query(qText, values.concat(limit));    
@@ -132,7 +132,7 @@ export async function getFromTableDB(table_name, searchFormData, limit = 100) {
 // Provide searchFormData for to specify which row/s you want updating
 export async function updateTableDB(table_name, searchFormData, updateFormData) { 
   if (!table_names.includes(table_name)) {
-    throw new Error('Trying to insert to non-existent table (possibly misidentified/mispelled/malicious injection):', table_name);
+    throw new Error('Trying to update non-existent table (possibly misidentified/mispelled/malicious injection):', table_name);
   }
 
   const searchAttributes = [...searchFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection

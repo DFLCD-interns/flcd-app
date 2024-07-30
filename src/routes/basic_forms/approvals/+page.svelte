@@ -1,32 +1,4 @@
-<script>
-  let data;
-  let form; 
-
-  async function handleSubmit(event) {
-    try {
-      const formData = new FormData(event.target);
-      const response = await fetch('?/createApprovalForm', {
-        method: 'POST',
-        body: formData
-      });
-
-      const body = await response.json();
-      const success = body.data.includes('true');
-
-      if (success) {
-        alert('Approval form created successfully!');
-      }
-      else {
-        alert('Failed to create approval form.');
-      }
-    } catch (error) {
-      console.error('Error creating approval form:', error);
-      alert('Failed to create approval form.');
-    }
-  }
-</script>
-  
-<form on:submit|preventDefault={handleSubmit}>
+<form action="?/createApprovalForm" method="POST">
   <label>
     Status:
     <input name="status" type="text" required />

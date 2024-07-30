@@ -1,56 +1,5 @@
-<script>
-  let data;
-  let form; 
-
-  async function handleSubmitEquipment(event) {
-    try {
-      const formData = new FormData(event.target);
-      const response = await fetch('?/createEquipmentRequest', {
-        method: 'POST',
-        body: formData
-      });
-
-      const body = await response.json();
-      const success = body.data.includes('true');
-
-      if (success) {
-        alert('Equipment request created successfully!');
-      }
-      else {
-        alert('Failed to create equipment request.');
-      }
-    } catch (error) {
-      console.error('Error creating equipment request:', error);
-      alert('Failed to create equipment request.');
-    }
-  }
-
-  async function handleSubmitVenue(event) {
-    try {
-      const formData = new FormData(event.target);
-      const response = await fetch('?/createVenueRequest', {
-        method: 'POST',
-        body: formData
-      });
-
-      const body = await response.json();
-      const success = body.data.includes('true');
-
-      if (success) {
-        alert('Venue request created successfully!');
-      }
-      else {
-        alert('Failed to create venue request.');
-      }
-    } catch (error) {
-      console.error('Error creating venue request:', error);
-      alert('Failed to create venue request.');
-    }
-  }
-</script>
-  
 # Equipment Request
-<form on:submit|preventDefault={handleSubmitEquipment}>
+<form action="?/createEquipmentRequest" method="POST">
   <label>
     Count:
     <input name="count" type="number" placeholder="10" required />
@@ -90,7 +39,7 @@
 </form>
 
 # Venue Request
-<form on:submit|preventDefault={handleSubmitVenue}>
+<form action="?/createVenueRequest" method="POST">
   <label>
     Usage Start Time:
     <input name="start_time" type="datetime-local" required />

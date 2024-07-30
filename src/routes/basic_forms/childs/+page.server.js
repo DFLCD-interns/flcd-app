@@ -1,14 +1,14 @@
 import { insertIntoTableDB } from '$lib/server/db';
 
 export const actions = {
-    registerChild: async ({cookies, request}) => {
+    createChild: async ({cookies, request}) => {
         try {
             const data = await request.formData();
             const response = await insertIntoTableDB("childs", data);
-            return response.ok;
+            return {success: response.success};
         } catch (error) {   
             console.error("Action failed:", error.message);
-            return response.ok;
+            return {success: response.success};
         }
     }
 }
