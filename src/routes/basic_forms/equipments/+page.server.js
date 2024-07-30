@@ -1,4 +1,4 @@
-import { insertIntoTableDB } from '$lib/db';
+import { insertIntoTableDB } from '$lib/server/db';
 
 export const actions = {
     createEquipment: async ({cookies, request}) => {

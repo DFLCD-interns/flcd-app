@@ -1,4 +1,4 @@
-import { createUserDB, getUsersDB } from '$lib/db';
+import { createUserDB, getUsersDB } from '$lib/server/db';
 import { redirect } from '@sveltejs/kit';
 
 export const actions = {
@@ -13,3 +13,4 @@ export const actions = {
         throw redirect(303, '/dashboard'); // idk how to make this work
     }
 }
+
