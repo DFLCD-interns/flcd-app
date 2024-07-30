@@ -71,6 +71,9 @@ CREATE TABLE classes (
     batch_id INT,
     FOREIGN KEY (batch_id) REFERENCES batches(id),
     description VARCHAR(512),
+    schedule VARCHAR(128), -- must be a string, separable by , (COMMA), with format START:TIME-END:TIME
+    -- sample schedule
+    -- 09:00-10:00,10:00-11:00,11:00-12:00
     created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
@@ -104,10 +107,13 @@ CREATE TABLE childs (
 );
 
 
+INSERT INTO users (first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) 
+VALUES ('Joshua', 'Tester', 'jt@testmail.com', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', '+639451234567', '202300001', 'BS Computer Science', 'DCS', NULL, 1);
+
 CREATE TABLE base_requests (
     id SERIAL PRIMARY KEY,
-    request_time TIMESTAMP DEFAULT NOW(),
-    completion_time TIMESTAMP NOT NULL,
+    -- request_time TIMESTAMP DEFAULT NOW(),
+    completion_time TIMESTAMP NOT NULL, -- when the request was completed (objects were returned verified and closed by lender)
     faculty_id INT,
     FOREIGN KEY (faculty_id) REFERENCES users(id),
     office VARCHAR(128),
@@ -116,13 +122,15 @@ CREATE TABLE base_requests (
     FOREIGN KEY (admin_approve_layer) REFERENCES admin_types(id),
     requester_id INT,
     FOREIGN KEY (requester_id) REFERENCES users(id),
-    created TIMESTAMP DEFAULT NOW() NOT NULL
+    created TIMESTAMP DEFAULT NOW() NOT NULL -- when the request was created
 );
 
 CREATE TABLE child_requests (
     id SERIAL PRIMARY KEY,
-    preferred_age_group_low INT,
-    preferred_age_group_high INT,
+    -- preferred_age_group_low INT,
+    -- preferred_age_group_high INT,
+    observation_time VARCHAR(128),
+    -- FOREIGN KEY (observation_time) REFERENCES 
     child_id INT,
     FOREIGN KEY (child_id) REFERENCES childs(id),
     request_id INT,
@@ -139,10 +147,11 @@ CREATE TABLE class_requests (
 
 CREATE TABLE venue_requests (
     id SERIAL PRIMARY KEY,
-    start_time TIMESTAMP,
-    end_time TIMESTAMP,
-    promised_return_time TIMESTAMP,
-    return_time TIMESTAMP,
+    date_needed_start TIMESTAMP, -- date needed start
+    date_needed_end TIMESTAMP, -- date needed end/ expected return date
+    -- promised_return_time TIMESTAMP,
+    -- return_time TIMESTAMP, -- usurped by completion time in base request
+    purpose VARCHAR(1024), -- Reason field
     venue_id INT,
     FOREIGN KEY (venue_id) REFERENCES venues(id),
     request_id INT,
@@ -152,10 +161,11 @@ CREATE TABLE venue_requests (
 CREATE TABLE equipment_requests (
     id SERIAL PRIMARY KEY,
     count INT,
-    start_time TIMESTAMP,
-    end_time TIMESTAMP,
-    promised_return_time TIMESTAMP,
-    return_time TIMESTAMP,
+    date_needed_start TIMESTAMP, -- start when the equipment will be used (schedule of event where equipment will be used)
+    date_needed_end TIMESTAMP, -- end time of the event where equipment will be used
+    promised_return_time TIMESTAMP, -- when the equipment will be returned
+    -- return_time TIMESTAMP, -- when the equipment was returned
+    venue VARCHAR(128),
     equipment_id INT,
     FOREIGN KEY (equipment_id) REFERENCES equipments(id),
     request_id INT,

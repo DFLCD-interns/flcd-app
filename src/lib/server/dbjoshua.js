@@ -84,5 +84,4 @@ export async function getUserFromSessionDB(sessionuuid) {
   return res.body.result.rows[0];
 }
 
-
-
+// TODO transfer all of this and rename query into db.js
