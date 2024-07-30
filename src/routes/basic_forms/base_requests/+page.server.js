@@ -1,4 +1,4 @@
-import { insertIntoTableDB } from '$lib/server/db';
+import { insertIntoTableDB } from '$lib/server/db.js';
 
 export const actions = {
     createBaseRequest: async ({cookies, request}) => {

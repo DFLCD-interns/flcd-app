@@ -57,6 +57,7 @@ export async function createUserDB(uuid, first_name, last_name, email, pw_hash, 
     // TODO: check if email is already in used if it is then throw an error
     console.log('hi')
     const res = await query('INSERT INTO users (uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup]);
+    console.log("res:", res);
     return res;
 }
 
