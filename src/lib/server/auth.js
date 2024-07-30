@@ -274,11 +274,11 @@ async function resolvePW(password, email) {
     // console.log("auth.js -- peppa", PEPPA_PIG);
     finalkey = scryptSync(finalkey, PEPPA_PIG, 64).toString("hex");
     console.log("auth.js -- final key",finalkey);
-    console.log("hii")
-    const correctHash = pw_hash.slice(0,128);
+    // const correctHash = pw_hash.slice(0,128);
     
     if (email) {
         if (finalkey !== pw_hash.slice(0,128)) {
+            console.log("fail");
             return {
                 success: false,
                 message: "Authentication failed, incorrect password?",
@@ -292,6 +292,7 @@ async function resolvePW(password, email) {
             }
         }
     }
+    console.log("user create")
     return {
         success: true,
         message: "Successfully authenticated.",
