@@ -6,19 +6,26 @@
     import pmclassesdata from "../../../lib/pmclassesdata.json";
     import { browser } from "$app/environment";
     import { Button, Card, GradientButton, Input, Label, MultiSelect, Select, Textarea, Tabs, TabItem, Radio, Alert } from "flowbite-svelte";
-    import { AddressBookOutline, AddressBookSolid, ArrowLeftOutline, BuildingSolid, CheckCircleSolid, ChevronLeftOutline, ComputerSpeakerSolid, MoonSolid, SunSolid, UserAddSolid, } from "flowbite-svelte-icons";
+    import { AddressBookOutline, AddressBookSolid, ArrowLeftOutline, BuildingSolid, CheckCircleSolid, ChevronLeftOutline, ComputerSpeakerSolid, MoonSolid, SunSolid, TrashBinSolid, UserAddSolid, } from "flowbite-svelte-icons";
     
     function navBack() {
         if (browser) window.history.back();
     }
-
+    // function printStuff(){
+    //     console.log(dateTimeRows)
+    // }
     let requesterSection = ""
+    let dateTimeRows = [{ date: '', time: '', available: false}];
+    function addRow() {
+        dateTimeRows = [...dateTimeRows, { date: '', time: '',  available: false}];
+    }
+    function deleteRow(index) {
+        dateTimeRows = dateTimeRows.filter((_, i) => i !== index);
+    }
     let classtime = ""
     let selectedClass = ""
     let selectedDate = ""
     let selectedSlot = ""
-    let isChecked = false
-    let isAvailable = false
     let sections = [
         {
             name: "FLCD 123",
@@ -62,16 +69,14 @@
         }
     ]
     let unavailable = ["AM-TC 2024-07-25 8-9", "AM-TC 2024-07-25 10-11", "PM-TC 2024-07-25 8-9"]
-    $: selected = selectedClass.concat(" ", selectedDate," ",selectedSlot)
-    $: canRequest = (selected.length >= 20 && !(unavailable.includes(selected)))
-    function checkSlot(){
-        isChecked = true;
-        let selected = selectedClass.concat(" ", selectedDate," ",selectedSlot);
-        console.log(unavailable)
-        console.log(selected)
-        if (unavailable.includes(selected)) isAvailable = false;
-        else isAvailable = true;
+    function isSlotAvailable(section, date, time) {
+        return !unavailable.includes(`${section} ${date} ${time}`);
     }
+    function updateAvailability(index, date, time) {
+        dateTimeRows[index].available = isSlotAvailable(selectedClass, date, time);
+    }
+    $: canRequest = dateTimeRows.length >= 1 && dateTimeRows.every(row => row.available);
+
     const date = new Date();
 
     let day = date.getDate();
@@ -109,34 +114,50 @@
                         Observation Request
                     </h3>
                     <hr />
-                    <div class="grid gap-6 mb-6 md:grid-cols-2">
+                    <div class="grid gap-6 mb-6 md:grid-cols-3">
                         <Label class="space-y-2">
                             <span>Your section</span>
-                            <Select class="mt-2" items={sections} bind:value={requesterSection} required/>
+                            <Select class="mt-2" name="requesterSection" items={sections} bind:value={requesterSection} required/>
                         </Label>
                         <Label class="space-y-2">
                             <span>Class time to be observed</span>
                             <ul class="items-center w-full rounded-lg border border-gray-200 sm:flex dark:bg-gray-800 dark:border-gray-600 divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-600 h-min">
-                                <li class="w-full"><Radio value="AM" name="classtime" class="p-3" bind:group={classtime} on:change={()=>{selectedClass = ""; selectedDate =""; selectedSlot=""}}>AM</Radio></li>
-                                <li class="w-full"><Radio value="PM"name="classtime" class="p-3" bind:group={classtime} on:change={()=>{selectedClass = ""; selectedDate =""; selectedSlot=""}}>PM</Radio></li>
+                                <li class="w-full"><Radio value="AM" name="classTime" class="p-3" bind:group={classtime} on:change={()=>{selectedClass = ""; selectedDate =""; selectedSlot=""}}>AM</Radio></li>
+                                <li class="w-full"><Radio value="PM"name="classTime" class="p-3" bind:group={classtime} on:change={()=>{selectedClass = ""; selectedDate =""; selectedSlot=""}}>PM</Radio></li>
                               </ul>
                         </Label>
-                        <Label>
-                            <span>Date of Observation</span>
-                            <Input type="date" bind:value={selectedDate} name="selectedDate" min={currentDate} required></Input>
-                        </Label>
                         {#key classtime}
+                        <Label class="space-y-2">
+                            <span color="black">{classtime} Class</span>
+                            <Select 
+                                class="mt-2"
+                                items={(classtime == "AM" ? amclassesdata : pmclassesdata)}
+                                disabled={(classtime == "")}
+                                required
+                                name="selectedClass"
+                                bind:value={selectedClass} />
+                        </Label>
+                        {/key}
+                        </div>
+                        <hr>
+                        <Button size="sm" class="md:col-span-2" on:click={addRow}>Add Slot ({dateTimeRows.length})</Button>
+
+                        {#each dateTimeRows as row, index}
+                        <div>
+                            <div class="flex justify-end">
+                                <Button class="block !p-2 mb-2 align-self-end" color="red" size="sm" outline on:click={() => deleteRow(index)}><TrashBinSolid/></Button>
+                            </div>
                         
+                        <div class="grid gap-6 mb-6 md:grid-cols-2">
                             
-                            <Label class="space-y-2">
-                                <span color="black">{classtime} Class</span>
-                                <Select 
-                                    class="mt-2"
-                                    items={(classtime == "AM" ? amclassesdata : pmclassesdata)}
-                                    disabled={(classtime == "")}
-                                    required
-                                    bind:value={selectedClass} />
-                            </Label>
+                        {#key classtime}
+                        <Label class="space-y-2">
+                            <span>Date of Observation</span>
+                            
+                            <Input type="date" bind:value={row.date} name="selectedDate" disabled={(classtime == "")} min={currentDate} required on:change={(e) => updateAvailability(index, e.target.value, row.time)}></Input>
+                        </Label>
+                            
+                            
                             <Label class="space-y-2">
                                 <span color="black">{classtime} Timeslot</span>
                                 <Select
@@ -144,35 +165,38 @@
                                     items={(classtime == "AM" ? amslots : pmslots)}
                                     disabled={(classtime == "")}
                                     required
-                                    bind:value={selectedSlot} />
+                                    name="selectedSlot"
+                                    bind:value={row.time}
+                                    on:change={(e) => updateAvailability(index, row.date, e.target.value)} />
                             </Label>
                         {/key}
-                        <!-- <div class = "flex flex-wrap gap-2 items-center justify-between">
-                            <h6>Please check availability before requesting:</h6>
-                            <Button size="sm" class="w-full justify-self-end" on:click={() => {checkSlot()}} disabled={(selectedClass.concat(" ", selectedDate," ",selectedSlot).length < 20)}>
-                                <CheckCircleSolid></CheckCircleSolid>  Check </Button>
-                        </div> -->
                         <div class="md:col-span-2">
-                            {#if selected.length >= 20}
-                                {#if canRequest}
-                                    <Alert border color="green">
+                            {#key row.available, row.date, row.time}
+                            {#if row.date != '' && row.time != ''}
+                                {#if row.available}
+                                    <Alert border color="green" dismissable>
                                         <span class="font-medium">Slot is available.</span>
                                         You may request this slot!
                                     </Alert>
                                     {:else}
-                                    <Alert border color="red">
+                                    <Alert border color="red" dismissable>
                                         <span class="font-medium">Slot is unavailable.</span>
                                         Please try another timeslot.
                                     </Alert>
                                 {/if}
                                 {:else}
-                                <Alert border color="yellow">
-                                    <span class="font-medium">Please answer the above fields to be able to requesst.</span>
+                                <Alert border color="yellow" dismissable>
+                                    <span class="font-medium">Please answer the above fields to be able to request.</span>
                                 </Alert>
                             {/if}
+                            {/key}
                         </div>
                     </div>
                     
+                    </div>
+                    <hr>
+                    {/each}
+                    <!-- <Button on:click={()=>{printStuff()}}>check</Button> -->
                     <GradientButton shadow color="green"  type="submit" disabled={!canRequest}>
                         Request
                     </GradientButton>

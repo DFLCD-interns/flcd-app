@@ -81,7 +81,8 @@ export async function getUsersDB() {
 
 export async function getEquipmentDB() {
   const result = await query("SELECT * FROM equipments");
-  return result;
+  console.log(result.body.result.rows);
+  return result.body.result.rows;
 }
 
 export async function createUserDB(first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, access_level) {
