@@ -1,10 +1,10 @@
-import { insertIntoTableDB } from '$lib/server/db.js';
+import { createUserDB, getUsersDB } from '$lib/server/db';
 
 export const actions = {
-    createBaseRequest: async ({cookies, request}) => {
+    createBatch: async ({cookies, request}) => {
         try {
             const data = await request.formData();
-            const response = await insertIntoTableDB("base_requests", data);
+            const response = await insertIntoTableDB("batches", data);
             return {success: response.success};
         } catch (error) {   
             console.error("Action failed:", error.message);
@@ -12,3 +12,4 @@ export const actions = {
         }
     }
 }
+

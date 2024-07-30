@@ -1,32 +1,4 @@
-<script>
-  let data;
-  let form; 
-
-  async function handleSubmit(event) {
-    try {
-      const formData = new FormData(event.target);
-      const response = await fetch('?/createAdminType', {
-        method: 'POST',
-        body: formData
-      });
-
-      const body = await response.json();
-      const success = body.data.includes('true');
-
-      if (success) {
-        alert('Admin type created successfully!');
-      }
-      else {
-        alert('Failed to create admin type.');
-      }
-    } catch (error) {
-      console.error('Error creating admin type:', error);
-      alert('Failed to create admin type.');
-    }
-  }
-</script>
-  
-<form on:submit|preventDefault={handleSubmit}>
+<form action="?/createAdminType" method="POST">
   <label>
     Admin Type Name:
     <input name="name" type="text" required />
