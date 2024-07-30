@@ -1,4 +1,4 @@
-import { insertIntoTableDB, getFromTableDB, updateTableDB } from '$lib/db';
+import { insertIntoTableDB, getFromTableDB, updateTableDB } from '$lib/server/db';
 
 export const load = async () => {
     try {

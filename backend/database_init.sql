@@ -106,6 +106,10 @@ CREATE TABLE childs (
     created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
+
+INSERT INTO users (first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) 
+VALUES ('Joshua', 'Tester', 'jt@testmail.com', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', '+639451234567', '202300001', 'BS Computer Science', 'DCS', NULL, 1);
+
 CREATE TABLE base_requests (
     id SERIAL PRIMARY KEY,
     -- request_time TIMESTAMP DEFAULT NOW(),

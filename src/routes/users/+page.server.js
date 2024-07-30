@@ -1,4 +1,4 @@
-import { createUserDB, getUsersDB } from '$lib/db';
+import { createUserDB, getUsersDB } from '$lib/server/db';
 import { redirect } from '@sveltejs/kit';
 
 export const actions = {

@@ -22,6 +22,8 @@ const table_names = [
   'equipment_requests',
   'preferred_times_child',
   'preferred_times_class',
+  'sessions',
+  'transaction_logs',
   'users',
   'venues',
   'venue_requests'

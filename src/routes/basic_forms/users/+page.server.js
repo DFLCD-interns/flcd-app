@@ -1,4 +1,4 @@
-import { insertIntoTableDB } from '$lib/db';
+import { insertIntoTableDB } from '$lib/server/db';
 import { redirect } from '@sveltejs/kit';
 
 export const actions = {
