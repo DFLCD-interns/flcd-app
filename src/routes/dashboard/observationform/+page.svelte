@@ -70,7 +70,9 @@
     ]
     let unavailable = ["AM-TC 2024-07-25 8-9", "AM-TC 2024-07-25 10-11", "PM-TC 2024-07-25 8-9"]
     function isSlotAvailable(section, date, time) {
+        console.log(dateTimeRows)
         return !unavailable.includes(`${section} ${date} ${time}`);
+        
     }
     function updateAvailability(index, date, time) {
         dateTimeRows[index].available = isSlotAvailable(selectedClass, date, time);
@@ -80,11 +82,10 @@
     const date = new Date();
 
     let day = date.getDate();
-    let month = date.getMonth() + 1;
+    let month = (date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}`: date.getMonth() + 1);
     let year = date.getFullYear();
-
-    // This arrangement can be altered based on how we want the date's format to appear.
-    let currentDate = `${year}-${day}-${month}`;
+    let currentDate = `${year}-${month}-${day}`;
+    console.log(currentDate);
 </script>
 
 <div class="px-10 py-10">
