@@ -89,3 +89,9 @@ export async function getEquipmentRequestsDB() {
   // console.log(res);
   return res.body.result.rows[0];
 }// TODO transfer all of this and rename query into db.js
+
+export async function getUsersWithMatchingEmail(email) {
+  const res = await query('SELECT * FROM users WHERE email = $1', [email]);
+  // console.log(res);
+  return res.body.result.rows;
+}
