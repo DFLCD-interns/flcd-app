@@ -166,7 +166,6 @@ export async function createSessionByEmail(email, password) {
     if (emailValidationResult.error) {
         throw new Error(emailValidationResult.message);
     }
-
     const passwordValidationResult = validatePassword(password);
 
     if (passwordValidationResult.error) {
@@ -182,6 +181,7 @@ export async function createSessionByEmail(email, password) {
 
     // console.log("before userFound");
     const password_resolution = await resolvePW(password, email);
+
     // console.log("auth.js - password resolution: ", password_resolution);
     // console.log("after userFound");
 
@@ -208,6 +208,7 @@ export async function createSessionByEmail(email, password) {
     const SessionCreateResult = await createSessionById(userId);
     // console.log("authjs after await createsession");
     // console.log(SessionCreateResult);
+    
 
     return SessionCreateResult;
 }

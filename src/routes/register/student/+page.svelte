@@ -55,9 +55,8 @@
             });
 
             const body = await response.json();
-            const success = body.data.includes('true');
-
-            if (success) {
+            
+            if (body) {
                 alert('User created successfully!');
                 goto(`/dashboard`);
             } else {
@@ -65,7 +64,7 @@
             }
         } catch (error) {
             console.error('Error creating user:', error);
-            alert('Failed to create user');
+            alert(error);
         }
     }
     
@@ -217,6 +216,7 @@
                                         >Password</Label
                                     >
                                     <Input
+                                        name="password"
                                         bind:value={password}
                                         type="password"
                                         id="password"
