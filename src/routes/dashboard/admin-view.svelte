@@ -18,7 +18,7 @@
       table:'equipment_requests',
       id: item.request_id,
       name: item.name,
-      date: item.date_needed_start,
+      date: item.borrow_time,
       admin_approve_layer: item.admin_approve_layer
     })
   });
