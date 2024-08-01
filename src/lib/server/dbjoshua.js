@@ -62,7 +62,7 @@ export async function createUserDB(uuid, first_name, last_name, email, pw_hash, 
 
 export async function getEquipmentDB() {
   const result = await query("SELECT * FROM equipments");
-  console.log(result.body.result.rows);
+  //console.log(result.body.result.rows);
   return result.body.result.rows;
 }
 
@@ -85,8 +85,6 @@ export async function createSessionDB(sessionid, userid){
 
 export async function getUserFromSessionDB(sessionuuid) {
   const res = await query('SELECT * FROM users JOIN sessions ON sessions.user_id = users.id WHERE sessions.session_id = $1', [sessionuuid]);
-  console.log("owo:", sessionuuid);
-  console.log("res:", res);
   // console.log(res);
   return res.body.result.rows[0];
 }
@@ -108,7 +106,7 @@ export async function getUsersWithMatchingEmail(email) {
 export async function getUserBaseRequests(user){
   //console.log(`user ${user}`)
   const res = await query('SELECT * FROM base_requests WHERE base_requests.requester_id = $1', [user]);
-  console.log(`result from dbjoshua: ${res.body.result.rows.length}`)
+  // console.log(`result from dbjoshua: ${res.body.result.rows.length}`)
   return res.body.result.rows
 }
 
