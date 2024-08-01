@@ -16,15 +16,18 @@
     onMount(async () => {
         console.log('Component mounted.');
         try {
-            if (approvalForms == undefined || approvalForms.length == 0) {
+            if (approvalStatuses == undefined || approvalStatuses.length == 0) {
                 console.error('ERROR');
                 throw new Error('no retrieved forms for the time being');
             }
             
+            console.log(approverNames);
+            console.log(approvalStatuses.findIndex((status) => status === 'Pending'));
+
             if (approvalStatuses.includes("Declined"))
                 totalStatus = "Declined";
             else if (approvalStatuses.includes("Pending"))
-                totalStatus = "Pending";
+                totalStatus = "Pending with " + approverNames[approvalStatuses.findIndex((status) => status === 'Pending')];
             else if (approvalStatuses.every((elem) => elem === "Approved"))
                 totalStatus = "Approved";
             else {
@@ -150,8 +153,8 @@
                     {index > 0 && approvalStatuses[index-1] === 'Pending' ? '🔒 Invisible to' :
                      status === 'Approved' ? '✔️ Approved by' : 
                      status === 'Declined' ? '❌ Declined by' : 
-                     status === 'Pending' ?  '⌛ Pending with' :
-                                                          'Status unknown with'}
+                     status === 'Pending' ?  '⌛ Pending with' : 
+                                             'Status unknown with'}
                     {approverNames[index]}
                 </p>
             {/each}
