@@ -1,40 +1,53 @@
 <script>
+  /** @type {import('./$types').PageData} */
 	export let data;
-  import { Search, Button, Dropdown, DropdownItem, Checkbox, Radio, GradientButton} from 'flowbite-svelte';
+  import { Search, Button, Dropdown, DropdownItem, Checkbox, Radio, GradientButton, Table} from 'flowbite-svelte';
   import { SearchOutline, FilterSolid} from 'flowbite-svelte-icons';
   import RequestsCard from './requests-card.svelte';
   import { sineIn } from 'svelte/easing';
+    // import { isTemplateSpan } from 'typescript';
 
-  console.log(data)
+  let requests = []
 
-  let requestInfo = [
-      {
-        reqid: "0",
-        material:"Speaker",
-        date:"August 24, 2024",
-        status: "1"
-      },
-      {
-        reqid:"1",
-        material:"Microphone",
-        date:"August 28, 2024",
-        status: "2"
-      },
-    ]
-    let userData = {
-          firstName: "Cynthia",
-          lastName: "Watts",
-          userType: "Student"
-      }
-    let hidden1 = true;
-    let transitionParams = {
-      x: -320,
-      duration: 200,
-      easing: sineIn
-    };
-      function handleClick() {
-          window.location.href = "/";
-      }
+  data.equipment_requests.forEach(function (item) {
+    requests.push({
+      type: 'Equipment Request',
+      table:'equipment_requests',
+      id: item.request_id,
+      name: item.name,
+      date: item.date_needed_start,
+    })
+  });
+
+  data.venue_requests.forEach(function (item) {
+    requests.push({
+      type: 'Venue Request',
+      table:'venue_requests',
+      id: item.request_id,
+      name: item.name,
+      date: item.date_needed_start,
+    })
+  });
+
+  data.child_requests.forEach(function (item) {
+    requests.push({
+      type: 'Child Observation Request',
+      table:'child_requests',
+      id: item.request_id,
+      name: item.name,
+      date: item.observation_time,
+    })
+  });
+
+  data.class_requests.forEach(function (item) {
+    requests.push({
+      type: 'Class Observation Request',
+      table:'class_requests',
+      id: item.request_id,
+      name: item.name,
+      date: item.schedule,
+    })
+  });
 </script>
   
 <div class="px-10 py-10 w-full min-h-screen">
@@ -77,10 +90,14 @@
       View Requests History
     </a>
   </div>
-
+  
+  {#if requests.length != 0}
   <div class="space-y-3">
-    {#each requestInfo as info}
+    {#each requests as info}
     <RequestsCard {info}></RequestsCard>
     {/each}
   </div>
+  {:else}
+  <p>No Pending Requests</p>
+  {/if}
 </div>

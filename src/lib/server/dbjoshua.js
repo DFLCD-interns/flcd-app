@@ -84,14 +84,65 @@ export async function getUserFromSessionDB(sessionuuid) {
   return res.body.result.rows[0];
 }
 
-export async function getEquipmentRequestsDB() {
-  const res = await query('SELECT * FROM equipment_requests');
-  // console.log(res);
-  return res.body.result.rows[0];
-}// TODO transfer all of this and rename query into db.js
-
 export async function getUsersWithMatchingEmail(email) {
   const res = await query('SELECT * FROM users WHERE email = $1', [email]);
+  // console.log(res);
+  return res.body.result.rows;
+}
+
+export async function getEquipmentRequestsDB() {
+  const res = await query('SELECT * FROM equipment_requests JOIN equipments ON equipment_requests.equipment_id = equipments.id JOIN base_requests ON equipment_requests.request_id = base_requests.id');
+  // console.log(res);
+  return res.body.result.rows;
+}
+
+export async function getVenueRequestsDB() {
+  const res = await query('SELECT * FROM venue_requests JOIN venues ON venue_requests.venue_id = venues.id JOIN base_requests ON venue_requests.request_id = base_requests.id');
+  // console.log(res);
+  return res.body.result.rows;
+}
+
+export async function getChildRequestsDB() {
+  const res = await query('SELECT * FROM child_requests JOIN childs ON child_requests.child_id = childs.id JOIN base_requests ON child_requests.request_id = base_requests.id');
+  // console.log(res);
+  return res.body.result.rows;
+}
+
+export async function getClassRequestsDB() {
+  const res = await query('SELECT * FROM class_requests JOIN classes ON class_requests.class_id = classes.id JOIN base_requests ON class_requests.request_id = base_requests.id');
+  // console.log(res);
+  return res.body.result.rows;
+}
+
+
+// missing fields: class, requests, staff
+export async function getRequestDetailsDB(table, reqid) {
+  var type = ""
+  if (table = "equipment_requests"){
+    type = "equipments";
+  }
+  const res = await query(`SELECT 
+    br.id AS reqid,
+    requester.first_name AS requester_firstname,
+    requester.last_name AS requester_lastname,
+    requester.email,
+    requester.student_number AS studentno,
+    requester.phone AS contactno,
+    t.date_needed_start AS dateneeded,
+    faculty.first_name AS admin_firstname,
+    faculty.last_name AS admin_lastname,
+    requester.department AS dept,
+    e.name AS material,
+    t.count AS number,
+    t.venue AS room,
+    faculty.email AS adminemail,
+    t.date_needed_end AS returndate
+    FROM base_requests br 
+    LEFT JOIN ${table} t ON br.id = t.request_id
+	  LEFT JOIN ${type} e ON t.equipment_id = e.id 
+    LEFT JOIN users AS faculty ON br.faculty_id = faculty.id
+    LEFT JOIN users AS requester ON br.requester_id = requester.id
+    WHERE br.id = ${reqid}`);
   // console.log(res);
   return res.body.result.rows;
 }

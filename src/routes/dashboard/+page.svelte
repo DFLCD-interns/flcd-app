@@ -3,7 +3,7 @@
 	export let data;
     import AdminView from "./admin-view.svelte";
     import NonAdminView from "./non-admin-view.svelte";
-    let isAdmin = true;
+    let isAdmin =true;
     function handleClick() {
         window.location.href = "/";
     }
