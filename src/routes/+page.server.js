@@ -1,29 +1,28 @@
 import { SESSION_COOKIE_NAME } from '$lib/server/constants.js';
-import { createUser } from '$lib/server/auth.js';
+import { createSessionByEmail } from '$lib/server/auth.js';
 import { fail, redirect } from "@sveltejs/kit";
 
 export const actions = {
-	register: async ({request, cookies}) => {
+	signin: async ({request, cookies}) => {
 		// TODO log the user in
 		const formData = await request.formData();
 
 		const email = formData.get("email");
 		const password = formData.get("password");
-		const first_name = formData.get("first_name");
-		const last_name = formData.get("last_name");
-		const phone = formData.get("phone");
-		const student_number = formData.get("student_number");
-		const course = formData.get("course");
-		const department = formData.get("department");
 
         // console.log("signin+page.server.js -- GOT FORM DATA")
 
 		try {
-            // console.log("signup+page.server.js - before sessionresult");
-			console.log('creating user...')
-			const createUserResult = await createUser(first_name, last_name, email, password, phone, student_number, course, department, 1, 1);
+			const sessionCreationResult = await createSessionByEmail(email, password);
+            
+            console.log("signin+page.server.js: ",sessionCreationResult);
 
-            console.log("register+page.server.js", createUserResult);
+			cookies.set(SESSION_COOKIE_NAME, sessionCreationResult.id, {
+				path: "/",
+				httpOnly: true,
+                sameSite: "strict",
+                maxAge: 60 * 60 * 12,
+			});
 		} catch (error) {
 			if (error instanceof Error) {
 				return fail(500, {
@@ -39,9 +38,10 @@ export const actions = {
 				  });
 			}
 		}
-
 		throw redirect(303, "/dashboard");
 	},
+
+
 };
 
 // import { SESSION_COOKIE_NAME } from '$lib/constants.js';

@@ -33,16 +33,16 @@
                 </div>
                 <!--form-->
                 <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form on:submit|preventDefault={handleSubmit} class="space-y-5" action="#" method="POST">
+                    <form class="space-y-5" method="POST" action="?/signin">
                         <div class="mb-5">
                             <Label for="email" class="mb-2">Email address</Label>
-                            <Input type="email" id="email" autocomplete="email" required />
+                            <Input name="email" type="email" id="email" autocomplete="email" required />
                           </div>
                           <div class="mb-5">
                             <Label for="password" class="mb-2">Password</Label>
-                            <Input type="password" id="password" required />
+                            <Input name="password" type="password" id="password" required />
                           </div>
-                          <Button on:click={() => {handleClick()}} type="submit" class="w-full">Login</Button>
+                          <Button type="submit" class="w-full">Login</Button>
                     </form>
 
                     <div class="mt-5 grid grid-cols-3 items-center mb-5">

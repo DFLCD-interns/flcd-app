@@ -4,9 +4,9 @@ const { Pool } = pkg;
 const pool = new Pool({ //store this in an env file!
   user: 'postgres',
   host: 'localhost',
-  database: 'flcdtest',
+  database: 'postgres',
   password: 'password',
-  port: 5432, // Default PostgreSQL port
+  port: 5433, // Default PostgreSQL port
 });
 
 const table_names = [
@@ -127,7 +127,7 @@ export async function getFromTableDB(table_name, searchFormData, limit = 100) {
   const values = [...searchFormData.values()].map((val) => val); // will be for parametrization
 
   const whereText = attributes.map((attributeName, index) => `(${attributeName} = \$${index+1})`).join(' AND ')
-  const qText = `SELECT \* FROM ${table_name} WHERE ${whereText} ORDER BY (id) asc LIMIT \$${limit}`;
+  const qText = `SELECT \* FROM ${table_name} WHERE ${whereText} ORDER BY (id) asc LIMIT \$${attributes.length+1}`;
 
   console.log(qText, values.concat(limit));
   const res = await query(qText, values.concat(limit));    
