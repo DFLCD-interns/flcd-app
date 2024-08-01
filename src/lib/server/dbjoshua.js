@@ -55,10 +55,15 @@ async function query(sqlQuery, args) {
 
 export async function createUserDB(uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) {
     // TODO: check if email is already in used if it is then throw an error
-    console.log('hi')
     const res = await query('INSERT INTO users (uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup]);
-    console.log("res:", res);
+    //console.log("res:", res);
     return res;
+}
+
+export async function getEquipmentDB() {
+  const result = await query("SELECT * FROM equipments");
+  console.log(result.body.result.rows);
+  return result.body.result.rows;
 }
 
 export async function getUserPriv(sessionID) { // returns the admin type of the user associated with this session.
@@ -86,8 +91,10 @@ export async function getUserFromSessionDB(sessionuuid) {
 
 export async function getEquipmentRequestsDB() {
   const res = await query('SELECT * FROM equipment_requests');
-  // console.log(res);
-  return res.body.result.rows[0];
+  // console.log('equipment requests:');
+  // console.log(res.body.result.rows);
+  // console.log('done')
+  return res.body.result.rows;
 }// TODO transfer all of this and rename query into db.js
 
 export async function getUsersWithMatchingEmail(email) {
@@ -95,3 +102,24 @@ export async function getUsersWithMatchingEmail(email) {
   // console.log(res);
   return res.body.result.rows;
 }
+
+export async function getUserBaseRequests(user){
+  //console.log(`user ${user}`)
+  const res = await query('SELECT * FROM base_requests WHERE base_requests.requester_id = $1', [user]);
+  console.log(`result from dbjoshua: ${res.body.result.rows.length}`)
+  return res.body.result.rows
+}
+
+export async function getUserEquipmentRequests(user){
+  const res = await query(`SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id, equipments.name, base_requests.request_time, base_requests.admin_approve_layer
+    FROM base_requests
+    JOIN equipment_requests ON base_requests.id = equipment_requests.request_id
+    JOIN equipments ON equipment_requests.equipment_id = equipments.id
+    WHERE base_requests.requester_id = $1`, [user]);
+  return res.body.result.rows
+}
+
+// SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id
+// FROM base_requests
+// JOIN equipment_requests ON base_requests.id = equipment_requests.request_id
+// WHERE base_requests.requester_id = 19
