@@ -59,9 +59,12 @@ export const actions = {
     }, 
     approve: async ({cookies, request}) => {
         try {
-            const inputFormData = await request.formData(); // user input
+            const session = cookies.get('session_id');
+            const user = await getUserFromSessionDB(session);
+            
+            const inputFormData = await request.formData(); // the user input
+            inputFormData.append('approver_id', user?.user_id);
             inputFormData.append('request_id', 1); // debug, must come from page (parameters?)
-            inputFormData.append('approver_id', 1); // debug, must come from cookies
 
             const updateFormData = new FormData();
             updateFormData.append('status', inputFormData.get('status'));
