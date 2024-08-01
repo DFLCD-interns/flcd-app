@@ -4,6 +4,7 @@
 
     export let data;
     export let form;
+    let isAdmin = (data?.body.user.workgroup < 5);
 
     function handleClick() {
         window.location.href = "/";
@@ -161,34 +162,36 @@
                 </p>
             {/each}
         </div>
-        <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
-            <h1 class="text-gray-600 text-lg mb-1 font-medium title-font">Form Approval</h1>
-            <form bind:this={form} action="?/approve" method="POST">
-                <div class="relative mb-4">
-                    <input 
-                        id="remarks" 
-                        name="remarks" 
-                        placeholder="Remarks and comments."
-                        class="w-full bg-white rounded border border-gray-300 focus:border-green-600 focus:ring-2 focus:ring-green-600 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"/>
-                </div>
-                <div class="flex justify-center">
-                    <!-- Hidden input field to store the status -->
-                    <input type="hidden" id="status" name="status" />
-                    <button 
-                        on:click={() => form.querySelector('input[name="status"]').value = "Approved"}
-                        type="submit" 
-                        class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
-                        Approve
-                    </button>
-                    <button
-                        on:click={() => form.querySelector('input[name="status"]').value = "Declined"}
-                        type="submit" 
-                        class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
-                        Decline
-                    </button>
-                </div>
-            </form>
-        </div>
+        {#if isAdmin}
+            <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
+                <h1 class="text-gray-600 text-lg mb-1 font-medium title-font">Form Approval</h1>
+                <form bind:this={form} action="?/approve" method="POST">
+                    <div class="relative mb-4">
+                        <input 
+                            id="remarks" 
+                            name="remarks" 
+                            placeholder="Remarks and comments."
+                            class="w-full bg-white rounded border border-gray-300 focus:border-green-600 focus:ring-2 focus:ring-green-600 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"/>
+                    </div>
+                    <div class="flex justify-center">
+                        <!-- Hidden input field to store the status -->
+                        <input type="hidden" id="status" name="status" />
+                        <button 
+                            on:click={() => form.querySelector('input[name="status"]').value = "Approved"}
+                            type="submit" 
+                            class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
+                            Approve
+                        </button>
+                        <button
+                            on:click={() => form.querySelector('input[name="status"]').value = "Declined"}
+                            type="submit" 
+                            class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
+                            Decline
+                        </button>
+                    </div>
+                </form>
+            </div>
+        {/if}
     </div>
   </div>
 </div>
