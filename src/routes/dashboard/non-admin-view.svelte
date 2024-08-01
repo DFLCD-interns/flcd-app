@@ -68,9 +68,9 @@
     </div>
   
     <div class="space-y-3">
-    {#each grouped_requests as info}
+    <!-- {#each grouped_requests as info}
     <RequestsCard {info}></RequestsCard>
-    {/each}
+    {/each} -->
   </div>
 </div>
 

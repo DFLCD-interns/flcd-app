@@ -1,56 +1,28 @@
 <script>
-    
     /** @type {import('./$types').PageData} */
 	export let data;
     console.log(data.equipment);
     import { browser } from "$app/environment";
     import { Button, Card, GradientButton, Input, Label, MultiSelect, Select, Textarea, Tabs, TabItem, } from "flowbite-svelte";
     import { AddressBookOutline, ArrowLeftOutline, BuildingSolid, ChevronLeftOutline, ComputerSpeakerSolid, UserAddSolid, } from "flowbite-svelte-icons";
-    let equipmentList = data.equipment;
+ 
     let equipmentTypes = data.equipmentTypes;
-    function renameKey ( obj, oldKey, newKey ) {
-        obj[newKey] = obj[oldKey];
-        
-    }
     let selectedEq = [];
     let start_time = "";
     let return_time = "";
-   
-    equipmentList.forEach( obj => renameKey( obj, 'id', 'value' ) );
 
     // Add a 'value' property to each object in the array; same function as above line
-    equipmentTypes = equipmentTypes.map((item, index) => ({
-      ...item,
-      value: index + 1
-    }));
-
+    equipmentTypes = equipmentTypes.map((item, index) => ({ ...item, value: index + 1 }));
     console.log(equipmentTypes)
-    console.log(equipmentTypes[0])
-
-    function navBack() {
-        if (browser) window.history.back();
-    }
-
-    let equipment = [
-        { value: "l_microphone", name: "Lapel Microphone" },
-        { value: "speaker", name: "Bluetooth Speaker" },
-        { value: "projector", name: "Projector" },
-        { value: "projector_screen", name: "Projector Screen" },
-    ];
 
     let selectedDept = "";
     $: isOther = selectedDept == "other";
-    let isStudent = false;
     let depts = [
-        {
-            value: "dflcd",
-            name: "Department of Family Life and Child Development",
-        },
-        {
-            value: "dctid",
-            name: "Department of Clothing, Textiles, and Interior Design",
-        },
-        { value: "dfsn", name: "Department of Food Science and Nutrition" },
+        { value: "DCTID", name: "Department of Clothing, Textiles, and Interior Design" },
+        { value: "DFLCD", name: "Department of Family Life and Child Development" },
+        { value: "DFSN", name: "Department of Food Science and Nutrition" },
+        { value: "DHeEd", name: "Department of Home Economics Education" },
+        { value: "DHRIM", name: "Department of Hotel, Restaurant, and Institution Management" },
         { value: "other", name: "Other..." },
     ];
 </script>
@@ -59,10 +31,8 @@
     <!--header-->
     <div class="flex items-center gap-4 mb-5">
         <Button
-            on:click={() => {   
-                navBack();
-            }}
             color="alternative"
+            href="/dashboard"
             class="w-auto p-0"><ChevronLeftOutline size="xl" /></Button
         >
         <h4
@@ -107,7 +77,7 @@
                     <hr />
                     <div class="grid gap-6 mb-6 md:grid-cols-2">
                         <Label class="space-y-2">
-                            <span>Use Time</span>
+                            <span>Borrow Time</span>
                             <Input type="datetime-local" name="start_time" bind:value={start_time} required />
                         </Label>
                         <Label class="space-y-2">
@@ -115,7 +85,7 @@
                             <Input type="datetime-local" name="return_time" bind:value={return_time} required />
                         </Label>
                         <Label class="space-y-2">
-                            <span>Venue</span>
+                            <span>Venue of Equipment Usage</span>
                             <Input type="text" name="venue" required />
                         </Label>
                         <Label class="space-y-2">
@@ -134,45 +104,6 @@
                         <Label class="space-y-2">
                             <span>Email of Coordinating Faculty/Admin</span>
                             <Input type="email" name="email" required />
-                        </Label>
-                    </div>
-                    <hr />
-                    <div class="grid gap-6 mb-6 md:grid-cols-2">
-                        <Label>
-                            <span>Department</span>
-                            <Select
-                                class="mt-2"
-                                items={depts}
-                                bind:value={selectedDept}
-                            />
-                        </Label>
-                        {#key isOther}
-                            <Label class="space-y-2">
-                                <span>(Non-CHE) Department</span>
-                                <Input
-                                    disabled={!isOther}
-                                    type="text"
-                                    name="department"
-                                />
-                            </Label>
-                        {/key}
-                        <Label class="space-y-2">
-                            <span>Course</span>
-                            <Input
-                                type="text"
-                                name="course"
-                                required={isStudent}
-                                disabled={!isStudent}
-                            />
-                        </Label>
-                        <Label class="space-y-2">
-                            <span>Preschool Section Assigned</span>
-                            <Input
-                                type="text"
-                                name="pschool_section"
-                                required={isStudent}
-                                disabled={!isStudent}
-                            />
                         </Label>
                     </div>
                     <GradientButton shadow color="green"  type="submit">
@@ -246,24 +177,6 @@
                                 />
                             </Label>
                         {/key}
-                        <Label class="space-y-2">
-                            <span>Course</span>
-                            <Input
-                                type="text"
-                                name="course"
-                                required={isStudent}
-                                disabled={!isStudent}
-                            />
-                        </Label>
-                        <Label class="space-y-2">
-                            <span>Preschool Section Assigned</span>
-                            <Input
-                                type="text"
-                                name="pschool_section"
-                                required={isStudent}
-                                disabled={!isStudent}
-                            />
-                        </Label>
                     </div>
                     <GradientButton shadow color="green" type="submit">
                         Request
