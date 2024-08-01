@@ -1,5 +1,10 @@
 <form action="?/register" method="POST">
   <label>
+    UUID:
+    <input name="uuid" type="text" required />
+  </label>
+
+  <label>
     First Name:
     <input name="first_name" type="text" required />
   </label>

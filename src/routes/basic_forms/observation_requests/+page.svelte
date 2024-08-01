@@ -1,13 +1,8 @@
 # Child Observation Request
 <form action="?/createChildRequest" method="POST">
   <label>
-    Preferred Age Group Low:
-    <input name="preferred_age_group_low" type="number" placeholder="4" />
-  </label>
-
-  <label>
-    Preferred Age Group High:
-    <input name="preferred_age_group_high" type="number" placeholder="7" />
+    Observation Time:
+    <input name="observation_time" type="text" placeholder="" />
   </label>
 
   <label>

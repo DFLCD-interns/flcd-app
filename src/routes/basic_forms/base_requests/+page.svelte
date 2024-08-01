@@ -1,17 +1,17 @@
 <form action="?/createBaseRequest" method="POST">
   <label>
-    Request Timestamp:
-    <input name="request_time" type="datetime-local" required />
-  </label>
-
-  <label>
-    Completion Timestamp:
-    <input name="completion_time" type="datetime-local" required />
-  </label>
-
-  <label>
     Faculty-in-Charge ID:
     <input name="faculty_id" type="number" required />
+  </label>
+
+  <label>
+    Staff Assistant ID:
+    <input name="staff_assistant_id" type="number" required />
+  </label>  
+
+  <label>
+    Purpose:
+    <input name="purpose" type="text" required />
   </label>
   
   <label>
@@ -32,6 +32,11 @@
   <label>
     Requester ID:
     <input name="requester_id" type="number" required />
+  </label>
+  
+  <label>
+    Completion Timestamp:
+    <input name="completion_time" type="datetime-local" required />
   </label>
 
   <button type="submit" class="button-style">Create Base Request</button>

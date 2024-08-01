@@ -4,7 +4,7 @@
 	export let data;
     import AdminView from "./admin-view.svelte";
     import NonAdminView from "./non-admin-view.svelte";
-    let isAdmin = true; // (data.current_user.workgroup < 5);
+    let isAdmin = (data.current_user.workgroup < 5);
     
     console.log(`workgroup: ${data.current_user.workgroup}, ${isAdmin}`)
     function handleClick() {

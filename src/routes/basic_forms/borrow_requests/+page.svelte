@@ -1,28 +1,23 @@
 # Equipment Request
 <form action="?/createEquipmentRequest" method="POST">
   <label>
-    Count:
-    <input name="count" type="number" placeholder="10" required />
+    Borrow Time:
+    <input name="borrow_time" type="datetime-local" required />
   </label>
 
   <label>
-    Usage Start Time:
-    <input name="start_time" type="datetime-local" required />
+    Return Time:
+    <input name="return_time" type="datetime-local" required />
   </label>
 
   <label>
-    Usage End Time:
-    <input name="end_time" type="datetime-local" required />
+    Venue:
+    <input name="venue" type="text" required />
   </label>
-  
+
   <label>
-    Promised Return Time:
-    <input name="promised_return_time" type="datetime-local" required />
-  </label>
-  
-  <label>
-    Actual Return Time:
-    <input name="return_time" type="datetime-local" />
+    Equipment Type:
+    <input name="equipment_type" type="text" required />
   </label>
 
   <label>
@@ -41,25 +36,15 @@
 # Venue Request
 <form action="?/createVenueRequest" method="POST">
   <label>
-    Usage Start Time:
-    <input name="start_time" type="datetime-local" required />
+    Date Needed Start:
+    <input name="date_needed_start" type="datetime-local" required />
   </label>
 
   <label>
-    Usage End Time:
-    <input name="end_time" type="datetime-local" required />
+    Date Needed End:
+    <input name="date_needed_end" type="datetime-local" required />
   </label>
   
-  <label>
-    Promised Return Time:
-    <input name="promised_return_time" type="datetime-local" required />
-  </label>
-  
-  <label>
-    Actual Return Time:
-    <input name="return_time" type="datetime-local" />
-  </label>
-
   <label>
     Venue ID:
     <input name="venue_id" type="number" required />

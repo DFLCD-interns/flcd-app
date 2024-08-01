@@ -4,11 +4,16 @@
     export let form;
     
     import {Badge, Button, GradientButton} from 'flowbite-svelte'
-    import { ArrowLeftOutline } from 'flowbite-svelte-icons';
-    import { onMount } from 'svelte';
+    import { ArrowLeftOutline, CodeBranchSolid } from 'flowbite-svelte-icons';
+    import { onMount, onDestroy } from 'svelte';
     import { page } from '$app/stores';
-    console.log(data)
+    import { equipmentReqName } from '$lib/stores';
+
     let requestInfo = data.body.reqdetails[0];
+    let requestName;
+
+    const unsubscribeToStore = equipmentReqName.subscribe(value => requestName = value);
+    onDestroy(() => unsubscribeToStore());
 
     let request_type = "";
 
@@ -115,8 +120,8 @@
 <div class = "min-h-screen  p-10">
     <div class="w-full items-center justify-between">
         <a href="/dashboard"><Button class="bg-white text-gray-500 hover:bg-white drop-shadow-md"><ArrowLeftOutline/></Button></a>
-        <h2 class="pt-3 text-2xl font-semibold text-gray-600">{request_type}: {requestInfo.material}</h2>
-        <Badge class="mt-2" large border color='yellow'> Pending</Badge>
+        <h2 class="pt-3 text-2xl font-semibold text-gray-600">{request_type}: {requestName}</h2>
+        <Badge class="mt-2" large border color='yellow'>{totalStatus}</Badge>
     </div>
     <div class="min-w-full md:flex pt-5 gap-10 justify-center">
         <div class="bg-white flex items-center justify-center rounded-lg shadow-lg p-6">
@@ -140,10 +145,6 @@
                     <td class="py-3 px-4">{requestInfo.contactno}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
-                    <td class="py-3 px-4 font-semibold">Date needed</td>
-                    <td class="py-3 px-4">{requestInfo.date_needed_start}</td>
-                </tr>
-                <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Name of admin/faculty in charge or coordinating teacher</td>
                     <td class="py-3 px-4">{requestInfo.admin_firstname} {requestInfo.admin_lastname}</td>
                 </tr>
@@ -153,7 +154,7 @@
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Requested equipment</td>
-                    <td class="py-3 px-4">{requestInfo.material}</td>
+                    <td class="py-3 px-4">{requestName}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Equipment usage date</td>
@@ -191,34 +192,36 @@
                 </p>
             {/each}
         </div>
-        <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
-            <h1 class="text-gray-600 text-lg mb-1 font-medium title-font">Form Approval</h1>
-            <form bind:this={form} action="?/approve" method="POST">
-                <div class="relative mb-4">
-                    <input 
-                        id="remarks" 
-                        name="remarks" 
-                        placeholder="Remarks and comments."
-                        class="w-full bg-white rounded border border-gray-300 focus:border-green-600 focus:ring-2 focus:ring-green-600 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"/>
-                </div>
-                <div class="flex justify-center">
-                    <!-- Hidden input field to store the status -->
-                    <input type="hidden" id="status" name="status" />
-                    <button 
-                        on:click={() => form.querySelector('input[name="status"]').value = "Approved"}
-                        type="submit" 
-                        class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
-                        Approve
-                    </button>
-                    <button
-                        on:click={() => form.querySelector('input[name="status"]').value = "Declined"}
-                        type="submit" 
-                        class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
-                        Decline
-                    </button>
-                </div>
-            </form>
-        </div>
+        {#if data.current_user.workgroup < 5}
+            <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
+                <h1 class="text-gray-600 text-lg mb-1 font-medium title-font">Form Approval</h1>
+                <form bind:this={form} action="?/approve" method="POST">
+                    <div class="relative mb-4">
+                        <input 
+                            id="remarks" 
+                            name="remarks" 
+                            placeholder="Remarks and comments."
+                            class="w-full bg-white rounded border border-gray-300 focus:border-green-600 focus:ring-2 focus:ring-green-600 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"/>
+                    </div>
+                    <div class="flex justify-center">
+                        <!-- Hidden input field to store the status -->
+                        <input type="hidden" id="status" name="status" />
+                        <button 
+                            on:click={() => form.querySelector('input[name="status"]').value = "Approved"}
+                            type="submit" 
+                            class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
+                            Approve
+                        </button>
+                        <button
+                            on:click={() => form.querySelector('input[name="status"]').value = "Declined"}
+                            type="submit" 
+                            class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
+                            Decline
+                        </button>
+                    </div>
+                </form>
+            </div>
+        {/if}
     </div>
   </div>
 </div>
