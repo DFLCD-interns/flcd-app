@@ -51,7 +51,8 @@ CREATE TABLE users (
 
 INSERT INTO users (first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup)
 VALUES ('Joshua', 'Tester', 'testerjoshua@gmail.com', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', '+631234567890', NULL, 'BS Computer Science', 'DCS', NULL, 1),
-('Joshua2', 'Tester2', 'testerjoshua2@gmail.com', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', '+631234567890', '201900002', 'BS Computer Science', 'DCS', 1, 2);
+('Joshua2', 'Tester2', 'testerjoshua2@gmail.com', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', '+631234567890', '201900002', 'BS Computer Science', 'DCS', 1, 2),
+('Joshua', 'Tester', 'jt@testmail.com', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', '+639451234567', '202300001', 'BS Computer Science', 'DCS', NULL, 1);
 
 CREATE TABLE batches (
     id SERIAL PRIMARY KEY,
@@ -95,6 +96,11 @@ CREATE TABLE equipments (
     created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
+INSERT INTO equipments (name, description, count)
+VALUES ('TV', 'From Room 103', 1), 
+('TV', 'From Room 104', 1), 
+('Electric Fan', 'From Room 103', 2), 
+('Electric Fan', 'From Room 104', 2);
 
 CREATE TABLE childs (
     id SERIAL PRIMARY KEY,
@@ -106,24 +112,21 @@ CREATE TABLE childs (
     created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
-
-INSERT INTO users (first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) 
-VALUES ('Joshua', 'Tester', 'jt@testmail.com', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', '+639451234567', '202300001', 'BS Computer Science', 'DCS', NULL, 1);
-
 CREATE TABLE base_requests (
     id SERIAL PRIMARY KEY,
     faculty_id INT,
-    staff_assistant_id INT,
-    purpose VARCHAR(1024), -- reason for borrowing
     FOREIGN KEY (faculty_id) REFERENCES users(id),
+    staff_assistant_id INT,
+    FOREIGN KEY (staff_assistant_id) REFERENCES users(id),
+	 purpose VARCHAR(1024), -- reason for borrowing
     office VARCHAR(128),
     company VARCHAR(128),
     admin_approve_layer INT,
     FOREIGN KEY (admin_approve_layer) REFERENCES admin_types(id),
     requester_id INT,
     FOREIGN KEY (requester_id) REFERENCES users(id),
-    created TIMESTAMP DEFAULT NOW() NOT NULL -- when the request was created
-    completion_time TIMESTAMP NOT NULL, -- when the request was completed (objects were returned verified and closed by lender)
+    created TIMESTAMP DEFAULT NOW() NOT NULL, -- when the request was created
+    completion_time TIMESTAMP NOT NULL -- when the request was completed (objects were returned verified and closed by lender)
 );
 
 CREATE TABLE child_requests (
@@ -192,7 +195,6 @@ CREATE TABLE approvals (
     remarks VARCHAR(512),
     approver_id INT,
     FOREIGN KEY (approver_id) REFERENCES users(id),
-    FOREIGN KEY (staff_assistant_id) REFERENCES users(id),
     request_id INT,
     FOREIGN KEY (request_id) REFERENCES base_requests(id),
     created TIMESTAMP DEFAULT NOW()
