@@ -195,11 +195,11 @@ export async function createSessionByEmail(email, password) {
     //     return user.email === email && user.password === password;
     // });
 
-    // console.log("before userFound");
+    console.log("before userFound");
     const password_resolution = await resolvePW(password, email);
 
-    // console.log("auth.js - password resolution: ", password_resolution);
-    // console.log("after userFound");
+    console.log("auth.js - password resolution: ", password_resolution);
+    console.log("after userFound");
 
     // if (!userFound) {
     //     const userWithSameEmail = currentUsers.find((user) => user.email === email);
@@ -281,21 +281,22 @@ async function resolvePW(password, email) {
     let salt;
     let pw_hash;
     const user = await authUserDB(email);
+    console.log("authUser - ", user)
     if (!email) {
         salt = randomBytes(64).toString('hex');
         console.log("auth.js - salt inside if", salt);
     } else {
         pw_hash = user.pw_hash; //await authUserDB(email);
-        // console.log("auth.js - pw_hash in resolvePW", pw_hash);
+        console.log("auth.js - pw_hash in resolvePW", pw_hash);
         salt = pw_hash.slice(128, 256);
     }
     
-    // console.log("auth.js -- salt", salt);
+    console.log("auth.js -- salt", salt);
     let finalkey = scryptSync(password, salt, 64).toString("hex"); // salting first
     // console.log("auth.js -- prefinal key",finalkey);
     // console.log("auth.js -- peppa", PEPPA_PIG);
     finalkey = scryptSync(finalkey, PEPPA_PIG, 64).toString("hex");
-    // console.log("auth.js -- final key",finalkey);
+    console.log("auth.js -- final key",finalkey);
     // console.log("correct hash", correctHash);
     if (email) {
         if (finalkey !== pw_hash.slice(0,128)) {

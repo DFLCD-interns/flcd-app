@@ -54,6 +54,8 @@ VALUES ('Joshua', 'Tester', 'testerjoshua@gmail.com', '5E884898DA28047151D0E56F8
 ('Joshua2', 'Tester2', 'testerjoshua2@gmail.com', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', '+631234567890', '201900002', 'BS Computer Science', 'DCS', 1, 2),
 ('Joshua', 'Tester', 'jt@testmail.com', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', '+639451234567', '202300001', 'BS Computer Science', 'DCS', NULL, 1);
 
+
+
 CREATE TABLE batches (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
@@ -118,7 +120,7 @@ CREATE TABLE base_requests (
     FOREIGN KEY (faculty_id) REFERENCES users(id),
     staff_assistant_id INT,
     FOREIGN KEY (staff_assistant_id) REFERENCES users(id),
-	 purpose VARCHAR(1024), -- reason for borrowing
+	purpose VARCHAR(1024), -- reason for borrowing
     office VARCHAR(128),
     company VARCHAR(128),
     admin_approve_layer INT,
@@ -126,7 +128,8 @@ CREATE TABLE base_requests (
     requester_id INT,
     FOREIGN KEY (requester_id) REFERENCES users(id),
     created TIMESTAMP DEFAULT NOW() NOT NULL, -- when the request was created
-    completion_time TIMESTAMP NOT NULL -- when the request was completed (objects were returned verified and closed by lender)
+    completion_time TIMESTAMP, -- when the request was completed (objects were returned verified and closed by lender)
+    uuid VARCHAR(128)
 );
 
 -- CREATE TABLE child_requests (
@@ -143,9 +146,11 @@ CREATE TABLE base_requests (
 
 CREATE TABLE class_requests (
     id SERIAL PRIMARY KEY,
+    timeslot VARCHAR(128), -- timeslot of the class selected in this format: 13:00-14:00
+    -- no spaces for timeslot above, only 1 timeslot per class_request
     class_id INT,
     FOREIGN KEY (class_id) REFERENCES classes(id),
-    request_id INT,
+    request_id INT, -- the base request id so this can be associated with a base request
     FOREIGN KEY (request_id) REFERENCES base_requests(id)
 );
 

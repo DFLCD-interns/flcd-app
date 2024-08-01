@@ -5,7 +5,7 @@ import { json } from '@sveltejs/kit';
 const pool = new Pool({ //store this in an env file!
   user: 'postgres',
   host: 'localhost',
-  database: 'flcdtest',
+  database: 'test', 
   password: 'password',
   port: 5432, // Default PostgreSQL port
 });
@@ -73,7 +73,7 @@ export async function getUserPriv(sessionID) { // returns the admin type of the 
 
 export async function authUserDB(email) {
   const res = await query('SELECT * FROM users WHERE email = $1', [email]);
-  // console.log(res);
+  // console.log(res, email);
   return res.body.result.rows[0];
 }
 
@@ -173,6 +173,22 @@ export async function getRequestDetailsDB(table, reqid) {
     WHERE br.id = ${reqid}`);
   // console.log(res);
   return res.body.result.rows;
+}
+
+
+export async function createBaseRequestDB(faculty_id, staff_assistant_id, purpose, office, company, admin_approve_layer, requester_id, completion_time, br_uuid) {
+  const res = await query('INSERT INTO base_requests (faculty_id, staff_assistant_id, purpose, office, company, admin_approve_layer, requester_id, completion_time, uuid) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [faculty_id, staff_assistant_id, purpose, office, company, admin_approve_layer, requester_id, completion_time, br_uuid]);
+  return res;
+}
+
+export async function createClassRequestDB(class_id, request_id, timeslot, observe_date) {
+  const res = await query('INSERT INTO class_requests (timeslot, class_id, request_id, observe_date) VALUES ($1, $2, $3, $4)', [timeslot, class_id, request_id, observe_date])
+
+}
+
+export async function getBaseRequestByUuid(br_uuid) {
+  const res = await query('SELECT * FROM base_requests WHERE uuid = $1', [br_uuid]);
+  return res.body.result.rows[0];
 }
 
 // SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id
