@@ -1,4 +1,5 @@
 <script>
+    export let data;
     import { Card, Button, Drawer, CloseButton } from 'flowbite-svelte';
     import { ArrowRightOutline, InfoCircleSolid, HomeSolid } from 'flowbite-svelte-icons';
     import { sineIn } from 'svelte/easing';
@@ -14,11 +15,11 @@
     }
 </script>
 <aside class="hidden lg:block fixed z-10 top-0 pb-3 px-6 w-full justify-between h-screen border-r bg-white transition duration-300 md:w-4/12 lg:ml-0 lg:w-[25%] xl:w-[20%] 2xl:w-[15%]">
-    <Sidebar></Sidebar>
+    <Sidebar {data}></Sidebar>
 </aside>
 
 <Drawer transitionType="fly" {transitionParams} bind:hidden={hidden1} id="sidebar1" class="justify-between">
-    <Sidebar></Sidebar>
+    <Sidebar {data}></Sidebar>
 </Drawer>
 
 <!--navbar-->

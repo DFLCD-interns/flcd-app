@@ -1,25 +1,24 @@
 <script>
+  export let data;
   import { Card, Button, Drawer, CloseButton, Badge, GradientButton } from 'flowbite-svelte';
   import { ArrowRightOutline, InfoCircleSolid } from 'flowbite-svelte-icons';
   import { sineIn } from 'svelte/easing';
   import Sidebar from './sidebar.svelte';
     import RequestsCard from './requests-card.svelte';
   //placeholder for now
-  let requestInfo = [
-    {
-      material:"Speaker",
-      date:"August 24, 2024",
-      status: "1"
-    },
-    {
-      material:"Microphone",
-      date:"August 28, 2024",
-      status: "2"
-    },
-  ]
+  let requestInfo = data.equipment_requests
+  let reduced = requestInfo.reduce((x, y) => {
+    (x[y.br_id] = x[y.br_id] || []).push(y);
+    return x;
+  }, {});
+  let grouped_requests = Object.keys(reduced).map((key) => reduced[key]);
+  console.log(grouped_requests);
+
+  let user= data.current_user
+  console.log(`req length: ${requestInfo}`)
   let userData = {
-        firstName: "Cynthia",
-        lastName: "Watts",
+        firstName: user.first_name,
+        lastName: user.last_name,
         userType: "Student"
     }
   let hidden1 = true;
@@ -69,9 +68,9 @@
     </div>
   
     <div class="space-y-3">
-    {#each requestInfo as info}
+    <!-- {#each grouped_requests as info}
     <RequestsCard {info}></RequestsCard>
-    {/each}
+    {/each} -->
   </div>
 </div>
 

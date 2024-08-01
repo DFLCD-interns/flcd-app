@@ -2,6 +2,9 @@
   import { Card, Button, Drawer, CloseButton, Badge, Gallery, GradientButton } from 'flowbite-svelte';
   import { ArrowRightOutline, IndentOutline, InfoCircleSolid } from 'flowbite-svelte-icons';
   export let info;
+  let status = info.admin_approve_layer
+  let status_msg  = ['Approved', 'Pending Approval - Chair', 'Pending Approval - FIC', 'Pending Approval - Staff']
+  let status_color = ['green', 'yellow', 'yellow', 'yellow']
 </script>
 
 <Card class="w-full max-w-full" href="#">

@@ -1,6 +1,7 @@
 <script>
   /** @type {import('./$types').PageData} */
 	export let data;
+  console.log(data)
   import { Search, Button, Dropdown, DropdownItem, Checkbox, Radio, GradientButton, Table} from 'flowbite-svelte';
   import { SearchOutline, FilterSolid} from 'flowbite-svelte-icons';
   import RequestsCard from './requests-card.svelte';
@@ -9,13 +10,16 @@
 
   let requests = []
 
-  data.equipment_requests.forEach(function (item) {
+ 
+
+  data.equipment_requests2.forEach(function (item) {
     requests.push({
       type: 'Equipment Request',
       table:'equipment_requests',
       id: item.request_id,
       name: item.name,
       date: item.date_needed_start,
+      admin_approve_layer: item.admin_approve_layer
     })
   });
 
@@ -26,6 +30,7 @@
       id: item.request_id,
       name: item.name,
       date: item.date_needed_start,
+      admin_approve_layer: item.admin_approve_layer
     })
   });
 
@@ -36,6 +41,7 @@
       id: item.request_id,
       name: item.name,
       date: item.observation_time,
+      admin_approve_layer: item.admin_approve_layer
     })
   });
 
@@ -46,8 +52,11 @@
       id: item.request_id,
       name: item.name,
       date: item.schedule,
+      admin_approve_layer: item.admin_approve_layer
     })
   });
+
+  console.log(requests)
 </script>
   
 <div class="px-10 py-10 w-full min-h-screen">
@@ -98,6 +107,6 @@
     {/each}
   </div>
   {:else}
-  <p>No Pending Requests</p>
+  <p class="text-gray-500">No Pending Requests</p>
   {/if}
 </div>

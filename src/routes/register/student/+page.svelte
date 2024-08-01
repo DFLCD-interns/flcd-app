@@ -68,16 +68,14 @@
         }
     }
     
+    $: isOther = selectedDept == "other";
     let depts = [
-        { value: "dflcd", name: "Department of Family Life and Child Development" },
-        { value: "dctid", name: "Department of Clothing, Textiles, and Interior Design" },
-        { value: "dfsn", name: "Department of Food Science and Nutrition" },
-    ];
-
-    let courses = [
-        { value: "c1", name: "Example Course 1" },
-        { value: "c2", name: "Example Course 2" },
-        { value: "c3", name: "Example Course 3" },
+        { value: "DCTID", name: "Department of Clothing, Textiles, and Interior Design" },
+        { value: "DFLCD", name: "Department of Family Life and Child Development" },
+        { value: "DFSN", name: "Department of Food Science and Nutrition" },
+        { value: "DHeEd", name: "Department of Home Economics Education" },
+        { value: "DHRIM", name: "Department of Hotel, Restaurant, and Institution Management" },
+        { value: "other", name: "Other..." },
     ];
 
     function navBack() {
@@ -120,7 +118,7 @@
                         <div class="flex flex-wrap align-center">
                             <div class="sm:w-1/2 w-full mt-3 space-y-4 sm:pr-1.5">
                                 <div class="flex items-center space-x-2">
-                                    <div class="w-1/2">
+                                    <div>
                                         <Label for="first_name" class="mb-2">
                                             First Name
                                         </Label>
@@ -160,24 +158,32 @@
                                 </div>
                                 <div>
                                     <Label>
-                                        Department
+                                        <span>Department</span>
                                         <Select
-                                            name="department"
                                             class="mt-2"
                                             items={depts}
                                             bind:value={selectedDept}
-                                            required
                                         />
                                     </Label>
                                 </div>
                                 <div>
+                                    {#key isOther}
+                                        <Label class="space-y-2">
+                                            <span>(Non-CHE) Department</span>
+                                            <Input
+                                                disabled={!isOther}
+                                                type="text"
+                                                name="department"
+                                            />
+                                        </Label>
+                                    {/key}
+                                </div>
+                                <div>
                                     <Label>
                                         Course
-                                        <Select
+                                        <Input
+                                            type="text"
                                             name="course"
-                                            class="mt-2"
-                                            items={courses}
-                                            bind:value={selectedCourse}
                                             required
                                         />
                                     </Label>

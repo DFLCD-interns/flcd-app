@@ -55,10 +55,15 @@ async function query(sqlQuery, args) {
 
 export async function createUserDB(uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) {
     // TODO: check if email is already in used if it is then throw an error
-    console.log('hi')
     const res = await query('INSERT INTO users (uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup]);
-    console.log("res:", res);
+    //console.log("res:", res);
     return res;
+}
+
+export async function getEquipmentDB() {
+  const result = await query("SELECT * FROM equipments");
+  //console.log(result.body.result.rows);
+  return result.body.result.rows;
 }
 
 export async function getUserPriv(sessionID) { // returns the admin type of the user associated with this session.
@@ -84,13 +89,37 @@ export async function getUserFromSessionDB(sessionuuid) {
   return res.body.result.rows[0];
 }
 
+export async function getEquipmentRequestsDB() {
+  const res = await query('SELECT * FROM equipment_requests');
+  // console.log('equipment requests:');
+  // console.log(res.body.result.rows);
+  // console.log('done')
+  return res.body.result.rows;
+}// TODO transfer all of this and rename query into db.js
+
 export async function getUsersWithMatchingEmail(email) {
   const res = await query('SELECT * FROM users WHERE email = $1', [email]);
   // console.log(res);
   return res.body.result.rows;
 }
 
-export async function getEquipmentRequestsDB() {
+export async function getUserBaseRequests(user){
+  //console.log(`user ${user}`)
+  const res = await query('SELECT * FROM base_requests WHERE base_requests.requester_id = $1', [user]);
+  // console.log(`result from dbjoshua: ${res.body.result.rows.length}`)
+  return res.body.result.rows
+}
+
+export async function getUserEquipmentRequests(user){
+  const res = await query(`SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id, equipments.name, base_requests.admin_approve_layer, base_requests.created
+    FROM base_requests
+    JOIN equipment_requests ON base_requests.id = equipment_requests.request_id
+    JOIN equipments ON equipment_requests.equipment_id = equipments.id
+    WHERE base_requests.requester_id = $1`, [user]);
+  return res.body.result.rows
+}
+
+export async function getEquipmentRequests2DB() {
   const res = await query('SELECT * FROM equipment_requests JOIN equipments ON equipment_requests.equipment_id = equipments.id JOIN base_requests ON equipment_requests.request_id = base_requests.id');
   // console.log(res);
   return res.body.result.rows;
@@ -115,7 +144,7 @@ export async function getClassRequestsDB() {
 }
 
 
-// missing fields: class, requests, staff
+// missing fields: class, requests, staff, course, purpose
 export async function getRequestDetailsDB(table, reqid) {
   var type = ""
   if (table = "equipment_requests"){
@@ -128,15 +157,14 @@ export async function getRequestDetailsDB(table, reqid) {
     requester.email,
     requester.student_number AS studentno,
     requester.phone AS contactno,
-    t.date_needed_start AS dateneeded,
+    t.borrow_time AS dateneeded,
     faculty.first_name AS admin_firstname,
     faculty.last_name AS admin_lastname,
     requester.department AS dept,
     e.name AS material,
-    t.count AS number,
     t.venue AS room,
     faculty.email AS adminemail,
-    t.date_needed_end AS returndate
+    t.return_time AS returndate
     FROM base_requests br 
     LEFT JOIN ${table} t ON br.id = t.request_id
 	  LEFT JOIN ${type} e ON t.equipment_id = e.id 
@@ -146,3 +174,8 @@ export async function getRequestDetailsDB(table, reqid) {
   // console.log(res);
   return res.body.result.rows;
 }
+
+// SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id
+// FROM base_requests
+// JOIN equipment_requests ON base_requests.id = equipment_requests.request_id
+// WHERE base_requests.requester_id = 19

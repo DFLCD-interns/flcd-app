@@ -1,14 +1,5 @@
-import { insertIntoTableDB, getFromTableDB, updateTableDB } from '../../../../lib/server/db';
-import * as db from '../../../../lib/server/dbjoshua.js';
+import { insertIntoTableDB, getFromTableDB, updateTableDB } from '$lib/server/db';
 import { getUserFromSessionDB } from '$lib/server/dbjoshua';
-
-// /** @type {import('./$types.js').LayoutServerLoad} */
-// export async function load({params}) {
-// 	return {
-// 		type: params.table,
-// 		reqdetails: await db.getRequestDetailsDB(params.table, params.reqid),
-// 	};
-// }
 
 async function getApprovalsInfo(searchFormData) { 
     const formsQuery = await getFromTableDB("approvals", searchFormData); 
@@ -41,7 +32,7 @@ async function getApprovalsInfo(searchFormData) {
     }};
 }
 
-export const load = async ( {cookies, params} ) => {
+export const load = async ( {cookies} ) => {
     try {
         const session = cookies.get('session_id');
         const user = await getUserFromSessionDB(session);
@@ -53,9 +44,7 @@ export const load = async ( {cookies, params} ) => {
         return { success: true, body: { 
             user: user,
             approvalFormStatuses: approvalsInfo.body.statuses, 
-            approverNames: approvalsInfo.body.displayNames,
-			type: params.table,
-			reqdetails: await db.getRequestDetailsDB(params.table, params.reqid),
+            approverNames: approvalsInfo.body.displayNames
         }}; 
     } catch (error) {   
         console.error("Action failed:", error.message);

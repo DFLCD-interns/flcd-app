@@ -1,31 +1,13 @@
 <script>
-    /** @type {import('./$types').PageData} */
+    import { ChevronLeftOutline, ClipboardSolid, ComputerSpeakerOutline } from 'flowbite-svelte-icons';
+	import { onMount } from 'svelte';
+
     export let data;
     export let form;
-    
-    import {Badge, Button, GradientButton} from 'flowbite-svelte'
-    import { ArrowLeftOutline } from 'flowbite-svelte-icons';
-    import { onMount } from 'svelte';
-    import { page } from '$app/stores';
-    console.log(data)
-    let requestInfo = data.body.reqdetails[0];
 
-    let request_type = "";
-
-    if (data.body.type == "equipment_requests"){
-        request_type = "Equipment Requests"
+    function handleClick() {
+        window.location.href = "/";
     }
-    else if (data.body.type == "venue_requests"){
-        request_type = "Venue Requests"
-    }
-
-    if (requestInfo.studentno == null){
-        requestInfo.studentno = "none";
-    }
-    console.log('What')
-    console.log(requestInfo)
-    console.log(data)
-    
 
     let totalStatus = "";
     $: approvalStatuses = data?.body.approvalFormStatuses;
@@ -62,114 +44,102 @@
 
         return () => approvalForms = [];
     })
-
-    
-
-    // let requestInfo = {
-    //     reqid: data.reqdetails.reqid,
-    //     type: rtype,
-    //     name: data.reqdetails.requester_firstname + data.reqdetails.requester_last_name,
-    //     email: data.reqdetails.email,
-    //     studentno: data.reqdetails.studentno,
-    //     contactno: data.reqdetails.contactno,
-    //     dateneeded: data.reqdetails.dateneeded,
-    //     admin: data.reqdetails.admin_firstname + data.reqdetails.admin_lastname,
-    //     dept: data.reqdetails.dept,
-    //     material: data.reqdetails.material,
-    //     number:data.reqdetails.number,
-    //     room:data.reqdetails.room,
-    //     adminemail:data.reqdetails.adminemail,
-    //     returndate:data.reqdetails.returndate
-    // }
-    // console.log(requestInfo)
-
-    // let requestInfo =
-    //   {
-    //     reqid:"0",
-    //     status:"Pending",
-    //     type:"Equipment Request",
-    //     name:"Christian Magaway",
-    //     email:"clmagaway@up.edu.ph",
-    //     studentno:"None",
-    //     contactno:"09218344896",
-    //     dateneeded:"June 21, 2024",
-    //     timeneeded:"8:00 AM",
-    //     admin:"Asst. Prof. Joseph G. Taluban Jr.",
-    //     dept:"DCTID",
-    //     class:"None",
-    //     course:"None",
-    //     material:"Speaker",
-    //     number:"1",
-    //     reason:"Used for interior design mock board assessment and monitoring",
-    //     usedate:"June 21, 2024",
-    //     usetime:"8:00 AM",
-    //     room:"CHE Museum Room 104",
-    //     staff:"Ms. Mikee",
-    //     adminemail:"jgtaluban@up.edu.ph",
-    //     returndate:"June 21, 2024",
-    //     returntime:"3:00 PM"
-    //   }
 </script>
 
-
 <div class = "min-h-screen  p-10">
-    <div class="w-full items-center justify-between">
-        <a href="/dashboard"><Button class="bg-white text-gray-500 hover:bg-white drop-shadow-md"><ArrowLeftOutline/></Button></a>
-        <h2 class="pt-3 text-2xl font-semibold text-gray-600">{request_type}: {requestInfo.material}</h2>
-        <Badge class="mt-2" large border color='yellow'> Pending</Badge>
+    <div class="w-full flex items-center justify-between">
+        <a href="\dashboard"><ChevronLeftOutline class="size-10 text-gray-600"></ChevronLeftOutline></a>
+        <h2 class="text-2xl font-semibold text-gray-600">Equipment Request</h2>
+        <h2 class="text-xl font-semibold text-yellow-600">{totalStatus}</h2>
     </div>
-    <div class="min-w-full md:flex pt-5 gap-10 justify-center">
+    <div class="md:flex pt-10 gap-10 justify-center">
         <div class="bg-white flex items-center justify-center rounded-lg shadow-lg p-6">
-            <div class="overflow-x-auto">
-            <table class="table-fixed object-cover">
+            <div class="overflow-x-auto ">
+            <table class="min-w-full">
                 <tbody class="text-gray-600">
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Name</td>
-                    <td class="py-3 px-4">{requestInfo.requester_firstname} {requestInfo.requester_lastname}</td>
+                    <td class="py-3 px-4">Christian Magaway</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Email</td>
-                    <td class="py-3 px-4">{requestInfo.email}</td>
+                    <td class="py-3 px-4">clmagaway@up.edu.ph</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Student number</td>
-                    <td class="py-3 px-4">{requestInfo.studentno}</td>
+                    <td class="py-3 px-4">None</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
-                    <td class="py-3 px-4 font-semibold">Contact number</td>
-                    <td class="py-3 px-4">{requestInfo.contactno}</td>
+                    <td class="py-3 px-4 font-semibold">Contact number<noframes></noframes>eeded</td>
+                    <td class="py-3 px-4">09218344896</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
-                    <td class="py-3 px-4 font-semibold">Date needed</td>
-                    <td class="py-3 px-4">{requestInfo.date_needed_start}</td>
+                    <td class="py-3 px-4 font-semibold">Date<noframes></noframes>eeded</td>
+                    <td class="py-3 px-4">Jun 21, 2024</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
-                    <td class="py-3 px-4 font-semibold">Name of admin/faculty in charge or coordinating teacher</td>
-                    <td class="py-3 px-4">{requestInfo.admin_firstname} {requestInfo.admin_lastname}</td>
+                    <td class="py-3 px-4 font-semibold">Time needed</td>
+                    <td class="py-3 px-4">8:00 AM</td>
+                </tr>
+                <tr class="border-b border-blue-gray-200">
+                    <td class="py-3 px-4 font-semibold">Name of admin/daculty in charge or coordinating teacher</td>
+                    <td class="py-3 px-4">Asst. Prof. Joseph G. Taluban Jr.</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Department/section</td>
-                    <td class="py-3 px-4">{requestInfo.dept}</td>
+                    <td class="py-3 px-4">DCTID</td>
+                </tr>
+                <tr class="border-b border-blue-gray-200">
+                    <td class="py-3 px-4 font-semibold">Preschool class assigned</td>
+                    <td class="py-3 px-4">None</td>
+                </tr>
+                <tr class="border-b border-blue-gray-200">
+                    <td class="py-3 px-4 font-semibold">College course subject</td>
+                    <td class="py-3 px-4">None</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Requested equipment</td>
-                    <td class="py-3 px-4">{requestInfo.material}</td>
+                    <td class="py-3 px-4">Lapel microphone RODE</td>
+                </tr>
+                <tr class="border-b border-blue-gray-200">
+                    <td class="py-3 px-4 font-semibold">Number of requested equipment</td>
+                    <td class="py-3 px-4">1</td>
+                </tr>
+                <tr class="border-b border-blue-gray-200">
+                    <td class="py-3 px-4 font-semibold">Reason to use the equipment</td>
+                    <td class="py-3 px-4">Used for Interior Design Mock Board Assessment and Mentoring</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Equipment usage date</td>
-                    <td class="py-3 px-4">{requestInfo.dateneeded}</td>
+                    <td class="py-3 px-4">Jun 21, 2024</td>
+                </tr>
+                <tr class="border-b border-blue-gray-200">
+                    <td class="py-3 px-4 font-semibold">Equipment usage time</td>
+                    <td class="py-3 px-4">8:00 AM</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Room where the equipment will be used</td>
-                    <td class="py-3 px-4">{requestInfo.room}</td>
+                    <td class="py-3 px-4">CHE MUSEUM ROOM 104</td>
+                </tr>
+                <tr class="border-b border-blue-gray-200">
+                    <td class="py-3 px-4 font-semibold">Assisting staff</td>
+                    <td class="py-3 px-4">Ms. Mikee</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Email address of admin/faculty in charge or coordinating teacher</td>
-                    <td class="py-3 px-4">{requestInfo.adminemail}</td>
+                    <td class="py-3 px-4">jgtaluban@up.edu.ph</td>
+                </tr>
+                <tr class="border-b border-blue-gray-200">
+                    <td class="py-3 px-4 font-semibold">Email address</td>
+                    <td class="py-3 px-4">clmagaway@up.edu.ph</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Equipment return date</td>
-                    <td class="py-3 px-4">{requestInfo.returndate}</td>
+                    <td class="py-3 px-4">Jun 21, 2024</td>
+                </tr>
+                <tr class="border-b border-blue-gray-200">
+                    <td class="py-3 px-4 font-semibold">Equipment return time</td>
+                    <td class="py-3 px-4">3:00 PM</td>
                 </tr>
                 </tbody>
             </table>
