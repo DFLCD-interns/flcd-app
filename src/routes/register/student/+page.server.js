@@ -40,7 +40,7 @@ export const actions = {
 			}
 		}
 
-		throw redirect(303, "/dashboard");
+		throw redirect(303, "/");
 	},
 };
 
