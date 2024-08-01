@@ -1,44 +1,50 @@
 import { insertIntoTableDB, getFromTableDB, updateTableDB } from '$lib/server/db';
 import { getUserFromSessionDB } from '$lib/server/dbjoshua';
 
+async function getApprovalsInfo(searchFormData) { 
+    const formsQuery = await getFromTableDB("approvals", searchFormData); 
+
+    const statuses = [];
+    formsQuery.body.result.rows.map(async row => {
+        statuses.push(row?.status);
+    })
+
+    const displayNames = [];
+    searchFormData.delete('request_id');
+    searchFormData.append('id', 0);
+    const searchFormData2 = new FormData();
+    searchFormData2.append('access_level', 5);
+    for (const row of formsQuery.body.result.rows) {
+        searchFormData.set('id', row.approver_id);
+        const approverQuery = await getFromTableDB("users", searchFormData);
+        const workgroup = approverQuery.body.result.rows[0].workgroup;
+
+        searchFormData2.set('access_level', workgroup-1);
+        const workgroupQuery = await getFromTableDB("admin_types", searchFormData2);
+        const displayName = workgroupQuery.body.result.rows[0].description;
+
+        displayNames.push(displayName);
+    }
+    
+    return { success: true, body: {
+        statuses: statuses, 
+        displayNames: displayNames
+    }};
+}
+
 export const load = async ( {cookies} ) => {
     try {
         const session = cookies.get('session_id');
         const user = await getUserFromSessionDB(session);
 
-        const searchFormData = new FormData(); // user input
-        searchFormData.append('request_id', 1); // temp
-
-        const formsQuery = await getFromTableDB("approvals", searchFormData); 
-        console.log('forms:', formsQuery.body.result.rows)
-
-        const statuses = [];
-        formsQuery.body.result.rows.map(async row => {
-            statuses.push(row?.status);
-        })
-        console.log("statuses:", statuses);
-
-        const approverNames = [];
-        searchFormData.delete('request_id');
-        searchFormData.append('id', 0);
-        const searchFormData2 = new FormData();
-        searchFormData2.append('access_level', 5);
-        for (const row of formsQuery.body.result.rows) {
-            searchFormData.set('id', row.approver_id);
-            const approverQuery = await getFromTableDB("users", searchFormData);
-            const workgroup = approverQuery.body.result.rows[0].workgroup;
-
-            searchFormData2.set('access_level', workgroup-1);
-            const workgroupQuery = await getFromTableDB("admin_types", searchFormData2);
-            const displayName = workgroupQuery.body.result.rows[0].description;
-
-            approverNames.push(displayName);
-        }
+        const formData = new FormData(); // user input
+        formData.append('request_id', 1); // temp
+        const approvalsInfo = await getApprovalsInfo(formData);
 
         return { success: true, body: { 
             user: user,
-            approvalFormStatuses: statuses, 
-            approverNames: approverNames
+            approvalFormStatuses: approvalsInfo.body.statuses, 
+            approverNames: approvalsInfo.body.displayNames
         }}; 
     } catch (error) {   
         console.error("Action failed:", error.message);
