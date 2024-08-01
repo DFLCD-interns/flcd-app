@@ -112,9 +112,9 @@ VALUES ('Joshua', 'Tester', 'jt@testmail.com', '5E884898DA28047151D0E56F8DC62927
 
 CREATE TABLE base_requests (
     id SERIAL PRIMARY KEY,
-    -- request_time TIMESTAMP DEFAULT NOW(),
-    completion_time TIMESTAMP NOT NULL, -- when the request was completed (objects were returned verified and closed by lender)
     faculty_id INT,
+    staff_assistant_id INT,
+    purpose VARCHAR(1024), -- reason for borrowing
     FOREIGN KEY (faculty_id) REFERENCES users(id),
     office VARCHAR(128),
     company VARCHAR(128),
@@ -123,6 +123,7 @@ CREATE TABLE base_requests (
     requester_id INT,
     FOREIGN KEY (requester_id) REFERENCES users(id),
     created TIMESTAMP DEFAULT NOW() NOT NULL -- when the request was created
+    completion_time TIMESTAMP NOT NULL, -- when the request was completed (objects were returned verified and closed by lender)
 );
 
 CREATE TABLE child_requests (
@@ -151,24 +152,21 @@ CREATE TABLE venue_requests (
     date_needed_end TIMESTAMP, -- date needed end/ expected return date
     -- promised_return_time TIMESTAMP,
     -- return_time TIMESTAMP, -- usurped by completion time in base request
-    purpose VARCHAR(1024), -- Reason field
     venue_id INT,
     FOREIGN KEY (venue_id) REFERENCES venues(id),
     request_id INT,
     FOREIGN KEY (request_id) REFERENCES base_requests(id)
 );
 
-CREATE TABLE equipment_requests (
+CREATE TABLE equipment_requests ( -- one entry for each equipment in a request
     id SERIAL PRIMARY KEY,
-    count INT,
-    date_needed_start TIMESTAMP, -- start when the equipment will be used (schedule of event where equipment will be used)
-    date_needed_end TIMESTAMP, -- end time of the event where equipment will be used
-    promised_return_time TIMESTAMP, -- when the equipment will be returned
-    -- return_time TIMESTAMP, -- when the equipment was returned
-    venue VARCHAR(128),
-    equipment_id INT,
+    borrow_time TIMESTAMP, -- start of when the equipment will be borrowed
+    return_time TIMESTAMP, -- when the equipment should be returned
+    venue VARCHAR(128), -- place where the equipment will be used
+    equipment_type VARCHAR(128), -- equipment type
+    equipment_id INT, -- specific equipment to be assigned by approvers
     FOREIGN KEY (equipment_id) REFERENCES equipments(id),
-    request_id INT,
+    request_id INT, -- same for all entries in the same request
     FOREIGN KEY (request_id) REFERENCES base_requests(id)
 );
 
@@ -194,7 +192,6 @@ CREATE TABLE approvals (
     remarks VARCHAR(512),
     approver_id INT,
     FOREIGN KEY (approver_id) REFERENCES users(id),
-    staff_assistant_id INT,
     FOREIGN KEY (staff_assistant_id) REFERENCES users(id),
     request_id INT,
     FOREIGN KEY (request_id) REFERENCES base_requests(id),

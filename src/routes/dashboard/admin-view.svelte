@@ -79,8 +79,8 @@
   </div>
 
   <div class="space-y-3">
-    {#each requestInfo as info}
+    <!-- {#each requestInfo as info}
     <RequestsCard {info}></RequestsCard>
-    {/each}
+    {/each} -->
   </div>
 </div>
