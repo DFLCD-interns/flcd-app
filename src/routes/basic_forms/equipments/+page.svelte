@@ -14,6 +14,7 @@
     <input name="count" type="text" placeholder="2" required />
   </label>
 
+
   <button type="submit" class="button-style">Create Equipment</button>
 </form>
 

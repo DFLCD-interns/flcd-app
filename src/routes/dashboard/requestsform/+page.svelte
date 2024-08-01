@@ -6,6 +6,7 @@
     import { Button, Card, GradientButton, Input, Label, MultiSelect, Select, Textarea, Tabs, TabItem, } from "flowbite-svelte";
     import { AddressBookOutline, ArrowLeftOutline, BuildingSolid, ChevronLeftOutline, ComputerSpeakerSolid, UserAddSolid, } from "flowbite-svelte-icons";
     let equipmentList = data.equipment;
+    let equipmentTypes = data.equipmentTypes;
     function renameKey ( obj, oldKey, newKey ) {
         obj[newKey] = obj[oldKey];
         
@@ -15,8 +16,16 @@
     let return_time = "";
    
     equipmentList.forEach( obj => renameKey( obj, 'id', 'value' ) );
-    //console.log(equipmentList)
-    //console.log(equipmentList[0])
+
+    // Add a 'value' property to each object in the array; same function as above line
+    equipmentTypes = equipmentTypes.map((item, index) => ({
+      ...item,
+      value: index + 1
+    }));
+
+    console.log(equipmentTypes)
+    console.log(equipmentTypes[0])
+
     function navBack() {
         if (browser) window.history.back();
     }
@@ -27,6 +36,7 @@
         { value: "projector", name: "Projector" },
         { value: "projector_screen", name: "Projector Screen" },
     ];
+
     let selectedDept = "";
     $: isOther = selectedDept == "other";
     let isStudent = false;
@@ -77,7 +87,7 @@
                         tabindex=0
                             name="selectedEq"
                             class="mt-2"
-                            items={equipmentList}
+                            items={equipmentTypes}
                             bind:value={selectedEq}
                             required
                         />
@@ -85,11 +95,11 @@
                     <div class="grid gap-6 mb-6 md:grid-cols-4">
                         {#each selectedEq as eq}
                             <Label>
-                                <span>Quantity of {equipmentList.find(
+                                <span>Quantity of {equipmentTypes.find(
                                     (x) => x.value == eq,
                                 ).name}</span
                             >
-                            <Input type="number" name={eq} min=1 max={equipmentList.find((x) => x.value == eq, ).count} required />
+                            <Input type="number" name={eq} min=1 max={equipmentTypes.find((x) => x.value == eq, ).total_count} required /> 
                             </Label>
                         {/each}
                     </div>

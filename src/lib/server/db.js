@@ -85,6 +85,12 @@ export async function getEquipmentDB() {
   return result.body.result.rows;
 }
 
+export async function getEquipmentTypesDB() {
+  const result = await query("SELECT name, SUM(count) AS total_count FROM equipments GROUP BY name");
+  console.log(result.body.result.rows);
+  return result.body.result.rows;
+}
+
 export async function createUserDB(first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, access_level) {
   const qText = `INSERT INTO users (first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) VALUES ('${first_name}', '${last_name}', '${email}', '${pw_hash}', '${phone}', '${student_number}', '${course}', '${department}', ${superior_id}, ${access_level})`;
   console.log(qText);
