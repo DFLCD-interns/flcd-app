@@ -1,14 +1,5 @@
-import { insertIntoTableDB, getFromTableDB, updateTableDB } from '../../../../lib/server/db';
-import * as db from '../../../../lib/server/dbjoshua.js';
-import { getUserFromSessionDB } from '$lib/server/dbjoshua';
-
-// /** @type {import('./$types.js').LayoutServerLoad} */
-// export async function load({params}) {
-// 	return {
-// 		type: params.table,
-// 		reqdetails: await db.getRequestDetailsDB(params.table, params.reqid),
-// 	};
-// }
+import { insertIntoTableDB, getFromTableDB, updateTableDB } from '$lib/server/db';
+import { getRequestDetailsDB, getUserFromSessionDB } from '$lib/server/dbjoshua';
 
 async function getApprovalsInfo(searchFormData) { 
     const formsQuery = await getFromTableDB("approvals", searchFormData); 
@@ -41,21 +32,19 @@ async function getApprovalsInfo(searchFormData) {
     }};
 }
 
+/** @type {import('./$types.js').LayoutServerLoad} */
 export const load = async ( {cookies, params} ) => {
     try {
-        const session = cookies.get('session_id');
-        const user = await getUserFromSessionDB(session);
-
         const formData = new FormData(); // user input
-        formData.append('request_id', 1); // temp
+        formData.append('request_id', params.reqid);
         const approvalsInfo = await getApprovalsInfo(formData);
+        const reqDetails = await getRequestDetailsDB(params.table, params.reqid);
 
         return { success: true, body: { 
-            user: user,
             approvalFormStatuses: approvalsInfo.body.statuses, 
             approverNames: approvalsInfo.body.displayNames,
 			type: params.table,
-			reqdetails: await db.getRequestDetailsDB(params.table, params.reqid),
+			reqdetails: reqDetails
         }}; 
     } catch (error) {   
         console.error("Action failed:", error.message);
@@ -74,14 +63,14 @@ export const actions = {
             return {success: response.success}; 
         }
     }, 
-    approve: async ({cookies, request}) => {
+    approve: async ({cookies, request, params}) => {
         try {
             const session = cookies.get('session_id');
             const user = await getUserFromSessionDB(session);
             
             const inputFormData = await request.formData(); // the user input
             inputFormData.append('approver_id', user?.user_id);
-            inputFormData.append('request_id', 1); // debug, must come from page (parameters?)
+            inputFormData.append('request_id', params.reqid);
 
             const updateFormData = new FormData();
             updateFormData.append('status', inputFormData.get('status'));

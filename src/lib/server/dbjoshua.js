@@ -67,8 +67,8 @@ export async function getEquipmentDB() {
 }
 
 export async function getUserPriv(sessionID) { // returns the admin type of the user associated with this session.
-  const res = await query('SELECT users.workgroup FROM sessions JOIN users ON sessions.user_id = users.id WHERE sessions.uuid == $1', [sessionID]);
-  return res;
+  const res = await query('SELECT users.workgroup FROM sessions JOIN users ON sessions.user_id = users.id WHERE sessions.session_id = $1', [sessionID]);
+  return res.body.result.rows[0].workgroup;
 }
 
 export async function authUserDB(email) {

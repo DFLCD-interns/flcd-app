@@ -1,7 +1,7 @@
 <script>
   /** @type {import('./$types').PageData} */
 	export let data;
-  console.log(data)
+
   import { Search, Button, Dropdown, DropdownItem, Checkbox, Radio, GradientButton, Table} from 'flowbite-svelte';
   import { SearchOutline, FilterSolid} from 'flowbite-svelte-icons';
   import RequestsCard from './requests-card.svelte';
@@ -10,17 +10,24 @@
 
   let requests = []
 
- 
-
-  data.equipment_requests2.forEach(function (item) {
+  const equipReqsGroupedDict = {};
+  data.equipment_requests2.forEach(row => {
+    if (Object.keys(equipReqsGroupedDict).includes(row.request_id.toString())) 
+      equipReqsGroupedDict[row.request_id].push(row); // add to existing key-value pair
+    else equipReqsGroupedDict[row.request_id] = [row]; // new key-value pair
+  });
+  Object.values(equipReqsGroupedDict).forEach(function (groupedItem) {
     requests.push({
-      type: 'Equipment Request',
-      table:'equipment_requests',
-      id: item.request_id,
-      name: item.name,
-      date: item.borrow_time,
-      admin_approve_layer: item.admin_approve_layer
-    })
+        type: 'Equipment Request',
+        table:'equipment_requests',
+        id: groupedItem[0].request_id,
+        name: groupedItem.map(item => item.name).join(', '),
+        date: groupedItem[0].borrow_time,
+        admin_approve_layer: groupedItem[0].admin_approve_layer,
+        status: groupedItem.some(item => item.status === 'Declined') ? 'Declined' :
+                groupedItem.some(item => item.status === 'Pending') ? 'Pending' :
+                groupedItem.every(item => item.status === 'Approved') ? 'Approved' : 'Status cannot be determined' // not working yet
+      })
   });
 
   data.venue_requests.forEach(function (item) {
@@ -30,7 +37,8 @@
       id: item.request_id,
       name: item.name,
       date: item.date_needed_start,
-      admin_approve_layer: item.admin_approve_layer
+      admin_approve_layer: item.admin_approve_layer,
+      status : item.status
     })
   });
 
@@ -56,7 +64,6 @@
     })
   });
 
-  console.log(requests)
 </script>
   
 <div class="px-10 py-10 w-full min-h-screen">
@@ -101,11 +108,11 @@
   </div>
   
   {#if requests.length != 0}
-  <div class="space-y-3">
-    {#each requests as info}
-    <RequestsCard {info}></RequestsCard>
-    {/each}
-  </div>
+    <div class="space-y-3">
+      {#each requests as info}
+      <RequestsCard {info}></RequestsCard>
+      {/each}
+    </div>
   {:else}
   <p class="text-gray-500">No Pending Requests</p>
   {/if}
