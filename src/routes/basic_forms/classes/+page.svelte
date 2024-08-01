@@ -35,6 +35,11 @@
     <input name="description" type="text" placeholder="(eg, Section 1)" size="lg" />
   </label>
   
+  <label>
+    Schedule:
+    <input name="schedule" type="text" placeholder="" size="lg" />
+  </label>
+
   <button type="submit" class="button-style">Create Class</button>
 </form>
 
