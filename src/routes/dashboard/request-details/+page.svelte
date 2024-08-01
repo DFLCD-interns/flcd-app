@@ -10,23 +10,25 @@
     }
 
     let totalStatus = "";
-    $: approvalForms = data?.body.result;
+    $: approvalStatuses = data?.body.approvalFormStatuses;
+    $: approverNames = data?.body.approverNames;
     
     onMount(async () => {
         console.log('Component mounted.');
         try {
-            approvalForms = data.body.result;            
-            if (approvalForms == undefined || approvalForms.length == 0) {
+            if (approvalStatuses == undefined || approvalStatuses.length == 0) {
                 console.error('ERROR');
                 throw new Error('no retrieved forms for the time being');
             }
             
-            const statuses = approvalForms.map((elem) => elem.status); 
-            if (statuses.includes("Declined"))
+            console.log(approverNames);
+            console.log(approvalStatuses.findIndex((status) => status === 'Pending'));
+
+            if (approvalStatuses.includes("Declined"))
                 totalStatus = "Declined";
-            else if (statuses.includes("Pending"))
-                totalStatus = "Pending";
-            else if (statuses.every((elem) => elem === "Approved"))
+            else if (approvalStatuses.includes("Pending"))
+                totalStatus = "Pending with " + approverNames[approvalStatuses.findIndex((status) => status === 'Pending')];
+            else if (approvalStatuses.every((elem) => elem === "Approved"))
                 totalStatus = "Approved";
             else {
                 totalStatus = "Cannot be determined";
@@ -146,13 +148,16 @@
     <div class="space-y-10 relative">
         <div class="bg-white rounded-lg p-8 shadow-md">
             <h2 class="text-gray-600 text-lg mb-1 font-medium title-font">Approval Status</h2>
-            {#each approvalForms as approvalForm} 
+            {#each approvalStatuses as status, index} 
                 <p class="text-gray-600" >
-                    {approvalForm.status === 'Approved' ? '✔️ Approved by' : 
-                     approvalForm.status === 'Declined' ? '❌ Declined by' : 
-                     approvalForm.status === 'Pending' ?  '⌛ Pending with' :
-                                                          'Status unknown with'}
-                    {approvalForm.approver_id}
+                    {index > 0 && approvalStatuses[index-1] === 'Pending' ? '🔒 Invisible to' :
+                        status === 'Approved' ? '✔️ Approved by' : 
+                        status === 'Declined' ? '❌ Declined by' : 
+                        totalStatus === 'Declined' ? '🔒 Invisible to' :
+                        status === 'Pending' ?  '⌛ Pending with' : 
+                                                'Status unknown with'}
+                    {approverNames[index]}
+
                 </p>
             {/each}
         </div>
