@@ -78,6 +78,15 @@
   <button type="submit" class="button-style">Choose this Preferred Time (Class)</button>
 </form>
 
+<form action="?/createObservationRequest" method="POST">
+  <label>
+    Observation Request
+    <input name="observation_request" type="text" />
+  </label>
+
+  <button type="submit">Create Observation Request</button>
+</form>
+
 <style>
   .button-style {
     border-radius: 20px;

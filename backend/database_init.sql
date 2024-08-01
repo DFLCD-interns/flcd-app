@@ -126,17 +126,17 @@ CREATE TABLE base_requests (
     completion_time TIMESTAMP NOT NULL, -- when the request was completed (objects were returned verified and closed by lender)
 );
 
-CREATE TABLE child_requests (
-    id SERIAL PRIMARY KEY,
-    -- preferred_age_group_low INT,
-    -- preferred_age_group_high INT,
-    observation_time VARCHAR(128),
-    -- FOREIGN KEY (observation_time) REFERENCES 
-    child_id INT,
-    FOREIGN KEY (child_id) REFERENCES childs(id),
-    request_id INT,
-    FOREIGN KEY (request_id) REFERENCES base_requests(id)
-);
+-- CREATE TABLE child_requests (
+--     id SERIAL PRIMARY KEY,
+--     -- preferred_age_group_low INT,
+--     -- preferred_age_group_high INT,
+--     observation_time VARCHAR(128),
+--     -- FOREIGN KEY (observation_time) REFERENCES 
+--     child_id INT,
+--     FOREIGN KEY (child_id) REFERENCES childs(id),
+--     request_id INT,
+--     FOREIGN KEY (request_id) REFERENCES base_requests(id)
+-- );
 
 CREATE TABLE class_requests (
     id SERIAL PRIMARY KEY,

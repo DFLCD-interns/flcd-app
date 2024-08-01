@@ -300,7 +300,7 @@ async function resolvePW(password, email) {
     if (email) {
         if (finalkey !== pw_hash.slice(0,128)) {
             console.log("resolve fail");
-
+            throw new Error("Authentication Failed!, incorrect password!");
             return {
                 success: false,
                 message: "Authentication failed, incorrect password?",
@@ -329,7 +329,7 @@ async function resolvePW(password, email) {
      }} else {
         return { 
             success: true,
-            message: "Successfully authenticated.",
+            message: "Account Creation.",
             body: {
                 userid: null,
                 useruuid: null,
