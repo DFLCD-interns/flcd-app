@@ -85,6 +85,8 @@ export async function createSessionDB(sessionid, userid){
 
 export async function getUserFromSessionDB(sessionuuid) {
   const res = await query('SELECT * FROM users JOIN sessions ON sessions.user_id = users.id WHERE sessions.session_id = $1', [sessionuuid]);
+  console.log("owo:", sessionuuid);
+  console.log("res:", res);
   // console.log(res);
   return res.body.result.rows[0];
 }
@@ -111,7 +113,7 @@ export async function getUserBaseRequests(user){
 }
 
 export async function getUserEquipmentRequests(user){
-  const res = await query(`SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id, equipments.name, base_requests.request_time, base_requests.admin_approve_layer
+  const res = await query(`SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id, equipments.name, base_requests.admin_approve_layer, base_requests.created
     FROM base_requests
     JOIN equipment_requests ON base_requests.id = equipment_requests.request_id
     JOIN equipments ON equipment_requests.equipment_id = equipments.id

@@ -173,12 +173,16 @@ async function createSessionById(userId) {
 
 // Step 2
 export async function createSessionByEmail(email, password) {
-    const emailValidationResult = validateEmail(email);
+    const emailValidationResult = await validateEmail(email);
 
+    console.log("e:", emailValidationResult)
+    
     if (emailValidationResult.error) {
         throw new Error(emailValidationResult.message);
     }
     const passwordValidationResult = validatePassword(password);
+
+    console.log("p:", passwordValidationResult)
 
     if (passwordValidationResult.error) {
         throw new Error(passwordValidationResult.message);
