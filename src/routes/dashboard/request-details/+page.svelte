@@ -151,11 +151,13 @@
             {#each approvalStatuses as status, index} 
                 <p class="text-gray-600" >
                     {index > 0 && approvalStatuses[index-1] === 'Pending' ? '🔒 Invisible to' :
-                     status === 'Approved' ? '✔️ Approved by' : 
-                     status === 'Declined' ? '❌ Declined by' : 
-                     status === 'Pending' ?  '⌛ Pending with' : 
-                                             'Status unknown with'}
+                        status === 'Approved' ? '✔️ Approved by' : 
+                        status === 'Declined' ? '❌ Declined by' : 
+                        totalStatus === 'Declined' ? '🔒 Invisible to' :
+                        status === 'Pending' ?  '⌛ Pending with' : 
+                                                'Status unknown with'}
                     {approverNames[index]}
+
                 </p>
             {/each}
         </div>
