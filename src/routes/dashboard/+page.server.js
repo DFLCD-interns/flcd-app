@@ -7,6 +7,10 @@ export async function load({ cookies }) {
 	const userid = user?.user_id;
 	return {
 		equipment_requests: await db.getUserEquipmentRequests(userid),
-		requests: await db.getUserBaseRequests(userid)
+		requests: await db.getUserBaseRequests(userid),
+		equipment_requests2: await db.getEquipmentRequests2DB(),
+		venue_requests: await db.getVenueRequestsDB(),
+		child_requests: await db.getChildRequestsDB(),
+		class_requests: await db.getClassRequestsDB(),
 	};
 }

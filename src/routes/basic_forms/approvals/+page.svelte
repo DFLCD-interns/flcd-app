@@ -15,11 +15,6 @@
   </label>
   
   <label>
-    Staff Assisted ID:
-    <input name="staff_assistant_id" type="number" required />
-  </label>
-
-  <label>
     Base Request ID:
     <input name="request_id" type="number" required />
   </label>

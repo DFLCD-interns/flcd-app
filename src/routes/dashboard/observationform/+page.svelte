@@ -108,7 +108,7 @@
         <TabItem open>
             <span slot="title" class="flex gap-2"><AddressBookSolid/>Observation</span>
             <Card class="max-w-full">
-                <form class="flex flex-col space-y-6" method="POST">
+                <form class="flex flex-col space-y-6" action="?/createObservationRequest" method="POST">
                     <h3
                         class="text-xl font-medium text-gray-900 dark:text-white"
                     >

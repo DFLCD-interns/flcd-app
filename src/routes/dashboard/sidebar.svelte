@@ -1,11 +1,10 @@
 <script>
     export let data;
     import { GridSolid } from "flowbite-svelte-icons";
-    //placeholder for now :3
     let userData = {
         firstName: data.current_user.first_name,
         lastName: data.current_user.last_name,
-        userType: "Student"
+        userType: data.user_workgroup.charAt(0).toUpperCase() + data.user_workgroup.slice(1) // first letter capitalized
     }
 </script>
 
