@@ -11,8 +11,8 @@
     let start_time = "";
     let return_time = "";
 
-    // Add a 'value' property to each object in the array; same function as above line
-    equipmentTypes = equipmentTypes.map((item, index) => ({ ...item, value: index + 1 }));
+    // Add a 'value' property to each object in the array
+    equipmentTypes = equipmentTypes.map((item) => ({ ...item, value: item.name }));
     console.log(equipmentTypes)
 
     let selectedDept = "";
@@ -78,7 +78,7 @@
                     <div class="grid gap-6 mb-6 md:grid-cols-2">
                         <Label class="space-y-2">
                             <span>Borrow Time</span>
-                            <Input type="datetime-local" name="start_time" bind:value={start_time} required />
+                            <Input type="datetime-local" name="borrow_time" bind:value={start_time} required />
                         </Label>
                         <Label class="space-y-2">
                             <span>Return Time</span>
@@ -99,11 +99,11 @@
                         </Label>
                         <Label class="space-y-2">
                             <span>Name of Coordinating Faculty/Admin</span>
-                            <Input type="name" name="name" required />
+                            <Input type="faculty_name" name="name" required />
                         </Label>
                         <Label class="space-y-2">
                             <span>Email of Coordinating Faculty/Admin</span>
-                            <Input type="email" name="email" required />
+                            <Input type="faculty_email" name="email" required />
                         </Label>
                     </div>
                     <GradientButton shadow color="green"  type="submit">

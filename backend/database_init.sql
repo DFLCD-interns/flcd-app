@@ -126,7 +126,7 @@ CREATE TABLE base_requests (
     requester_id INT,
     FOREIGN KEY (requester_id) REFERENCES users(id),
     created TIMESTAMP DEFAULT NOW() NOT NULL, -- when the request was created
-    completion_time TIMESTAMP NOT NULL -- when the request was completed (objects were returned verified and closed by lender)
+    completion_time TIMESTAMP -- when the request was completed (objects were returned verified and closed by lender)
 );
 
 CREATE TABLE child_requests (
