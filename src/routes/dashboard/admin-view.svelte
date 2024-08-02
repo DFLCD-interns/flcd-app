@@ -1,7 +1,7 @@
 <script>
   /** @type {import('./$types').PageData} */
 	export let data;
-
+  let isAdmin = true;
   import { Search, Button, Dropdown, DropdownItem, Checkbox, Radio, GradientButton, Table} from 'flowbite-svelte';
   import { SearchOutline, FilterSolid} from 'flowbite-svelte-icons';
   import RequestsCard from './requests-card.svelte';
@@ -63,7 +63,7 @@
       admin_approve_layer: item.admin_approve_layer
     })
   });
-
+  console.log(requests)
 </script>
   
 <div class="px-10 py-10 w-full min-h-screen">
@@ -110,7 +110,7 @@
   {#if requests.length != 0}
     <div class="space-y-3">
       {#each requests as info}
-      <RequestsCard {info}></RequestsCard>
+      <RequestsCard info={info} data={data}></RequestsCard>
       {/each}
     </div>
   {:else}

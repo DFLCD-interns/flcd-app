@@ -121,7 +121,6 @@ export async function getUserEquipmentRequests(user){
 
 export async function getEquipmentRequests2DB() {
   const res = await query('SELECT * FROM equipment_requests JOIN equipments ON equipment_requests.equipment_id = equipments.id JOIN base_requests ON equipment_requests.request_id = base_requests.id');
-  // console.log(res);
   return res.body.result.rows;
 }
 
