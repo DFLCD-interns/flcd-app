@@ -1,7 +1,6 @@
 // put in here functions which will be called fo rmaking requests, add 1 function for each class of request (observation, equipment, venue) these functions should support an argument that is a list so that these multiple args are rendered as separate entries for the requests while only mapping to a single base request
 
-import { getUserFromSessionDB } from "$lib/server/dbjoshua"
-import { createClassRequestDB, getBaseRequestByUuid } from "../../../lib/server/dbjoshua";
+import { createClassRequestDB, getBaseRequestByUuid, createBaseRequestDB, getUserFromSessionDB } from "$lib/server/dbjoshua";
 import { v4 as uuid } from "uuid";
 
 //sample
@@ -21,6 +20,8 @@ export async function createObservationRequestServer(session_id, staff_assistant
     //     observe_date: DATE(<Aug 4, 2024>)
     // }
 
+    console.log("request.js - timeslots - ", timeslots);
+
     // getting the user
     const user = await getUserFromSessionDB(session_id);
     
@@ -34,6 +35,8 @@ export async function createObservationRequestServer(session_id, staff_assistant
 
     // fetch the newly created base request via its uuid so we can get the id of that base_request
     const base_req = await getBaseRequestByUuid(br_uuid);
+    console.log("after get base request by uuid");
+
 
     // create all the other requests
     for (let i = 0; i < timeslots.length; i++) {

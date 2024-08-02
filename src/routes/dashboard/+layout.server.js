@@ -4,7 +4,9 @@ import * as db2 from '$lib/server/dbjoshua.js';
 /** @type {import('./$types').LayoutServerLoad} */
 export async function load({ cookies }) {
 	const session = cookies.get('session_id');
-
+	if (!session) {
+		throw new Error("No Session ID found! not logged in?");
+	}
 	const searchFormData = new FormData();
 	searchFormData.append('id', await db2.getUserPriv(session));
 	const userWorkgroup = await db.getFromTableDB('admin_types', searchFormData);

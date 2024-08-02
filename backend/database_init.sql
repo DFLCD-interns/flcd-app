@@ -132,22 +132,23 @@ CREATE TABLE base_requests (
     uuid VARCHAR(128)
 );
 
--- CREATE TABLE child_requests (
---     id SERIAL PRIMARY KEY,
---     -- preferred_age_group_low INT,
---     -- preferred_age_group_high INT,
---     observation_time VARCHAR(128),
---     -- FOREIGN KEY (observation_time) REFERENCES 
---     child_id INT,
---     FOREIGN KEY (child_id) REFERENCES childs(id),
---     request_id INT,
---     FOREIGN KEY (request_id) REFERENCES base_requests(id)
--- );
+CREATE TABLE child_requests (
+    id SERIAL PRIMARY KEY,
+    -- preferred_age_group_low INT,
+    -- preferred_age_group_high INT,
+    observation_time VARCHAR(128),
+    -- FOREIGN KEY (observation_time) REFERENCES 
+    child_id INT,
+    FOREIGN KEY (child_id) REFERENCES childs(id),
+    request_id INT,
+    FOREIGN KEY (request_id) REFERENCES base_requests(id)
+);
 
 CREATE TABLE class_requests (
     id SERIAL PRIMARY KEY,
     timeslot VARCHAR(128), -- timeslot of the class selected in this format: 13:00-14:00
     -- no spaces for timeslot above, only 1 timeslot per class_request
+    observe_date DATE,
     class_id INT,
     FOREIGN KEY (class_id) REFERENCES classes(id),
     request_id INT, -- the base request id so this can be associated with a base request
