@@ -5,7 +5,7 @@ import { json } from '@sveltejs/kit';
 const pool = new Pool({ //store this in an env file!
   user: 'postgres',
   host: 'localhost',
-  database: 'test', 
+  database: 'flcdtest', 
   password: 'password',
   port: 5432, // Default PostgreSQL port
 });

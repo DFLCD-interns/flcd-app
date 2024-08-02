@@ -58,7 +58,7 @@
             
             if (body) {
                 alert('User created successfully!');
-                goto(`/dashboard`);
+                goto(`/`);
             } else {
                 throw new Error('Failed to create user');
             }
