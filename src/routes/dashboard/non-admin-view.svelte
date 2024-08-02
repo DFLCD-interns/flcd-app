@@ -1,14 +1,15 @@
 <script>
   export let data;
+  let isAdmin = false;
   import { Card, Button, Drawer, CloseButton, Badge, GradientButton } from 'flowbite-svelte';
   import { ArrowRightOutline, InfoCircleSolid } from 'flowbite-svelte-icons';
   import { sineIn } from 'svelte/easing';
   import Sidebar from './sidebar.svelte';
     import RequestsCard from './requests-card.svelte';
   //placeholder for now
-  let requestInfo = data.equipment_requests
+  let requestInfo = data.equipment_requests2
   let reduced = requestInfo.reduce((x, y) => {
-    (x[y.br_id] = x[y.br_id] || []).push(y);
+    (x[y.id] = x[y.id] || []).push(y);
     return x;
   }, {});
   let grouped_requests = Object.keys(reduced).map((key) => reduced[key]);
@@ -68,9 +69,9 @@
     </div>
   
     <div class="space-y-3">
-    <!-- {#each grouped_requests as info}
-    <RequestsCard {info}></RequestsCard>
-    {/each} -->
+    {#each grouped_requests as info}
+    <RequestsCard info={info} data={data}></RequestsCard>
+    {/each}
   </div>
 </div>
 

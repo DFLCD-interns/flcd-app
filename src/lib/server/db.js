@@ -91,6 +91,11 @@ export async function getEquipmentTypesDB() {
   return result.body.result.rows;
 }
 
+export async function getLatestBaseRequestID(user_id) {
+  const result = await query('SELECT id FROM base_requests WHERE requester_id = $1 ORDER BY created DESC LIMIT 1;', [user_id]);
+  return result.body.result.rows[0].id;;
+}
+
 export async function createUserDB(first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, access_level) {
   const qText = `INSERT INTO users (first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) VALUES ('${first_name}', '${last_name}', '${email}', '${pw_hash}', '${phone}', '${student_number}', '${course}', '${department}', ${superior_id}, ${access_level})`;
   console.log(qText);
