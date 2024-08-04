@@ -6,12 +6,12 @@
     import NonAdminView from "./non-admin-view.svelte";
     let isAdmin = (data.current_user.workgroup < 5);
     
-    console.log(`workgroup: ${data.current_user.workgroup}, ${isAdmin}`)
+    // console.log(`workgroup: ${data.current_user.workgroup}, ${isAdmin}`)
     function handleClick() {
         window.location.href = "/";
     }
-    console.log(data.current_user.user_id)
-    console.log(`request: ${data.equipment_requests.length}`)
+    // console.log(data.current_user.user_id)
+    // console.log(`request: ${data.equipment_requests.length}`)
 </script>
 
 {#if isAdmin}

@@ -9,7 +9,7 @@
   //let status = info.admin_approve_layer
   let status_msg  = ['Approved', 'Pending Approval - Chair', 'Pending Approval - FIC', 'Pending Approval - Staff']
   let status_color = ['green', 'yellow', 'yellow', 'yellow']
-  console.log(`from info: ${info}`)
+  // console.log(`from info: ${info}`)
 </script>
 
 <Card class="w-full max-w-full" href="#">

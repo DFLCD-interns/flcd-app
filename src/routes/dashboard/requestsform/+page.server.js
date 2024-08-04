@@ -34,7 +34,7 @@ export const actions = {
         
         // get newly added base-request id 
         const request_id = await getLatestBaseRequestID(user.user_id);
-        console.log("\nREQUEST ID: " + request_id + "\n");
+        // console.log("\nREQUEST ID: " + request_id + "\n");
 
         // APPROVALS INSERT
         for (let i = 0; i < 3; i++) { // 3 is admin_approve_layer for equipment requests
@@ -65,7 +65,7 @@ export const actions = {
         const return_time = data.get('return_time');
         const venue = data.get('venue');
         const selectedEq = data.getAll('selectedEq');
-        console.log('selectedEq: ' + selectedEq);
+        // console.log('selectedEq: ' + selectedEq);
         
         let total = 0;
         for (let i = 0; i < selectedEq.length; i++) {
@@ -105,7 +105,7 @@ export const actions = {
             }
             total += parseInt(data.get(selectedEq[i]))
         }
-        console.log('total requested equipment: ' + total)
+        // console.log('total requested equipment: ' + total)
 
 
         return {

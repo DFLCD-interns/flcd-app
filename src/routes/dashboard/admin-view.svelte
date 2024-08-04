@@ -63,7 +63,7 @@
       admin_approve_layer: item.admin_approve_layer
     })
   });
-  console.log(requests)
+  // console.log(requests)
 </script>
   
 <div class="px-10 py-10 w-full min-h-screen">

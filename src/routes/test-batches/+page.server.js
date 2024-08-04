@@ -10,11 +10,11 @@ export const actions = {
 
         const session_validation_result = await validateSession(session_id);
 
-        console.log(`/test-batches/+page.server.js - addBatch - session retrieved: ${session_validation_result}`);
+        // console.log(`/test-batches/+page.server.js - addBatch - session retrieved: ${session_validation_result}`);
 
 
         if (session_validation_result.userId) {
-            console.log(`session retrieved for user ${session_validation_result.userId}`);
+            // console.log(`session retrieved for user ${session_validation_result.userId}`);
         } 
         
         const batch_name = formData.get("name");
