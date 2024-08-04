@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS "admin_types" CASCADE;
+DROP TABLE IF EXISTS "user_types" CASCADE;
 DROP TABLE IF EXISTS "classes" CASCADE;
 DROP TABLE IF EXISTS "venues" CASCADE;
 DROP TABLE IF EXISTS "equipments" CASCADE;
@@ -16,20 +17,21 @@ DROP TABLE IF EXISTS "approvals" CASCADE;
 DROP TABLE IF EXISTS "sessions" CASCADE;
 DROP TABLE IF EXISTS "transaction_log" CASCADE;
 
-CREATE TABLE admin_types (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(128), 
-    description VARCHAR(512),
-    access_level INT
+CREATE TABLE user_types (
+    description VARCHAR(128),
+    access_level INT PRIMARY KEY
 );
 
-INSERT INTO admin_types (name, description, access_level)
-VALUES ('admin 0', 'DA', 0),
-('admin 1', 'chair', 1),
-('admin 2', 'FIC', 2),
-('admin 3', 'staff', 3),
-('admin 4', 'student', 4),
-('admin 5', 'guests', 5);
+INSERT INTO user_types (description, access_level)
+VALUES 
+('Database Admin', 0),
+('Chair', 1),
+('Faculty-in-Charge', 2),
+('Faculty', 3),
+('FLCD Instructor', 4),
+('FLCD Student', 5),
+('UP Student', 6),
+('Guest', 7);
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
@@ -42,19 +44,19 @@ CREATE TABLE users (
     student_number VARCHAR(12),
     course VARCHAR(128),
     department VARCHAR(128),
-    superior_id INT,
-    FOREIGN KEY (superior_id) REFERENCES users(id),
-    workgroup INT,
-    FOREIGN KEY (workgroup) REFERENCES admin_types(id),
+    min_approval_layer INT,
+    FOREIGN KEY (min_approval_layer) REFERENCES users(id),
+    access_level INT, 
+    FOREIGN KEY (access_level) REFERENCES user_types(access_level),
     created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
-INSERT INTO users (first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup)
-VALUES ('Joshua', 'Tester', 'testerjoshua@gmail.com', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', '+631234567890', NULL, 'BS Computer Science', 'DCS', NULL, 1),
-('Joshua2', 'Tester2', 'testerjoshua2@gmail.com', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', '+631234567890', '201900002', 'BS Computer Science', 'DCS', 1, 2),
-('Joshua', 'Tester', 'jt@testmail.com', '5E884898DA28047151D0E56F8DC6292773603D0D6AABBDD62A11EF721D1542D8', '+639451234567', '202300001', 'BS Computer Science', 'DCS', NULL, 1);
-
-
+INSERT INTO users (uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level) 
+VALUES 
+('dce56866-baaf-4d19-88e0-04d3ab47f4d2', 'Erickson', 'Maclid', 'chair@up.edu.ph', '31e9479f4cd9a8ca95278acdcc8888a9f758628b1840d9c7cdc02753db4c6d5a093994604bb3df83e8fb8e30b404521de74a278db4c64b3068a0496742e390ab99434dc445064f54380a08c21afa8d8eca4c68b58397bbbcf4707b885d2cb78b6a73d2419c5d6ce649a3c2318d34e2dea797a0515d55b72cc0e9ea2f8cf8e624', '09173170302', NULL, NULL, 'DFLCD', 1, 1),
+('66a71f7a-4181-46f0-888f-8aa003e9cc20', 'Jennifer Roxanne', 'Daez', 'fic@up.edu.ph', '4d16cbf4586069e61936a894cc9c51eaf0e59d0c8838b2ebe814df7ce8d4e4aad97dd2ce5b4b0d188c0f7c5290b94cf7329798e0ae958aff8601f943442312feeb5bf16054fd7b366c66d2cbdf37c148cdb1e753f8e59606520a481e32b5e1c995e688bfd4de77f164aa66918b4506077e5bce3c0829baefbe43d50617f1aed7', '09173170302', NULL, NULL, 'DFLCD', 1, 2),
+('68d32dce-25d2-4f5a-8d36-c8c73731d9c0', 'Staff', 'Dela Cruz', 'staff@up.edu.ph', 'd09c75e512d81e8c1472514e10cff4a8899b67b0d749420bce6470f3895b24377ad4dec3878c393f3432e2e0a843f899289434f7a34def06ab17330c746ae6814f93da9f282df159ff27f3b042262bca2747ac9378b4e406fa6e378d58ecd7a99829ba6eee8e911fba765cc7702cbfb47d0cce7d12754d7d20b0527cbeae8c3c', '09173170302', NULL, NULL, 'DFLCD', 2, 3),
+('9124846e-dc77-4079-8fda-e345dfe8662c', 'Carlos', 'Yulo', 'student@up.edu.ph', '06a379811c7d4ef38325e3810643a71af45c4a98f0da000b92cb7c1c351393180c00f340f58f6ad95d9e61b3cd8b9ae4762518388e16f25981a0ec38d8f179f136f02c913faeee025bb47afcb14e388b5adfef9099c205c6f779feffcaa00abc1f6669c997edc3c0b412fa5ed7e2fe0b3dfd44cc070378a7fe3047e366f75835', '09173170302', '202008925', 'BS Computer Science', 'other', 3, 5);
 
 CREATE TABLE batches (
     id SERIAL PRIMARY KEY,
@@ -75,8 +77,6 @@ CREATE TABLE classes (
     FOREIGN KEY (batch_id) REFERENCES batches(id),
     description VARCHAR(512),
     schedule VARCHAR(128), -- must be a string, separable by , (COMMA), with format START:TIME-END:TIME
-    -- sample schedule
-    -- 09:00-10:00,10:00-11:00,11:00-12:00
     created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
@@ -90,20 +90,6 @@ CREATE TABLE venues (
     created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
-CREATE TABLE equipments (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(128),
-    description VARCHAR(512),
-    count INT,
-    created TIMESTAMP DEFAULT NOW() NOT NULL
-);
-
-INSERT INTO equipments (name, description, count)
-VALUES ('TV', 'From Room 103', 1), 
-('TV', 'From Room 104', 1), 
-('Electric Fan', 'From Room 103', 2), 
-('Electric Fan', 'From Room 104', 2);
-
 CREATE TABLE childs (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
@@ -116,28 +102,47 @@ CREATE TABLE childs (
 
 CREATE TABLE base_requests (
     id SERIAL PRIMARY KEY,
-    faculty_id INT,
-    FOREIGN KEY (faculty_id) REFERENCES users(id),
-    staff_assistant_id INT,
-    FOREIGN KEY (staff_assistant_id) REFERENCES users(id),
-	purpose VARCHAR(1024), -- reason for borrowing
-    office VARCHAR(128),
-    company VARCHAR(128),
-    admin_approve_layer INT,
-    FOREIGN KEY (admin_approve_layer) REFERENCES admin_types(id),
     requester_id INT,
     FOREIGN KEY (requester_id) REFERENCES users(id),
-    created TIMESTAMP DEFAULT NOW() NOT NULL, -- when the request was created
-    completion_time TIMESTAMP, -- when the request was completed (objects were returned verified and closed by lender)
-    uuid VARCHAR(128)
+    staff_assistant_id INT,
+    FOREIGN KEY (staff_assistant_id) REFERENCES users(id),
+    purpose VARCHAR(1024), -- reason for borrowing
+    affiliation VARCHAR(128), -- for Non-FLCD students & guests
+    max_approval_layer INT,
+    FOREIGN KEY (max_approval_layer) REFERENCES user_types(access_level),
+    created TIMESTAMP DEFAULT NOW() NOT NULL
 );
+
+CREATE TABLE equipments (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(128), -- ideally includes model/brand; seen only by admins
+    type VARCHAR(128), -- type/category of equipment, displayed to requesters
+    location VARCHAR(128), -- current location of equipment
+    status VARCHAR(10), -- in use, in repair, available
+    notes VARCHAR(512),
+    date_registered TIMESTAMP DEFAULT NOW() NOT NULL
+);
+
+INSERT INTO equipments (name, type, location, status)
+VALUES 
+('Laminating Machine 1', 'Laminating Machine', 'Room XXX', 'available'),
+('Laminating Machine 2', 'Laminating Machine', 'Room XXX', 'available'),
+('Epson LX100 Printer', 'Printer', 'Room XXX', 'available'),
+('Paper Cutter Big', 'Paper Cutter', 'Room XXX', 'available'),
+('Paper Cutter Small', 'Paper Cutter', 'Room XXX', 'available'),
+('Extension Cord 1', 'Extension Cord', 'Room XXX', 'available'),
+('Extension Cord 2', 'Extension Cord', 'Room XXX', 'available'),
+('UPCDC Movable TV', 'Movable TV', 'Room XXX', 'available'),
+('DFLCD Movable TV', 'Movable TV', 'Room XXX', 'available'),
+('Portable Speaker Bldg 1', 'Portable Speaker', 'Room XXX', 'available'),
+('Portable Speaker Bldg 2', 'Portable Speaker', 'Room XXX', 'available'),
+('Sony Camera', 'Digital Camera', 'Room XXX', 'available'),
+('RODE Lapel', 'Lapel Microphone', 'Room XXX', 'available'),
+(NULL, 'For Printing Only', NULL, 'available');
 
 CREATE TABLE child_requests (
     id SERIAL PRIMARY KEY,
-    -- preferred_age_group_low INT,
-    -- preferred_age_group_high INT,
     observation_time VARCHAR(128),
-    -- FOREIGN KEY (observation_time) REFERENCES 
     child_id INT,
     FOREIGN KEY (child_id) REFERENCES childs(id),
     request_id INT,
@@ -147,7 +152,6 @@ CREATE TABLE child_requests (
 CREATE TABLE class_requests (
     id SERIAL PRIMARY KEY,
     timeslot VARCHAR(128), -- timeslot of the class selected in this format: 13:00-14:00
-    -- no spaces for timeslot above, only 1 timeslot per class_request
     observe_date DATE,
     class_id INT,
     FOREIGN KEY (class_id) REFERENCES classes(id),
@@ -158,9 +162,7 @@ CREATE TABLE class_requests (
 CREATE TABLE venue_requests (
     id SERIAL PRIMARY KEY,
     date_needed_start TIMESTAMP, -- date needed start
-    date_needed_end TIMESTAMP, -- date needed end/ expected return date
-    -- promised_return_time TIMESTAMP,
-    -- return_time TIMESTAMP, -- usurped by completion time in base request
+    date_needed_end TIMESTAMP, -- date needed end/expected return date
     venue_id INT,
     FOREIGN KEY (venue_id) REFERENCES venues(id),
     request_id INT,
@@ -169,9 +171,11 @@ CREATE TABLE venue_requests (
 
 CREATE TABLE equipment_requests ( -- one entry for each equipment in a request
     id SERIAL PRIMARY KEY,
-    borrow_time TIMESTAMP, -- start of when the equipment will be borrowed
-    return_time TIMESTAMP, -- when the equipment should be returned
-    venue VARCHAR(128), -- place where the equipment will be used
+    promised_start_time TIMESTAMP, 
+    promised_end_time TIMESTAMP, -- when the equipment should be returned
+    actual_start_time TIMESTAMP,
+    actual_end_time TIMESTAMP, -- when the request was completed (objects were returned verified and closed by lender)
+    location VARCHAR(128), -- place where the equipment will be used
     equipment_type VARCHAR(128), -- equipment type
     equipment_id INT, -- specific equipment to be assigned by approvers
     FOREIGN KEY (equipment_id) REFERENCES equipments(id),
@@ -207,18 +211,18 @@ CREATE TABLE approvals (
 );
 
 CREATE TABLE sessions (
-	id SERIAL PRIMARY KEY,
-	created TIMESTAMP DEFAULT NOW(),
-	last_used TIMESTAMP,
-	session_id VARCHAR(128) NOT NULL,
-	user_id INT NOT NULL,
-	FOREIGN KEY (user_id) REFERENCES users(id)
+    id SERIAL PRIMARY KEY,
+    created TIMESTAMP DEFAULT NOW(),
+    last_used TIMESTAMP,
+    session_id VARCHAR(128) NOT NULL,
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE transaction_log (
-	id SERIAL PRIMARY KEY,
-	user_id INT NOT NULL,
-	FOREIGN KEY (user_id) REFERENCES users(id),
-	log_time TIMESTAMP DEFAULT NOW(),
-	transaction_description VARCHAR(1024)
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    log_time TIMESTAMP DEFAULT NOW(),
+    transaction_description VARCHAR(1024)
 );
