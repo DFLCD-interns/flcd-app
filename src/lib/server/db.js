@@ -98,7 +98,7 @@ export async function getLatestBaseRequestID(user_id) {
 
 export async function createUserDB(first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, access_level) {
   const qText = `INSERT INTO users (first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) VALUES ('${first_name}', '${last_name}', '${email}', '${pw_hash}', '${phone}', '${student_number}', '${course}', '${department}', ${superior_id}, ${access_level})`;
-  console.log(qText);
+  // console.log(qText);
   const result = await query(qText);
   return result;
 }
@@ -113,7 +113,7 @@ export async function insertIntoTableDB(table_name, formData) {
   const values = [...formData.values()].map((val) => val); // will be for parametrization
   const qText = `INSERT INTO ${table_name} (${attributesText}) VALUES (${[...values.map((_, index) => '$' + (index+1))]})`; 
   
-  console.log(qText, values);
+  // console.log(qText, values);
   const res = await query(qText, values);
   return res;
 }
@@ -134,7 +134,7 @@ export async function getFromTableDB(table_name, searchFormData, limit = 100) {
   const whereText = attributes.map((attributeName, index) => `(${attributeName} = \$${index+1})`).join(' AND ')
   const qText = `SELECT \* FROM ${table_name} WHERE ${whereText} ORDER BY (id) asc LIMIT \$${attributes.length+1}`;
 
-  console.log(qText, values.concat(limit));
+  // console.log(qText, values.concat(limit));
   const res = await query(qText, values.concat(limit));    
   return res;
 }
@@ -159,7 +159,7 @@ export async function updateTableDB(table_name, searchFormData, updateFormData) 
     SET ${setText}
     WHERE ${whereText}`
 
-  console.log(qText, updateValues.concat(searchValues));
+  // console.log(qText, updateValues.concat(searchValues));
   const res = await query(qText, updateValues.concat(searchValues));    
   return res;
 }

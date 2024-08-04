@@ -15,7 +15,7 @@ export const actions = {
 		try {
 			const sessionCreationResult = await createSessionByEmail(email, password);
             
-            console.log("signin+page.server.js: ",sessionCreationResult);
+            // console.log("signin+page.server.js: ",sessionCreationResult);
 
 			cookies.set(SESSION_COOKIE_NAME, sessionCreationResult.id, {
 				path: "/",

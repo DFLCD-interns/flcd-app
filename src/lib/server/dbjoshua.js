@@ -25,15 +25,15 @@ async function query(sqlQuery, args) {
     const client = await connectToDB();
     const result = await client.query(sqlQuery, args
     //   , (err, res) => {
-    //     // console.log("db.js - query - Callback was invoked.", sqlQuery);
-    //     // console.log("err: ", err);
-    //     // console.log("res:", res);
-    //     // client.end();
+    //        console.log("db.js - query - Callback was invoked.", sqlQuery);
+    //        console.log("err: ", err);
+    //        console.log("res:", res);
+    //        client.end();
 
     //     if (err) {
     //         // we can either send a success message ehre but client wont be released so im gonna send it in result and hope that catch will indeed catch any error that occurs.
     //     }
-    //     // console.log("res?",res);
+    //     console.log("res?",res);
     //     return res;
     // }
   );

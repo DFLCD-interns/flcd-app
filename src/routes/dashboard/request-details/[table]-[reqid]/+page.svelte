@@ -27,9 +27,9 @@
     if (requestInfo.studentno == null){
         requestInfo.studentno = "none";
     }
-    console.log('What')
-    console.log(requestInfo)
-    console.log(data)
+    // console.log('What')
+    // console.log(requestInfo)
+    // console.log(data)
     
 
     let totalStatus = "";
@@ -37,15 +37,15 @@
     $: approverNames = data?.body.approverNames;
     
     onMount(async () => {
-        console.log('Component mounted.');
+        // console.log('Component mounted.');
         try {
             if (approvalStatuses == undefined || approvalStatuses.length == 0) {
                 console.error('ERROR');
                 throw new Error('no retrieved forms for the time being');
             }
             
-            console.log(approverNames);
-            console.log(approvalStatuses.findIndex((status) => status === 'Pending'));
+            // console.log(approverNames);
+            // console.log(approvalStatuses.findIndex((status) => status === 'Pending'));
 
             if (approvalStatuses.includes("Declined"))
                 totalStatus = "Declined";
@@ -58,8 +58,9 @@
                 console.error("Total status of form cannot be determined.")
             } 
 
-            if (data?.success)
-                console.log('Retrieved approval forms.');
+            if (data?.success) {
+                // console.log('Retrieved approval forms.');
+            }
             else throw new Error('failed to retrieve approval forms.');
         } catch (error) {
             console.error('Error retrieving approval forms:', error);

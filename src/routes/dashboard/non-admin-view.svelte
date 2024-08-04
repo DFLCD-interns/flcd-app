@@ -13,10 +13,10 @@
     return x;
   }, {});
   let grouped_requests = Object.keys(reduced).map((key) => reduced[key]);
-  console.log(grouped_requests);
+  // console.log(grouped_requests);
 
   let user= data.current_user
-  console.log(`req length: ${requestInfo}`)
+  // console.log(`req length: ${requestInfo}`)
   let userData = {
         firstName: user.first_name,
         lastName: user.last_name,

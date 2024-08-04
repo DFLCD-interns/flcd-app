@@ -20,12 +20,12 @@ export async function createObservationRequestServer(session_id, staff_assistant
     //     observe_date: DATE(<Aug 4, 2024>)
     // }
 
-    console.log("request.js - timeslots - ", timeslots);
+    // console.log("request.js - timeslots - ", timeslots);
 
     // getting the user
     const user = await getUserFromSessionDB(session_id);
     
-    console.log("requests.js - user ", user);
+    // console.log("requests.js - user ", user);
     
     // create a base request
     //createBaseRequestDB(faculty_id, staff_assistant_id, purpose, office, company, admin_approve_layer, requester_id, completion_time)
@@ -35,7 +35,7 @@ export async function createObservationRequestServer(session_id, staff_assistant
 
     // fetch the newly created base request via its uuid so we can get the id of that base_request
     const base_req = await getBaseRequestByUuid(br_uuid);
-    console.log("after get base request by uuid");
+    // console.log("after get base request by uuid");
 
 
     // create all the other requests

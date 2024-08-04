@@ -14,7 +14,7 @@ export const actions = {
         const selectedDates = formData.getAll("selectedDate");
         const selectedSlots = formData.getAll("selectedSlot");
 
-        console.log("+page.server - observationrequests ", selectedDates, selectedSlots);
+        // console.log("+page.server - observationrequests ", selectedDates, selectedSlots);
         // Fetching timeslots
         // const sample = {
         //     class_id: 3,
