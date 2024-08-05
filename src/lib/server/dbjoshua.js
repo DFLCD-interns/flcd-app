@@ -53,9 +53,9 @@ async function query(sqlQuery, args) {
 
 // pool.query('SELECT * FROM table where username=$1 and password=$2', [username, password], (error, results) => {});
 
-export async function createUserDB(uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) {
+export async function createUserDB(uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level) {
     // TODO: check if email is already in used if it is then throw an error
-    const res = await query('INSERT INTO users (uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup]);
+    const res = await query('INSERT INTO users (uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level]);
     //console.log("res:", res);
     return res;
 }
@@ -67,8 +67,8 @@ export async function getEquipmentDB() {
 }
 
 export async function getUserPriv(sessionID) { // returns the admin type of the user associated with this session.
-  const res = await query('SELECT users.workgroup FROM sessions JOIN users ON sessions.user_id = users.id WHERE sessions.session_id = $1', [sessionID]);
-  return res.body.result.rows[0].workgroup;
+  const res = await query('SELECT users.access_level FROM sessions JOIN users ON sessions.user_id = users.id WHERE sessions.session_id = $1', [sessionID]);
+  return res.body.result.rows[0].access_level;
 }
 
 export async function authUserDB(email) {
@@ -111,7 +111,7 @@ export async function getUserBaseRequests(user){
 }
 
 export async function getUserEquipmentRequests(user){
-  const res = await query(`SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id, equipments.name, base_requests.admin_approve_layer, base_requests.created
+  const res = await query(`SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id, equipments.name, base_requests.max_approval_layer, base_requests.created
     FROM base_requests
     JOIN equipment_requests ON base_requests.id = equipment_requests.request_id
     JOIN equipments ON equipment_requests.equipment_id = equipments.id

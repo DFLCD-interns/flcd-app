@@ -88,7 +88,7 @@ export function validatePassword(password) {
     return { success: true };
 }
 
-export async function createUser(first_name, last_name, email, password, phone, student_number, course, department, superior_id, workgroup) {
+export async function createUser(first_name, last_name, email, password, phone, student_number, course, department, min_approval_layer, access_level) {
     // console.log("auth.js - createUser start.");
 
     // const emailValidationResult = validateEmail(email);
@@ -125,7 +125,7 @@ export async function createUser(first_name, last_name, email, password, phone, 
 
     // console.log("auth.js - createUser before newuser.");
 
-    const newUser = await createUserDB(new_uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup);
+    const newUser = await createUserDB(new_uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level);
 
 
     if (!newUser) {

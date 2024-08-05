@@ -5,14 +5,15 @@
     import { browser } from "$app/environment";
     import { Button, Card, GradientButton, Input, Label, MultiSelect, Select, Textarea, Tabs, TabItem, } from "flowbite-svelte";
     import { AddressBookOutline, ArrowLeftOutline, BuildingSolid, ChevronLeftOutline, ComputerSpeakerSolid, UserAddSolid, } from "flowbite-svelte-icons";
- 
-    let equipmentTypes = data.equipmentTypes;
+    
+    let equipmentTypes = []
+    //let equipmentTypes = data.equipmentTypes;
     let selectedEq = [];
     let start_time = "";
     let return_time = "";
 
     // Add a 'value' property to each object in the array
-    equipmentTypes = equipmentTypes.map((item) => ({ ...item, value: item.name }));
+    // equipmentTypes = equipmentTypes.map((item) => ({ ...item, value: item.name }));
     // console.log(equipmentTypes)
 
     let selectedDept = "";

@@ -10,7 +10,6 @@ const pool = new Pool({ //store this in an env file!
 });
 
 const table_names = [
-  'admin_types',
   'approvals',
   'base_requests',
   'batches',
@@ -25,6 +24,7 @@ const table_names = [
   'sessions',
   'transaction_log',
   'users',
+  'user_types',
   'venues',
   'venue_requests'
 ]
@@ -85,11 +85,11 @@ export async function getEquipmentDB() {
   return result.body.result.rows;
 }
 
-export async function getEquipmentTypesDB() {
-  const result = await query("SELECT name, SUM(count) AS total_count FROM equipments GROUP BY name");
-  // console.log(result.body.result.rows);
-  return result.body.result.rows;
-}
+// export async function getEquipmentTypesDB() {
+//   const result = await query("SELECT name, SUM(count) AS total_count FROM equipments GROUP BY name");
+//   // console.log(result.body.result.rows);
+//   return result.body.result.rows;
+// }
 
 export async function getLatestBaseRequestID(user_id) {
   const result = await query('SELECT id FROM base_requests WHERE requester_id = $1 ORDER BY created DESC LIMIT 1;', [user_id]);
@@ -127,13 +127,18 @@ export async function getFromTableDB(table_name, searchFormData, limit = 100) {
   else if (limit < 0 || !Number.isInteger(limit)) {
     throw new Error('Trying to get negative or non-Integer number of rows (possibly mistyped/malicious injection)', limit);
   }
-
+  let qText = ""
   const attributes = [...searchFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection
   const values = [...searchFormData.values()].map((val) => val); // will be for parametrization
 
   const whereText = attributes.map((attributeName, index) => `(${attributeName} = \$${index+1})`).join(' AND ')
-  const qText = `SELECT \* FROM ${table_name} WHERE ${whereText} ORDER BY (id) asc LIMIT \$${attributes.length+1}`;
-
+  if (table_name == 'user_types'){
+    qText = `SELECT \* FROM ${table_name} WHERE ${whereText} ORDER BY (access_level) asc LIMIT \$${attributes.length+1}`;
+  }
+  else{ 
+    console.log({table_name})
+    qText = `SELECT \* FROM ${table_name} WHERE ${whereText} ORDER BY (id) asc LIMIT \$${attributes.length+1}`;
+}
   // console.log(qText, values.concat(limit));
   const res = await query(qText, values.concat(limit));    
   return res;
