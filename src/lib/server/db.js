@@ -86,7 +86,7 @@ export async function getEquipmentDB() {
 }
 
 // export async function getEquipmentTypesDB() {
-//   const result = await query("SELECT name, SUM(count) AS total_count FROM equipments GROUP BY name");
+//   const result = await query("SELECT name, SUM(count) AS total_count FROM equipments GROUP BY type");
 //   // console.log(result.body.result.rows);
 //   return result.body.result.rows;
 // }

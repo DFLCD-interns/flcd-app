@@ -10,7 +10,6 @@ export async function load({ cookies }) {
 	const searchFormData = new FormData();
 	searchFormData.append('access_level', await db2.getUserPriv(session));
 	const userWorkgroup = await db.getFromTableDB('user_types', searchFormData);
-	console.log(userWorkgroup)
 
 	return {
 		equipment: await db2.getEquipmentDB(),

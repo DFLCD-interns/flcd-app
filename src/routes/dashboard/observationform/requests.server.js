@@ -2,6 +2,7 @@
 
 import { createClassRequestDB, getBaseRequestByUuid, createBaseRequestDB, getUserFromSessionDB } from "$lib/server/dbjoshua";
 import { v4 as uuid } from "uuid";
+import { getNewestBaseRequest } from "../../../lib/server/dbjoshua";
 
 //sample
 // export async function createObservationRequest(schedules<list>, user<user>, other args) {
@@ -11,7 +12,7 @@ import { v4 as uuid } from "uuid";
 // }
 //}
 
-export async function createObservationRequestServer(session_id, staff_assistant_id, purpose, office, company, timeslots) {
+export async function createObservationRequestServer(session_id, staff_assistant_id, purpose, timeslots) {
     // NOTE: timeslots must be a list of objects!
     // each object must have this format (example with class id 3 and timeslot 13:00 to 14:00):
     // const sample = {
@@ -29,12 +30,12 @@ export async function createObservationRequestServer(session_id, staff_assistant
     
     // create a base request
     //createBaseRequestDB(faculty_id, staff_assistant_id, purpose, office, company, admin_approve_layer, requester_id, completion_time)
-    const br_uuid = uuid();
+    
+    // staff_assistant_id, purpose, admin_approve_layer, requester_id, completion_time
+    const br = await createBaseRequestDB(staff_assistant_id, purpose, 3, user.id);
 
-    const br = await createBaseRequestDB(null, staff_assistant_id, purpose, office, company, 3, user.id, null, br_uuid);
-
-    // fetch the newly created base request via its uuid so we can get the id of that base_request
-    const base_req = await getBaseRequestByUuid(br_uuid);
+    // fetch the newly created base request via its id so we can get the id of that base_request??? sorry 
+    const base_req = await getNewestBaseRequest();
     // console.log("after get base request by uuid");
 
 
@@ -45,5 +46,5 @@ export async function createObservationRequestServer(session_id, staff_assistant
     }
 
     // returning the uuid of the base_request ... just cause idk what to return
-    return br_uuid;
+    return 1;
 } 

@@ -7,8 +7,8 @@ export const actions = {
         const formData = await request.formData();
         const staff_assistant_id = formData.get("staff_assistant_id");
         const purpose = formData.get("purpose");
-        const office = formData.get("office");
-        const company = formData.get("company");
+        //const office = formData.get("office");
+        //const company = formData.get("company");
         const class_id = formData.get("class_id");
         // const timeslots = formData.getAll("timeslots");
         const selectedDates = formData.getAll("selectedDate");
@@ -29,8 +29,8 @@ export const actions = {
                 observe_date: selectedDates[i]
             });
         }
-
-        const server_req = await createObservationRequestServer(cookies.get(SESSION_COOKIE_NAME), staff_assistant_id, purpose, office, company, timeslots);
+        
+        const server_req = await createObservationRequestServer(cookies.get(SESSION_COOKIE_NAME), staff_assistant_id, purpose, timeslots);
         
         return { success: true ,
             base_request_uuid: server_req

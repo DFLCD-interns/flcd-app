@@ -175,8 +175,8 @@ export async function getRequestDetailsDB(table, reqid) {
 }
 
 
-export async function createBaseRequestDB(faculty_id, staff_assistant_id, purpose, office, company, admin_approve_layer, requester_id, completion_time, br_uuid) {
-  const res = await query('INSERT INTO base_requests (faculty_id, staff_assistant_id, purpose, office, company, admin_approve_layer, requester_id, completion_time, uuid) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [faculty_id, staff_assistant_id, purpose, office, company, admin_approve_layer, requester_id, completion_time, br_uuid]);
+export async function createBaseRequestDB(staff_assistant_id, purpose, max_approval_layer, requester_id) {
+  const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, max_approval_layer, requester_id) VALUES ($1, $2, $3, $4)', [staff_assistant_id, purpose, max_approval_layer, requester_id]);
   return res;
 }
 
@@ -185,8 +185,13 @@ export async function createClassRequestDB(class_id, request_id, timeslot, obser
 
 }
 
-export async function getBaseRequestByUuid(br_uuid) {
+export async function getBaseRequestById(br_uuid) {
   const res = await query('SELECT * FROM base_requests WHERE uuid = $1', [br_uuid]);
+  return res.body.result.rows[0];
+}
+
+export async function getNewestBaseRequest(){
+  const res = await query ('SELECT * FROM base_requests ORDER BY id DESC');
   return res.body.result.rows[0];
 }
 
