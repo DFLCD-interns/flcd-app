@@ -1,8 +1,8 @@
 // put in here functions which will be called fo rmaking requests, add 1 function for each class of request (observation, equipment, venue) these functions should support an argument that is a list so that these multiple args are rendered as separate entries for the requests while only mapping to a single base request
 
-import { createClassRequestDB, getBaseRequestByUuid, createBaseRequestDB, getUserFromSessionDB } from "$lib/server/dbjoshua";
+import { createClassRequestDB, getBaseRequestByUuid, createBaseRequestDB, getUserFromSessionDB } from "$lib/server/db";
 import { v4 as uuid } from "uuid";
-import { getNewestBaseRequest } from "../../../lib/server/dbjoshua";
+import { getNewestBaseRequest } from "$lib/server/db";
 
 //sample
 // export async function createObservationRequest(schedules<list>, user<user>, other args) {

@@ -3,10 +3,10 @@
 import { writable, get } from "svelte/store";
 import { v4 as uuid } from "uuid";
 import { PEPPA_PIG, SESSION_COOKIE_NAME } from "$lib/server/constants.js";
-import { getUserFromSessionDB, getUsersDB, createSessionDB, getUserByIDDB, getSessionByIDDB, createUserDB, authUserDB } from "$lib/server/dbjoshua.js";
+import { getUserFromSessionDB, getUsersDB, createSessionDB, getUserByIDDB, getSessionByIDDB, createUserDB, authUserDB } from "$lib/server/db.js";
 import { json } from "@sveltejs/kit";
 import { scryptSync, randomBytes} from "crypto"; 
-import { getUsersWithMatchingEmail } from "./dbjoshua";
+import { getUsersWithMatchingEmail } from "./db";
 
 //these seem to be treated as a temp database replacement
 // const usersStore = writable([]); 

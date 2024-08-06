@@ -29,6 +29,7 @@ const table_names = [
   'venue_requests'
 ]
 
+
 export async function connectToDB() {
   try {
     const client = await pool.connect();
@@ -39,44 +40,63 @@ export async function connectToDB() {
   }
 }
 
-async function execQuery(client, sqlQuery, args) {
-  return new Promise((resolve, reject) => {
-    client.query(sqlQuery, args, (error, result) => {
-      if (error) { 
-        reject({
-          success: false, 
-          body: {
-            result: error,
-          }
-        });
-      }
-      resolve({ 
-        success: true,
-        body:{
-          result: result,
-        }
-      });  
-    })
-  });
-}
-
 async function query(sqlQuery, args) {
-  let client;
   try {
-    client = await connectToDB();
-    const result = await execQuery(client, sqlQuery, args);
-    if (result.success) return result;
-    else throw result.body.result;
-  } catch (error) {
-    console.error('Error executing query:', error);
-  } finally {
+    const client = await connectToDB();
+    const result = await client.query(sqlQuery, args);
     client.release();
+    // console.log("db.js result", result);
+    return { success: true,
+      body:{
+        result: result,
+      }
+     };
+  } catch (error) {
+    console.error('Error executing query:', error.message);
+    throw error;
+    // return {success: false, error: error}
   }
 }
 
 export async function getUsersDB() {
   const result = await query("SELECT * FROM users");
   return result;
+}
+
+export async function createUserDB(uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level) {
+  // TODO: check if email is already in used if it is then throw an error
+  const res = await query('INSERT INTO users (uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level]);
+  //console.log("res:", res);
+  return res;
+}
+
+export async function getUserPriv(sessionID) { // returns the admin type of the user associated with this session.
+const res = await query('SELECT users.access_level FROM sessions JOIN users ON sessions.user_id = users.id WHERE sessions.session_id = $1', [sessionID]);
+return res.body.result.rows[0].access_level;
+}
+
+export async function authUserDB(email) {
+const res = await query('SELECT * FROM users WHERE email = $1', [email]);
+// console.log(res, email);
+return res.body.result.rows[0];
+}
+
+export async function createSessionDB(sessionid, userid){
+// console.log("db.js - sessionid, userid", sessionid, userid);
+const res = await query('INSERT INTO sessions (session_id, user_id, last_used) VALUES ($1, $2, NOW())', [sessionid, userid]);
+return res;
+}
+
+export async function getUserFromSessionDB(sessionuuid) {
+const res = await query('SELECT * FROM users JOIN sessions ON sessions.user_id = users.id WHERE sessions.session_id = $1', [sessionuuid]);
+// console.log(res);
+return res.body.result.rows[0];
+}
+
+export async function getUsersWithMatchingEmail(email) {
+  const res = await query('SELECT * FROM users WHERE email = $1', [email]);
+  // console.log(res);
+  return res.body.result.rows;
 }
 
 export async function getEquipmentDB() {
@@ -89,16 +109,97 @@ export async function getEquipmentTypesDB() {
   return result.body.result.rows;
 }
 
+
+export async function getUserBaseRequests(user){
+  //console.log(`user ${user}`)
+  const res = await query('SELECT * FROM base_requests WHERE base_requests.requester_id = $1', [user]);
+  // console.log(`result from db: ${res.body.result.rows.length}`)
+  return res.body.result.rows
+}
+
+export async function getUserEquipmentRequests(user){
+  const res = await query(`SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id, equipments.name, base_requests.max_approval_layer, base_requests.created
+    FROM base_requests
+    JOIN equipment_requests ON base_requests.id = equipment_requests.request_id
+    JOIN equipments ON equipment_requests.equipment_id = equipments.id
+    WHERE base_requests.requester_id = $1`, [user]);
+  return res.body.result.rows
+}
+
+export async function getEquipmentRequestsDB() {
+  const res = await query('SELECT * FROM equipment_requests JOIN equipments ON equipment_requests.equipment_id = equipments.id JOIN base_requests ON equipment_requests.request_id = base_requests.id');
+  return res.body.result.rows;
+}
+
+export async function getVenueRequestsDB() {
+  const res = await query('SELECT * FROM venue_requests JOIN venues ON venue_requests.venue_id = venues.id JOIN base_requests ON venue_requests.request_id = base_requests.id');
+  // console.log(res);
+  return res.body.result.rows;
+}
+
+export async function getChildRequestsDB() {
+  const res = await query('SELECT * FROM child_requests JOIN childs ON child_requests.child_id = childs.id JOIN base_requests ON child_requests.request_id = base_requests.id');
+  // console.log(res);
+  return res.body.result.rows;
+}
+
+export async function getClassRequestsDB() {
+  const res = await query('SELECT * FROM class_requests JOIN classes ON class_requests.class_id = classes.id JOIN base_requests ON class_requests.request_id = base_requests.id');
+  // console.log(res);
+  return res.body.result.rows;
+}
+
+
+// missing fields: class, requests, staff, course, purpose
+export async function getRequestDetailsDB(table, reqid) {
+  var type = ""
+  if (table = "equipment_requests"){
+    type = "equipments";
+  }
+  const res = await query(`SELECT 
+    br.id AS reqid,
+    requester.first_name AS requester_firstname,
+    requester.last_name AS requester_lastname,
+    requester.email,
+    requester.student_number AS studentno,
+    requester.phone AS contactno,
+    t.borrow_time AS dateneeded,
+    faculty.first_name AS admin_firstname,
+    faculty.last_name AS admin_lastname,
+    requester.department AS dept,
+    e.name AS material,
+    t.venue AS room,
+    faculty.email AS adminemail,
+    t.return_time AS returndate
+    FROM base_requests br 
+    LEFT JOIN ${table} t ON br.id = t.request_id
+	  LEFT JOIN ${type} e ON t.equipment_id = e.id 
+    LEFT JOIN users AS faculty ON br.faculty_id = faculty.id
+    LEFT JOIN users AS requester ON br.requester_id = requester.id
+    WHERE br.id = ${reqid}`);
+  // console.log(res);
+  return res.body.result.rows;
+}
+
+
+export async function createBaseRequestDB(staff_assistant_id, purpose, max_approval_layer, requester_id) {
+  const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, max_approval_layer, requester_id) VALUES ($1, $2, $3, $4)', [staff_assistant_id, purpose, max_approval_layer, requester_id]);
+  return res;
+}
+
+export async function createClassRequestDB(class_id, request_id, timeslot, observe_date) {
+  const res = await query('INSERT INTO class_requests (timeslot, class_id, request_id, observe_date) VALUES ($1, $2, $3, $4)', [timeslot, class_id, request_id, observe_date])
+
+}
+
+export async function getNewestBaseRequest(){
+  const res = await query ('SELECT * FROM base_requests ORDER BY id DESC');
+  return res.body.result.rows[0];
+}
+
 export async function getLatestBaseRequestID(user_id) {
   const result = await query('SELECT id FROM base_requests WHERE requester_id = $1 ORDER BY created DESC LIMIT 1;', [user_id]);
   return result.body.result.rows[0].id;;
-}
-
-export async function createUserDB(first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, access_level) {
-  const qText = `INSERT INTO users (first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, workgroup) VALUES ('${first_name}', '${last_name}', '${email}', '${pw_hash}', '${phone}', '${student_number}', '${course}', '${department}', ${superior_id}, ${access_level})`;
-  // console.log(qText);
-  const result = await query(qText);
-  return result;
 }
 
 export async function insertIntoTableDB(table_name, formData) {

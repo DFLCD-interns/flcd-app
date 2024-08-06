@@ -1,4 +1,4 @@
-import * as db from '../../lib/server/dbjoshua.js';
+import * as db from '$lib/server/db.js';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ cookies }) {
@@ -8,7 +8,7 @@ export async function load({ cookies }) {
 	return {
 		equipment_requests: await db.getUserEquipmentRequests(userid),
 		requests: await db.getUserBaseRequests(userid),
-		equipment_requests2: await db.getEquipmentRequests2DB(),
+		equipment_requests2: await db.getEquipmentRequestsDB(),
 		venue_requests: await db.getVenueRequestsDB(),
 		child_requests: await db.getChildRequestsDB(),
 		class_requests: await db.getClassRequestsDB(),

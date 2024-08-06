@@ -1,5 +1,4 @@
-import { insertIntoTableDB, getFromTableDB, updateTableDB } from '$lib/server/db';
-import { getRequestDetailsDB, getUserFromSessionDB } from '$lib/server/dbjoshua';
+import { insertIntoTableDB, getFromTableDB, updateTableDB, getRequestDetailsDB, getUserFromSessionDB } from '$lib/server/db';
 
 async function getApprovalsInfo(searchFormData) { 
     const formsQuery = await getFromTableDB("approvals", searchFormData); 

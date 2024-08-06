@@ -1,5 +1,4 @@
 import * as db from '$lib/server/db.js';
-import * as db2 from '$lib/server/dbjoshua.js';
 
 /** @type {import('./$types').LayoutServerLoad} */
 export async function load({ cookies }) {
@@ -8,13 +7,13 @@ export async function load({ cookies }) {
 		throw new Error("No Session ID found! not logged in?");
 	}
 	const searchFormData = new FormData();
-	searchFormData.append('access_level', await db2.getUserPriv(session));
+	searchFormData.append('access_level', await db.getUserPriv(session));
 	const userWorkgroup = await db.getFromTableDB('user_types', searchFormData);
 
 	return {
-		equipment: await db2.getEquipmentDB(),
+		equipment: await db.getEquipmentDB(),
 		equipmentTypes: await db.getEquipmentTypesDB(),
-		current_user: await db2.getUserFromSessionDB(session), 
+		current_user: await db.getUserFromSessionDB(session), 
 		user_workgroup: userWorkgroup.body.result.rows[0].description
 	};
 }

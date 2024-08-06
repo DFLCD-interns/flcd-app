@@ -1,5 +1,4 @@
-import { insertIntoTableDB, getLatestBaseRequestID } from '../../../lib/server/db.js';
-import { getUserFromSessionDB } from '$lib/server/dbjoshua';
+import { insertIntoTableDB, getLatestBaseRequestID, getUserFromSessionDB } from '$lib/server/db.js';
 
 /** @type {import('./$types').Actions} */
 export const actions = {    
