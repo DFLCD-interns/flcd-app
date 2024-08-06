@@ -13,6 +13,7 @@ export async function load({ cookies }) {
 
 	return {
 		equipment: await db2.getEquipmentDB(),
+		equipmentTypes: await db.getEquipmentTypesDB(),
 		current_user: await db2.getUserFromSessionDB(session), 
 		user_workgroup: userWorkgroup.body.result.rows[0].description
 	};

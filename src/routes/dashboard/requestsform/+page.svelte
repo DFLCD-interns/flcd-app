@@ -1,20 +1,18 @@
 <script>
     /** @type {import('./$types').PageData} */
 	export let data;
-    // console.log(data.equipment);
     import { browser } from "$app/environment";
     import { Button, Card, GradientButton, Input, Label, MultiSelect, Select, Textarea, Tabs, TabItem, } from "flowbite-svelte";
     import { AddressBookOutline, ArrowLeftOutline, BuildingSolid, ChevronLeftOutline, ComputerSpeakerSolid, UserAddSolid, } from "flowbite-svelte-icons";
     
-    let equipmentTypes = []
-    //let equipmentTypes = data.equipmentTypes;
+    let equipmentTypes = data.equipmentTypes;
     let selectedEq = [];
     let start_time = "";
     let return_time = "";
 
     // Add a 'value' property to each object in the array
-    // equipmentTypes = equipmentTypes.map((item) => ({ ...item, value: item.name }));
-    // console.log(equipmentTypes)
+    equipmentTypes = equipmentTypes.map((item) => ({ ...item, value: item.type, name: item.type }));
+    console.log(equipmentTypes)
 
     let selectedDept = "";
     $: isOther = selectedDept == "other";
@@ -71,7 +69,7 @@
                                     (x) => x.value == eq,
                                 ).name}</span
                             >
-                            <Input type="number" name={eq} min=1 max={equipmentTypes.find((x) => x.value == eq, ).total_count} required /> 
+                            <Input type="number" name={eq} min=1 max={equipmentTypes.find((x) => x.value == eq, ).count} required /> 
                             </Label>
                         {/each}
                     </div>

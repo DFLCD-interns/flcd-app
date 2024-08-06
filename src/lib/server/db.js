@@ -81,15 +81,13 @@ export async function getUsersDB() {
 
 export async function getEquipmentDB() {
   const result = await query("SELECT * FROM equipments");
-  // console.log(result.body.result.rows);
   return result.body.result.rows;
 }
 
-// export async function getEquipmentTypesDB() {
-//   const result = await query("SELECT name, SUM(count) AS total_count FROM equipments GROUP BY type");
-//   // console.log(result.body.result.rows);
-//   return result.body.result.rows;
-// }
+export async function getEquipmentTypesDB() {
+  const result = await query("SELECT type, COUNT(*) as count FROM equipments GROUP BY type");
+  return result.body.result.rows;
+}
 
 export async function getLatestBaseRequestID(user_id) {
   const result = await query('SELECT id FROM base_requests WHERE requester_id = $1 ORDER BY created DESC LIMIT 1;', [user_id]);
