@@ -104,6 +104,16 @@ export async function getEquipmentDB() {
   return result.body.result.rows;
 }
 
+export async function getUsersListDB() {
+  const result = await query("SELECT * FROM users");
+  return result.body.result.rows;
+}
+
+export async function getVenueDB() {
+  const result = await query("SELECT * FROM venues");
+  return result.body.result.rows;
+}
+
 export async function getEquipmentTypesDB() {
   const result = await query("SELECT type, COUNT(*) as count FROM equipments GROUP BY type");
   return result.body.result.rows;
