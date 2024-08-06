@@ -9,7 +9,7 @@
     import { page } from '$app/stores';
     import { equipmentReqName } from '$lib/stores';
 
-    let requestInfo = data.body.reqdetails[0];
+    let requestInfo = data?.requestDetails[0];
     let requestName;
 
     const unsubscribeToStore = equipmentReqName.subscribe(value => requestName = value);
@@ -17,10 +17,10 @@
 
     let request_type = "";
 
-    if (data.body.type == "equipment_requests"){
+    if (data.requestType == "equipment_requests"){
         request_type = "Equipment Requests"
     }
-    else if (data.body.type == "venue_requests"){
+    else if (data.requestType == "venue_requests"){
         request_type = "Venue Requests"
     }
 
@@ -32,45 +32,10 @@
     // console.log(data)
     
 
-    let totalStatus = "";
-    $: approvalStatuses = data?.body.approvalFormStatuses;
-    $: approverNames = data?.body.approverNames;
+    $: totalStatus = data?.approvalForms.totalStatus;
+    $: approvalStatuses = data?.approvalForms.statuses;
+    $: approverNames = data?.approvalForms.displayNames;
     
-    onMount(async () => {
-        // console.log('Component mounted.');
-        try {
-            if (approvalStatuses == undefined || approvalStatuses.length == 0) {
-                console.error('ERROR');
-                throw new Error('no retrieved forms for the time being');
-            }
-            
-            // console.log(approverNames);
-            // console.log(approvalStatuses.findIndex((status) => status === 'Pending'));
-
-            if (approvalStatuses.includes("Declined"))
-                totalStatus = "Declined";
-            else if (approvalStatuses.includes("Pending"))
-                totalStatus = "Pending with " + approverNames[approvalStatuses.findIndex((status) => status === 'Pending')];
-            else if (approvalStatuses.every((elem) => elem === "Approved"))
-                totalStatus = "Approved";
-            else {
-                totalStatus = "Cannot be determined";
-                console.error("Total status of form cannot be determined.")
-            } 
-
-            if (data?.success) {
-                // console.log('Retrieved approval forms.');
-            }
-            else throw new Error('failed to retrieve approval forms.');
-        } catch (error) {
-            console.error('Error retrieving approval forms:', error);
-        }
-
-        return () => approvalForms = [];
-    })
-
-    
-
     // let requestInfo = {
     //     reqid: data.reqdetails.reqid,
     //     type: rtype,

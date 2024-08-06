@@ -1,69 +1,12 @@
 <script>
   /** @type {import('./$types').PageData} */
 	export let data;
-  let isAdmin = true;
   import { Search, Button, Dropdown, DropdownItem, Checkbox, Radio, GradientButton, Table} from 'flowbite-svelte';
   import { SearchOutline, FilterSolid} from 'flowbite-svelte-icons';
   import RequestsCard from './requests-card.svelte';
   import { sineIn } from 'svelte/easing';
+  import { page } from '$app/stores';
     // import { isTemplateSpan } from 'typescript';
-
-  let requests = []
-
-  const equipReqsGroupedDict = {};
-  data.equipment_requests2.forEach(row => {
-    if (Object.keys(equipReqsGroupedDict).includes(row.request_id.toString())) 
-      equipReqsGroupedDict[row.request_id].push(row); // add to existing key-value pair
-    else equipReqsGroupedDict[row.request_id] = [row]; // new key-value pair
-  });
-  Object.values(equipReqsGroupedDict).forEach(function (groupedItem) {
-    requests.push({
-        type: 'Equipment Request',
-        table:'equipment_requests',
-        id: groupedItem[0].request_id,
-        name: groupedItem.map(item => item.name).join(', '),
-        date: groupedItem[0].borrow_time,
-        admin_approve_layer: groupedItem[0].admin_approve_layer,
-        status: groupedItem.some(item => item.status === 'Declined') ? 'Declined' :
-                groupedItem.some(item => item.status === 'Pending') ? 'Pending' :
-                groupedItem.every(item => item.status === 'Approved') ? 'Approved' : 'Status cannot be determined' // not working yet
-      })
-  });
-
-  data.venue_requests.forEach(function (item) {
-    requests.push({
-      type: 'Venue Request',
-      table:'venue_requests',
-      id: item.request_id,
-      name: item.name,
-      date: item.date_needed_start,
-      admin_approve_layer: item.admin_approve_layer,
-      status : item.status
-    })
-  });
-
-  data.child_requests.forEach(function (item) {
-    requests.push({
-      type: 'Child Observation Request',
-      table:'child_requests',
-      id: item.request_id,
-      name: item.name,
-      date: item.observation_time,
-      admin_approve_layer: item.admin_approve_layer
-    })
-  });
-
-  data.class_requests.forEach(function (item) {
-    requests.push({
-      type: 'Class Observation Request',
-      table:'class_requests',
-      id: item.request_id,
-      name: item.name,
-      date: item.schedule,
-      admin_approve_layer: item.admin_approve_layer
-    })
-  });
-  // console.log(requests)
 </script>
   
 <div class="px-10 py-10 w-full min-h-screen">
@@ -107,9 +50,9 @@
     </a>
   </div>
   
-  {#if requests.length != 0}
+  {#if data.requests.length != 0}
     <div class="space-y-3">
-      {#each requests as info}
+      {#each data.requestsDisplay as info}
       <RequestsCard info={info} data={data}></RequestsCard>
       {/each}
     </div>
