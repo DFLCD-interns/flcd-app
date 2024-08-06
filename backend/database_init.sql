@@ -104,7 +104,7 @@ CREATE TABLE base_requests (
     id SERIAL PRIMARY KEY,
     requester_id INT,
     FOREIGN KEY (requester_id) REFERENCES users(id),
-    instuctor_id INT,
+    instructor_id INT, -- for FLCD students
     FOREIGN KEY (instructor_id) REFERENCES users(id),
     staff_assistant_id INT,
     FOREIGN KEY (staff_assistant_id) REFERENCES users(id),
