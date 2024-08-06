@@ -10,7 +10,7 @@
     let data;
     let form; 
 
-    let workgroup = 4;
+    let access_level = 4;
     let superior_id = 3;
     let pw_hash = "hash"
 
@@ -26,8 +26,8 @@
         // Create FormData object from the form
         const formData = new FormData(event.target);
 
-        // Manually append superior_id and workgroup to the FormData
-        formData.append('workgroup', workgroup);
+        // Manually append superior_id and access_level to the FormData
+        formData.append('access_level', access_level);
         formData.append('superior_id', superior_id);
 
         // placeholder for password hashing logic

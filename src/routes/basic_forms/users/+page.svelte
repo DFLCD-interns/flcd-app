@@ -51,7 +51,7 @@
 
   <label>
     Access Level:
-    <input name="workgroup" type="number" />
+    <input name="access_level" type="number" />
   </label>
 
   <button type="submit" class="button-style">Create User</button>

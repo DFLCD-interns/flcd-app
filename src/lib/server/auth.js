@@ -6,7 +6,7 @@ import { PEPPA_PIG, SESSION_COOKIE_NAME } from "$lib/server/constants.js";
 import { getUserFromSessionDB, getUsersDB, createSessionDB, getUserByIDDB, getSessionByIDDB, createUserDB, authUserDB } from "$lib/server/db.js";
 import { json } from "@sveltejs/kit";
 import { scryptSync, randomBytes} from "crypto"; 
-import { getUsersWithMatchingEmail } from "./db";
+import { getUserWithMatchingEmail } from "./db";
 
 //these seem to be treated as a temp database replacement
 // const usersStore = writable([]); 
@@ -54,7 +54,7 @@ export async function validateEmail(email) { // checking of inputs is done here
 
     if (emailRegexExec && emailRegexExec[0] === email) {
         // check if email exists
-        const matches = await getUsersWithMatchingEmail(email);
+        const matches = await getUserWithMatchingEmail(email);
         if (matches.length > 1) {
             return {
                 error: true,

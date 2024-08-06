@@ -5,7 +5,7 @@
   import { page } from '$app/stores';
   export let info;
   export let data;
-  let isAdmin = (data.current_user.workgroup < 5);
+  let isAdmin = (data.current_user.access_level < 5);
  
   //let status = info.admin_approve_layer
   let status_msg  = ['Approved', 'Pending Approval - Chair', 'Pending Approval - FIC', 'Pending Approval - Staff']
