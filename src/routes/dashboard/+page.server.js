@@ -16,7 +16,7 @@ async function getAdminCards(user_id, equipment_requests, venue_requests, child_
 			table:'equipment_requests',
 			id: groupedItem[0].request_id,
 			name: groupedItem.map(item => item.name).join(', '),
-			date: groupedItem[0].borrow_time,
+			date: groupedItem[0].promised_start_time,
 			admin_approve_layer: groupedItem[0].admin_approve_layer,
 			status: null
 		})

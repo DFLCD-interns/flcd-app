@@ -8,13 +8,12 @@
     let equipmentTypes = data.equipmentTypes;
     let selectedEq = [];
     let start_time = "";
-    let return_time = "";
+    let promised_end_time = "";
 
     // Add a 'value' property to each object in the array
     equipmentTypes = equipmentTypes.map((item) => ({ ...item, value: item.type, name: item.type }));
-    console.log(equipmentTypes)
 
-    user_access_level = data.current_user.access_level
+    const user_access_level = data.current_user.access_level
     $: isFLCD = user_access_level == 5;
 
     let selectedDept = "";
@@ -80,15 +79,15 @@
                     <div class="grid gap-6 mb-6 md:grid-cols-2">
                         <Label class="space-y-2">
                             <span>Borrow Time</span>
-                            <Input type="datetime-local" name="borrow_time" bind:value={start_time} required />
+                            <Input type="datetime-local" name="promised_start_time" bind:value={start_time} required />
                         </Label>
                         <Label class="space-y-2">
                             <span>Return Time</span>
-                            <Input type="datetime-local" name="return_time" bind:value={return_time} required />
+                            <Input type="datetime-local" name="promised_end_time" bind:value={promised_end_time} required />
                         </Label>
                         <Label class="space-y-2">
-                            <span>Venue of Equipment Usage</span>
-                            <Input type="text" name="venue" required />
+                            <span>Location of Equipment Usage</span>
+                            <Input type="text" name="location" required />
                         </Label>
                         <Label class="space-y-2">
                             <span>Purpose</span>
@@ -99,18 +98,22 @@
                                 required
                             />
                         </Label>
-                        {#key !isFLCD}
-                            <Label class="space-y-2">
-                                <span>Office/Company (for non-FLCD students)</span>
-                                <Input type="text" name="affiliation" required />
-                            </Label>
-                        {/key}
-                        {#key isFLCD}
-                            <Label class="space-y-2">
-                                <span>Email of Coordinating Faculty/Admin</span>
-                                <Input type="email" name="instructor_email" required />
-                            </Label>
-                        {/key}
+                        <Label class="space-y-2">
+                            <span>Office/Company (for non-FLCD students)</span>
+                            <Input 
+                                disabled={isFLCD}
+                                type="text" 
+                                name="affiliation" 
+                                required />
+                        </Label>
+                        <Label class="space-y-2">
+                            <span>Email of Coordinating Faculty/Admin</span>
+                            <Input 
+                                disabled={!isFLCD}
+                                type="email" 
+                                name="instructor_email" 
+                                required />
+                        </Label>
                     </div>
                     <GradientButton shadow color="green"  type="submit">
                         Request

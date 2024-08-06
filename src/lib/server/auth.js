@@ -311,7 +311,7 @@ async function resolvePW(password, email) {
             }
         }
     }
-    console.log("resolve success");
+    // console.log("resolve success");
     if (user)
     {return { 
 

@@ -6,12 +6,26 @@ export const actions = {
         const session = cookies.get("session_id");
         const user = await getUserFromSessionDB(session);
         const data = await request.formData();
+
+        const instructor = await getUserWithMatchingEmail(data.get('instructor_email'));
+        if (user.access_level === 5) { // if FLCD student
+            // check if instructor email exists
+            if (instructor.length < 1) {
+                return {
+                    status: 409,
+                    body: {
+                        message: 'Instructor email does not exist.',
+                        error: undefined
+                    }
+                }
+            }
+        }
         
         // BASE-REQUESTS INSERT
 
         var base_fd = new FormData();
         base_fd.append('requester_id', user.user_id);
-        base_fd.append('instructor_id', getUserWithMatchingEmail(data.get('instructor_email'))[0].id);
+        base_fd.append('instructor_id', instructor[0].id);
         base_fd.append('purpose', data.get('purpose'));
         base_fd.append('max_approval_layer', 2); // faculty-in-charge
 
@@ -36,6 +50,7 @@ export const actions = {
         // console.log("\nREQUEST ID: " + request_id + "\n");
 
         // APPROVALS INSERT
+
         for (let i = 0; i < 3; i++) { // 3 is admin_approve_layer for equipment requests
             var fd = new FormData();
             fd.append('status', 'pending');  // pending, approved, declined
@@ -60,9 +75,9 @@ export const actions = {
         }
 
         // EQUIPMENT-REQUESTS INSERT
-        const borrow_time = data.get('borrow_time');
-        const return_time = data.get('return_time');
-        const venue = data.get('venue');
+        const promised_start_time = data.get('promised_start_time');
+        const promised_end_time = data.get('promised_end_time');
+        const location = data.get('location');
         const selectedEq = data.getAll('selectedEq');
         // console.log('selectedEq: ' + selectedEq);
         
@@ -71,9 +86,9 @@ export const actions = {
             for (let j = 0; j < parseInt(data.get(selectedEq[i])); j++) {
                 
                 var fd = {
-                    borrow_time: borrow_time,
-                    return_time: return_time,
-                    venue: venue,
+                    promised_start_time: promised_start_time,
+                    promised_end_time: promised_end_time,
+                    location: location,
                     equipment_type: selectedEq[i],
                     request_id: request_id
                     // equipment_id --- to be set by approver
@@ -111,7 +126,7 @@ export const actions = {
             status: 200,
             body: {
                 message: 'Form submitted successfully!',
-                data: {selectedEq, total, borrow_time, return_time}
+                data: {selectedEq, total, promised_start_time, promised_end_time}
             }
         };
     }
