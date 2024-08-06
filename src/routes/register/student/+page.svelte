@@ -33,7 +33,7 @@
         // placeholder for password hashing logic
         formData.append('pw_hash', pw_hash);
 
-        console.log([...formData.values()]);
+        // console.log([...formData.values()]);
 
         // Remove '-' from the student number in preparation for insertion in database 
         const noDash = formData.get('student_number').split('-').join('');

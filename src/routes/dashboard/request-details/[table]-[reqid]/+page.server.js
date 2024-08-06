@@ -1,28 +1,24 @@
-import { insertIntoTableDB, getFromTableDB, updateTableDB, getRequestDetailsDB, getUserFromSessionDB } from '$lib/server/db'; 
+import { getApprovalsInfo, getTotalStatus, insertIntoTableDB, getFromTableDB, updateTableDB, getRequestDetailsDB, getUserFromSessionDB } from '$lib/server/db'; 
 
 /** @type {import('./$types.js').LayoutServerLoad} */
-export const load = async ( {cookies, params} ) => {
+export const load = async ( {cookies, params, parent} ) => {
     try {
-        const formData = new FormData(); // user input
-        formData.append('request_id', params.reqid);
-        const approvalsInfo = await getApprovalsInfo(formData);
+        const parentData = await parent();
         const requestDetails = await getRequestDetailsDB(params.table, params.reqid);
-
-        const approvalStatuses = approvalsInfo.statuses;
-        const approverNames = approvalsInfo.displayNames;
-        const totalStatus = getTotalStatus(approverNames, approvalStatuses);
+        const request = parentData.requestsInfo.find(req => req.id == params.reqid && req.table === params.table);
         
         return {
             approvalForms: {
-                totalStatus: totalStatus,
-                statuses: approvalStatuses, 
-                displayNames: approverNames,
+                totalStatus: request.status,
+                statuses: request.approvalsInfo.statuses,
+                displayNames: request.approvalsInfo.displayNames,
             },
+            requestName: request.name,
             requestType: params.table,
             requestDetails: requestDetails
-        }; 
+        }
     } catch (error) {   
-        console.error("Action failed:", error.message);
+        console.error("Load failed:", error.message);
         return { error: error }; 
     }
 }

@@ -25,7 +25,7 @@ export const actions = {
 
         var base_fd = new FormData();
         base_fd.append('requester_id', user.user_id);
-        base_fd.append('instructor_id', instructor[0].id);
+        base_fd.append('instructor_id', instructor[0]?.id);
         base_fd.append('purpose', data.get('purpose'));
         base_fd.append('max_approval_layer', 2); // faculty-in-charge
 
@@ -51,7 +51,7 @@ export const actions = {
 
         // APPROVALS INSERT
 
-        for (let i = 0; i < 3; i++) { // 3 is admin_approve_layer for equipment requests
+        for (let i = 0; i < 3; i++) { // 3 is max_approval_layer for equipment requests
             var fd = new FormData();
             fd.append('status', 'pending');  // pending, approved, declined
             fd.append('approver_id', 1);  // placeholder

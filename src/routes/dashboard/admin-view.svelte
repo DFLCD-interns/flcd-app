@@ -50,9 +50,9 @@
     </a>
   </div>
   
-  {#if data.requests.length != 0}
+  {#if data.requestsInfo.length != 0}
     <div class="space-y-3">
-      {#each data.requestsDisplay as info}
+      {#each data.requestsInfo as info}
       <RequestsCard info={info} data={data}></RequestsCard>
       {/each}
     </div>
