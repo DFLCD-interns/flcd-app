@@ -1,4 +1,4 @@
-import { insertIntoTableDB, getLatestBaseRequestID, getUserFromSessionDB } from '$lib/server/db.js';
+import { insertIntoTableDB, getLatestBaseRequestID, getUserFromSessionDB, getUserWithMatchingEmail } from '$lib/server/db.js';
 
 /** @type {import('./$types').Actions} */
 export const actions = {    
@@ -10,10 +10,10 @@ export const actions = {
         // BASE-REQUESTS INSERT
 
         var base_fd = new FormData();
-        base_fd.append('faculty_id', 1); // placeholder for now
-        base_fd.append('purpose', data.get('purpose'));
-        base_fd.append('admin_approve_layer', 3);
         base_fd.append('requester_id', user.user_id);
+        base_fd.append('instructor_id', getUserWithMatchingEmail(data.get('instructor_email')));
+        base_fd.append('purpose', data.get('purpose'));
+        base_fd.append('max_approval_layer', 2); // faculty-in-charge
 
         try {
             // Insert the form data into the database

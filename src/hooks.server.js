@@ -19,7 +19,7 @@ export async function handle({ event, resolve }) {
 	// Stage 1
 	event.locals.user = await authenticateUser(event);
 
-	// console.log("Hookie - ", event.url.pathname, event.locals.user.workgroup);
+	// console.log("Hookie - ", event.url.pathname, event.locals.user.);
 
 
 	if (event.url.pathname.startsWith("/p")) {
@@ -28,23 +28,23 @@ export async function handle({ event, resolve }) {
 			throw redirect(303, "/")
 		}
     if (event.url.pathname.startsWith("/p0")) {
-			if (![0].includes(event.locals.user.workgroup)) {
+			if (![0].includes(event.locals.user.access_level)) {
 				// throw redirect(303, "/signout")
         return new Response("You do not have the correct access rights to view this!.");
 			}
 		}
 		if (event.url.pathname.startsWith("/p1")) {
-			if (![0,1].includes(event.locals.user.workgroup)) {
+			if (![0,1].includes(event.locals.user.access_level)) {
         return new Response("You do not have the correct access rights to view this!.");
 			}
 		}
     if (event.url.pathname.startsWith("/p2")) {
-			if (![0,1,2,3].includes(event.locals.user.workgroup)) {
+			if (![0,1,2,3].includes(event.locals.user.access_level)) {
         return new Response("You do not have the correct access rights to view this!.");
 			}
 		}
     if (event.url.pathname.startsWith("/p3")) {
-			if (![0,1,2,3,4,5].includes(event.locals.user.workgroup)) {
+			if (![0,1,2,3,4,5].includes(event.locals.user.access_level)) {
         return new Response("You do not have the correct access rights to view this!.");
         // throw redirect(303, "/signout")
 			}

@@ -4,7 +4,6 @@
     import { Input, Label, Button, Select, Alert } from "flowbite-svelte";
     import { ArrowLeftOutline } from "flowbite-svelte-icons";
     let selectedDept = "";
-    let selectedCourse = "";
     let password, confirm_password;
     let match = true;
 

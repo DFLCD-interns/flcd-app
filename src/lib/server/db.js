@@ -93,10 +93,10 @@ const res = await query('SELECT * FROM users JOIN sessions ON sessions.user_id =
 return res.body.result.rows[0];
 }
 
-export async function getUsersWithMatchingEmail(email) {
+export async function getUserWithMatchingEmail(email) { // no duplicate emails allowed; check should be in sign up
   const res = await query('SELECT * FROM users WHERE email = $1', [email]);
   // console.log(res);
-  return res.body.result.rows;
+  return res.body.result.rows[0].id;
 }
 
 export async function getEquipmentDB() {
@@ -108,7 +108,6 @@ export async function getEquipmentTypesDB() {
   const result = await query("SELECT type, COUNT(*) as count FROM equipments GROUP BY type");
   return result.body.result.rows;
 }
-
 
 export async function getUserBaseRequests(user){
   //console.log(`user ${user}`)
@@ -199,7 +198,7 @@ export async function getNewestBaseRequest(){
 
 export async function getLatestBaseRequestID(user_id) {
   const result = await query('SELECT id FROM base_requests WHERE requester_id = $1 ORDER BY created DESC LIMIT 1;', [user_id]);
-  return result.body.result.rows[0].id;;
+  return result.body.result.rows[0].id;
 }
 
 export async function insertIntoTableDB(table_name, formData) {
@@ -287,11 +286,11 @@ export async function getApprovalsInfo(searchFormData) {
       searchFormData.set('id', row.approver_id);
       const approverQuery = await getFromTableDB("users", searchFormData);
       if (!approverQuery?.body) throw new Error(`no appover matching the id ${searchFormData.get('id')}`);  
-      const workgroup = approverQuery?.body.result.rows[0].workgroup;
+      const access_level = approverQuery?.body.result.rows[0].access_level;
 
-      searchFormData2.set('access_level', workgroup-1);
-      const workgroupQuery = await getFromTableDB("admin_types", searchFormData2);
-      const displayName = workgroupQuery.body.result.rows[0].description;
+      searchFormData2.set('access_level', access_level);
+      const access_levelQuery = await getFromTableDB("admin_types", searchFormData2);
+      const displayName = access_levelQuery.body.result.rows[0].description;
 
       displayNames.push(displayName);
   }
