@@ -89,13 +89,11 @@ return res;
 
 export async function getUserFromSessionDB(sessionuuid) {
 const res = await query('SELECT * FROM users JOIN sessions ON sessions.user_id = users.id WHERE sessions.session_id = $1', [sessionuuid]);
-// console.log(res);
 return res.body.result.rows[0];
 }
 
 export async function getUserWithMatchingEmail(email) {
   const res = await query('SELECT * FROM users WHERE email = $1', [email]);
-  // console.log(res);
   return res.body.result.rows;
 }
 
@@ -162,14 +160,14 @@ export async function getRequestDetailsDB(table, reqid) {
     requester.email,
     requester.student_number AS studentno,
     requester.phone AS contactno,
-    t.borrow_time AS dateneeded,
+    t.promised_start_time AS dateneeded,
     faculty.first_name AS admin_firstname,
     faculty.last_name AS admin_lastname,
     requester.department AS dept,
     e.name AS material,
-    t.venue AS room,
+    t.location AS room,
     faculty.email AS adminemail,
-    t.return_time AS returndate
+    t.promised_end_time AS returndate
     FROM base_requests br 
     LEFT JOIN ${table} t ON br.id = t.request_id
 	  LEFT JOIN ${type} e ON t.equipment_id = e.id 
@@ -234,12 +232,12 @@ export async function getFromTableDB(table_name, searchFormData, limit = 100) {
     qText = `SELECT \* FROM ${table_name} WHERE ${whereText} ORDER BY (access_level) asc LIMIT \$${attributes.length+1}`;
   }
   else{ 
-    console.log("Table name:", {table_name})
+    // console.log("Table name:", {table_name})
     qText = `SELECT \* FROM ${table_name} WHERE ${whereText} ORDER BY (id) asc LIMIT \$${attributes.length+1}`;
 }
   // console.log(qText, values.concat(limit));
   const res = await query(qText, values.concat(limit));    
-  console.log(res);
+  // console.log(res);
   return res;
 }
 
