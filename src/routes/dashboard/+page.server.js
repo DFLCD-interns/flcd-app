@@ -1,4 +1,4 @@
-import { getFromTableDB, getApprovalsInfo, getTotalStatus } from '$lib/server/db.js'; 
+import { getFromTableDB, getApprovalsInfo, getTotalStatus, getUserFromSessionDB, getUserBaseRequests, getUserEquipmentRequests, getEquipmentRequestsDB, getVenueRequestsDB, getClassRequestsDB, getChildRequestsDB } from '$lib/server/db.js'; 
 
 async function getAdminCards(user_id, equipment_requests, venue_requests, child_requests, class_requests) {
 	
@@ -101,8 +101,8 @@ export async function load({ cookies }) {
 	return {
 		requestsDisplay: requestsDisplay,
 		equipment_requests:equipment_requests,
+		equipment_requests2: equipment_requests,
 		requests: requests,
-		equipment_requests: equipment_requests,
 		venue_requests: venue_requests,
 		child_requests: child_requests,
 		class_requests: class_requests,
