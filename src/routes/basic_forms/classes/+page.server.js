@@ -10,6 +10,16 @@ export const actions = {
             console.error("Action failed:", error.message);
             return {success: response.success};
         }
+    },
+    createClass: async ({cookies, request}) => {
+        try {
+            const data = await request.formData();
+            const response = await insertIntoTableDB("classes", data);
+            return {success: response.success};
+        } catch (error) {   
+            console.error("Action failed:", error.message);
+            return {success: response.success};
+        }
     }
 }
 

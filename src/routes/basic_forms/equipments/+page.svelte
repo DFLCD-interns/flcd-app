@@ -1,19 +1,28 @@
 <form action="?/createEquipment" method="POST">
   <label>
     Equipment Name:
-    <input name="name" type="text" placeholder="Electric Fan Room 103" required />
+    <input name="name" type="text" placeholder="TVA" required />
   </label>
 
   <label>
-    Description:
-    <input name="description" type="text" placeholder="From room 103" />
+    Type:
+    <input name="type" type="text" placeholder="Movable TV" required />
+  </label>
+  
+  <label>
+    Current Location:
+    <input name="location" type="text" placeholder="Room 103" required />
+  </label>
+  
+  <label>
+    Status:
+    <input name="status" type="text" placeholder="available" required />
   </label>
 
   <label>
-    Total Count:
-    <input name="count" type="text" placeholder="2" required />
+    Notes (description):
+    <input name="notes" type="text" placeholder="From room 103" />
   </label>
-
 
   <button type="submit" class="button-style">Create Equipment</button>
 </form>

@@ -1,7 +1,13 @@
 <form action="?/createBaseRequest" method="POST">
+  
   <label>
-    Faculty-in-Charge ID:
-    <input name="faculty_id" type="number" required />
+    Requester ID:
+    <input name="requester_id" type="number" required />
+  </label>
+
+  <label>
+    Instructor ID:
+    <input name="instructor_id" type="number" required />
   </label>
 
   <label>
@@ -15,28 +21,13 @@
   </label>
   
   <label>
-    Office:
-    <input name="office" type="text" required />
+    Affiliation (office/company):
+    <input name="affiliation" type="text" required />
   </label>
 
   <label>
-    Company:
-    <input name="company" type="text" required />
-  </label>
-
-  <label>
-    Admin Approval Layer:
-    <input name="admin_approve_layer" type="number" required />
-  </label>
-
-  <label>
-    Requester ID:
-    <input name="requester_id" type="number" required />
-  </label>
-  
-  <label>
-    Completion Timestamp:
-    <input name="completion_time" type="datetime-local" required />
+    Max Approval Layer:
+    <input name="max_approval_layer" type="number" required />
   </label>
 
   <button type="submit" class="button-style">Create Base Request</button>

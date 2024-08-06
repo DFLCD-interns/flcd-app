@@ -6,7 +6,7 @@
 
   <label>
     Birthdate:
-    <input name="birthdate" type="date" />
+    <input name="birthdate" type="datetime-local" />
   </label>
 
   <label>

@@ -45,13 +45,13 @@
   </label>
 
   <label>
-    Superior ID:
-    <input name="superior_id" type="number" />
+    Minimum Approval Layer:
+    <input name="min_approve_layer" type="number" />
   </label>
 
   <label>
     Access Level:
-    <input name="workgroup" type="number" />
+    <input name="access_level" type="number" />
   </label>
 
   <button type="submit" class="button-style">Create User</button>

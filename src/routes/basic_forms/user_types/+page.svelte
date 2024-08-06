@@ -1,12 +1,7 @@
-<form action="?/createAdminType" method="POST">
-  <label>
-    Admin Type Name:
-    <input name="name" type="text" required />
-  </label>
-
+<form action="?/createUserType" method="POST">
   <label>
     Description:
-    <input name="description" type="text" />
+    <input name="description" type="text" required />
   </label>
 
   <label>
@@ -14,7 +9,7 @@
     <input name="access_level" type="number" required />
   </label>
 
-  <button type="submit" class="button-style">Create Admin Type</button>
+  <button type="submit" class="button-style">Create User Type</button>
 </form>
 
 <style>

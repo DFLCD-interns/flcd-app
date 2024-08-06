@@ -46,9 +46,20 @@
   </label>
   
   <label>
+    Formatted Timeslot:
+    <input name="timeslot" type="number" required />
+  </label>
+  <label>
+
+    Observe Date:
+    <input name="observe_date" type="date" required />
+  </label>
+
+  <label>
     Base Request ID:
     <input name="request_id" type="number" required />
   </label>
+  
 
   <button type="submit" class="button-style">Create Class Observation Request</button>
 </form>

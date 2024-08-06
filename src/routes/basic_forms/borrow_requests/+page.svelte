@@ -1,18 +1,28 @@
 # Equipment Request
 <form action="?/createEquipmentRequest" method="POST">
   <label>
-    Borrow Time:
-    <input name="borrow_time" type="datetime-local" required />
+    Promised Start Time:
+    <input name="promised_start_time" type="datetime-local" required />
   </label>
 
   <label>
-    Return Time:
-    <input name="return_time" type="datetime-local" required />
+    Promised End Time:
+    <input name="promised_end_time" type="datetime-local" required />
   </label>
 
   <label>
-    Venue:
-    <input name="venue" type="text" required />
+    Actual Start Time:
+    <input name="actual_start_time" type="datetime-local" required />
+  </label>
+
+  <label>
+    Actual End Time:
+    <input name="actual_end_time" type="datetime-local" required />
+  </label>
+  
+  <label>
+    Location of Usage:
+    <input name="location" type="text" required />
   </label>
 
   <label>
