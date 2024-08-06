@@ -4,7 +4,7 @@
     let userData = {
         firstName: data.current_user.first_name,
         lastName: data.current_user.last_name,
-        userType: data.user_workgroup.charAt(0).toUpperCase() + data.user_workgroup.slice(1) // first letter capitalized
+        userType: data.user_access_level.charAt(0).toUpperCase() + data.user_access_level.slice(1) // first letter capitalized
     }
 </script>
 

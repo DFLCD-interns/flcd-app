@@ -93,10 +93,10 @@ const res = await query('SELECT * FROM users JOIN sessions ON sessions.user_id =
 return res.body.result.rows[0];
 }
 
-export async function getUserWithMatchingEmail(email) { // no duplicate emails allowed; check should be in sign up
+export async function getUserWithMatchingEmail(email) {
   const res = await query('SELECT * FROM users WHERE email = $1', [email]);
   // console.log(res);
-  return res.body.result.rows[0].id;
+  return res.body.result.rows;
 }
 
 export async function getEquipmentDB() {
@@ -234,7 +234,7 @@ export async function getFromTableDB(table_name, searchFormData, limit = 100) {
     qText = `SELECT \* FROM ${table_name} WHERE ${whereText} ORDER BY (access_level) asc LIMIT \$${attributes.length+1}`;
   }
   else{ 
-    console.log({table_name})
+    console.log("Table name:", {table_name})
     qText = `SELECT \* FROM ${table_name} WHERE ${whereText} ORDER BY (id) asc LIMIT \$${attributes.length+1}`;
 }
   // console.log(qText, values.concat(limit));

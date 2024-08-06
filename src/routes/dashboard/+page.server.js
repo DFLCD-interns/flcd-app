@@ -94,7 +94,7 @@ export async function load({ cookies }) {
 	
 	let requestsDisplay;
 	
-	if (user.workgroup < 5) {
+	if (user.access_level < 5) {
 		requestsDisplay = await getAdminCards(user_id, equipment_requests2, venue_requests, child_requests, class_requests);
 	}	
 	

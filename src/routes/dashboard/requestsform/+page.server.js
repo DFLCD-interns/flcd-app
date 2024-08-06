@@ -11,7 +11,7 @@ export const actions = {
 
         var base_fd = new FormData();
         base_fd.append('requester_id', user.user_id);
-        base_fd.append('instructor_id', getUserWithMatchingEmail(data.get('instructor_email')));
+        base_fd.append('instructor_id', getUserWithMatchingEmail(data.get('instructor_email'))[0].id);
         base_fd.append('purpose', data.get('purpose'));
         base_fd.append('max_approval_layer', 2); // faculty-in-charge
 
