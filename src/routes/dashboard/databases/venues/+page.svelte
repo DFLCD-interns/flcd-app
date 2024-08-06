@@ -5,6 +5,8 @@
   import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton } from 'flowbite-svelte';
   import { EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid } from 'flowbite-svelte-icons';
 
+  console.log(data)
+
   let venues = data.venue;
 
   let tableHead = Object.keys(venues[0]);
