@@ -303,11 +303,11 @@ export async function getApprovalsInfo(searchFormData) {
 
 // For requests
 export function getTotalStatus(names, statuses) {
-  if (statuses.includes("Declined"))
+  if (statuses.includes("declined"))
       return "Declined";
-  else if (statuses.includes("Pending"))
-      return "Pending with " + names[statuses.findIndex((status) => status === 'Pending')];
-  else if (statuses.every((elem) => elem === "Approved"))
+  else if (statuses.includes("pending"))
+      return "Pending with " + names[statuses.findIndex((status) => status === 'pending')];
+  else if (statuses.every((elem) => elem === "approved"))
       return "Approved";
   else {
       console.error("Total status of form cannot be determined.")
