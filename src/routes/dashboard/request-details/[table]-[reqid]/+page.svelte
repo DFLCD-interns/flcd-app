@@ -7,14 +7,9 @@
     import { ArrowLeftOutline, CodeBranchSolid } from 'flowbite-svelte-icons';
     import { onMount, onDestroy } from 'svelte';
     import { page } from '$app/stores';
-    import { equipmentReqName } from '$lib/stores';
+    import { statusColors } from '$lib';
 
-    let requestInfo = data?.requestDetails[0];
-    let requestName;
-
-    const unsubscribeToStore = equipmentReqName.subscribe(value => requestName = value);
-    onDestroy(() => unsubscribeToStore());
-
+    let requestDetails = data?.requestDetails[0];
     let request_type = "";
 
     if (data.requestType == "equipment_requests"){
@@ -24,8 +19,8 @@
         request_type = "Venue Requests"
     }
 
-    if (requestInfo.studentno == null){
-        requestInfo.studentno = "none";
+    if (requestDetails.studentno == null){
+        requestDetails.studentno = "none";
     }
     // console.log('What')
     // console.log(requestInfo)
@@ -86,8 +81,8 @@
 <div class = "min-h-screen  p-10">
     <div class="w-full items-center justify-between">
         <a href="/dashboard"><Button class="bg-white text-gray-500 hover:bg-white drop-shadow-md"><ArrowLeftOutline/></Button></a>
-        <h2 class="pt-3 text-2xl font-semibold text-gray-600">{request_type}: {requestName}</h2>
-        <Badge class="mt-2" large border color='yellow'>{totalStatus}</Badge>
+        <h2 class="pt-3 text-2xl font-semibold text-gray-600">{request_type}: {data.requestName}</h2>
+        <Badge class="mt-2" large border color='{totalStatus === 'Approved' ? statusColors.approved : totalStatus === 'Declined' ? statusColors.declined : statusColors.pending}'>{totalStatus}</Badge>
     </div>
     <div class="min-w-full md:flex pt-5 gap-10 justify-center">
         <div class="bg-white flex items-center justify-center rounded-lg shadow-lg p-6">
@@ -96,47 +91,47 @@
                 <tbody class="text-gray-600">
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Name</td>
-                    <td class="py-3 px-4">{requestInfo.requester_firstname} {requestInfo.requester_lastname}</td>
+                    <td class="py-3 px-4">{requestDetails.requester_firstname} {requestDetails.requester_lastname}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Email</td>
-                    <td class="py-3 px-4">{requestInfo.email}</td>
+                    <td class="py-3 px-4">{requestDetails.email}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Student number</td>
-                    <td class="py-3 px-4">{requestInfo.studentno}</td>
+                    <td class="py-3 px-4">{requestDetails.studentno}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Contact number</td>
-                    <td class="py-3 px-4">{requestInfo.contactno}</td>
+                    <td class="py-3 px-4">{requestDetails.contactno}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Name of admin/faculty in charge or coordinating teacher</td>
-                    <td class="py-3 px-4">{requestInfo.admin_firstname} {requestInfo.admin_lastname}</td>
+                    <td class="py-3 px-4">{requestDetails.admin_firstname} {requestDetails.admin_lastname}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Department/section</td>
-                    <td class="py-3 px-4">{requestInfo.dept}</td>
+                    <td class="py-3 px-4">{requestDetails.dept}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Requested equipment</td>
-                    <td class="py-3 px-4">{requestName}</td>
+                    <td class="py-3 px-4">{data.requestName}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Equipment usage date</td>
-                    <td class="py-3 px-4">{requestInfo.dateneeded}</td>
+                    <td class="py-3 px-4">{requestDetails.dateneeded}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Room where the equipment will be used</td>
-                    <td class="py-3 px-4">{requestInfo.room}</td>
+                    <td class="py-3 px-4">{requestDetails.room}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Email address of admin/faculty in charge or coordinating teacher</td>
-                    <td class="py-3 px-4">{requestInfo.adminemail}</td>
+                    <td class="py-3 px-4">{requestDetails.adminemail}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Equipment return date</td>
-                    <td class="py-3 px-4">{requestInfo.returndate}</td>
+                    <td class="py-3 px-4">{requestDetails.returndate}</td>
                 </tr>
                 </tbody>
             </table>
@@ -147,16 +142,23 @@
             <h2 class="text-gray-600 text-lg mb-1 font-medium title-font">Approval Status</h2>
             {#each approvalStatuses as status, index} 
                 <p class="text-gray-600" >
-                    {index > 0 && approvalStatuses[index-1] === 'Pending' ? '🔒 Invisible to' :
-                        status === 'Approved' ? '✔️ Approved by' : 
-                        status === 'Declined' ? '❌ Declined by' : 
-                        totalStatus === 'Declined' ? '🔒 Invisible to' :
-                        status === 'Pending' ?  '⌛ Pending with' : 
+                    {index > 0 && approvalStatuses[index-1] === 'pending' ? '🔒 Invisible to' :
+                        status === 'approved' ? '✔️ Approved by' : 
+                        status === 'declined' ? '❌ Declined by' : 
+                        totalStatus === 'declined' ? '🔒 Invisible to' :
+                        status === 'pending' ?  '⌛ Pending with' : 
                                                 'Status unknown with'}
                     {approverNames[index]}
 
                 </p>
             {/each}
+        </div>
+        <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
+            <h1 class="text-gray-600 text-lg mb-1 font-medium title-font">Remarks</h1>
+            <h2> "Must be approved ASAP" </h2>
+            <h3 class="text-gray-600 font-small">- Jenny Daez (Faculty-in-Charge)</h3>
+            <h3> PLACEHOLDER/IDEA ONLY ^</h3>
+            <h3> Could also be coloredd or smthn like the status (this time based on the response and not the total current status)</h3>
         </div>
         {#if data.current_user.access_level < 5}
             <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
@@ -166,20 +168,20 @@
                         <input 
                             id="remarks" 
                             name="remarks" 
-                            placeholder="Remarks and comments."
+                            placeholder="To requester and next approver."
                             class="w-full bg-white rounded border border-gray-300 focus:border-green-600 focus:ring-2 focus:ring-green-600 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"/>
                     </div>
                     <div class="flex justify-center">
                         <!-- Hidden input field to store the status -->
                         <input type="hidden" id="status" name="status" />
                         <button 
-                            on:click={() => form.querySelector('input[name="status"]').value = "Approved"}
+                            on:click={() => form.querySelector('input[name="status"]').value = "approved"}
                             type="submit" 
                             class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
                             Approve
                         </button>
                         <button
-                            on:click={() => form.querySelector('input[name="status"]').value = "Declined"}
+                            on:click={() => form.querySelector('input[name="status"]').value = "declined"}
                             type="submit" 
                             class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
                             Decline

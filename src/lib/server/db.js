@@ -181,7 +181,7 @@ export async function getRequestDetailsDB(table, reqid) {
     FROM base_requests br 
     LEFT JOIN ${table} t ON br.id = t.request_id
 	  LEFT JOIN ${type} e ON t.equipment_id = e.id 
-    LEFT JOIN users AS faculty ON br.faculty_id = faculty.id
+    LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
     LEFT JOIN users AS requester ON br.requester_id = requester.id
     WHERE br.id = ${reqid}`);
   // console.log(res);
@@ -294,11 +294,11 @@ export async function getApprovalsInfo(searchFormData) {
       searchFormData.set('id', row.approver_id);
       const approverQuery = await getFromTableDB("users", searchFormData);
       if (!approverQuery?.body) throw new Error(`no appover matching the id ${searchFormData.get('id')}`);  
-      const access_level = approverQuery?.body.result.rows[0].access_level;
+      const access_level = approverQuery?.body.result.rows[0]?.access_level;
 
       searchFormData2.set('access_level', access_level);
-      const access_levelQuery = await getFromTableDB("admin_types", searchFormData2);
-      const displayName = access_levelQuery.body.result.rows[0].description;
+      const access_levelQuery = await getFromTableDB("user_types", searchFormData2);
+      const displayName = access_levelQuery.body.result.rows[0]?.description;
 
       displayNames.push(displayName);
   }
@@ -321,4 +321,89 @@ export function getTotalStatus(names, statuses) {
       console.error("Total status of form cannot be determined.")
       return "Cannot be determined";
   } 
+}
+
+// For admin request cards
+export async function getAdminCards(user_id, equipment_requests, venue_requests, child_requests, class_requests) {
+	
+	const equipReqsGroupedDict = {};
+	equipment_requests.forEach(row => {
+		if (Object.keys(equipReqsGroupedDict).includes(row.request_id.toString())) 
+			equipReqsGroupedDict[row.request_id].push(row); // add to existing key-value pair
+		else equipReqsGroupedDict[row.request_id] = [row]; // new key-value pair
+	});
+
+	const requestsDisplay = [];
+	Object.values(equipReqsGroupedDict).forEach(function (groupedItem) {
+		requestsDisplay.push({
+			type: 'Equipment Request',
+			table:'equipment_requests',
+			id: groupedItem[0]?.request_id,
+			name: groupedItem.map(item => item.name).join(', '),
+			date: groupedItem[0]?.promised_start_time,
+			max_approval_layer: groupedItem[0]?.max_approval_layer,
+			status: null,
+      approvalsInfo: null,
+		})
+	});
+	
+	venue_requests.forEach(function (item) {
+		requestsDisplay.push({
+			type: 'Venue Request',
+			table:'venue_requests',
+			id: item.request_id,
+			name: item.name,
+			date: item.date_needed_start,
+			max_approval_layer: item.max_approval_layer,
+			status: null,
+      approvalsInfo: null,
+		})
+	});
+	
+	child_requests.forEach(function (item) {
+		requestsDisplay.push({
+			type: 'Child Observation Request',
+			table:'child_requests',
+			id: item.request_id,
+			name: item.name,
+			date: item.observation_time,
+			max_approval_layer: item.max_approval_layer,
+			status: null,
+      approvalsInfo: null,
+		})
+	});
+	 
+	class_requests.forEach(function (item) {
+		requestsDisplay.push({
+			type: 'Class Observation Request',
+			table:'class_requests',
+			id: item.request_id,
+			name: item.name,
+			date: item.schedule,
+			max_approval_layer: item.max_approval_layer,
+			status: null,
+      approvalsInfo: null,
+		})
+	});
+	
+	const _requestsDisplay = [];
+	for (const req of requestsDisplay) {
+		const formData = new FormData(); 
+		formData.append('request_id', req.id);
+		const approvalFormsQuery = await getFromTableDB('approvals', formData);
+		const forms = approvalFormsQuery.body.result.rows;
+		
+		const approvalsInfo = await getApprovalsInfo(formData);
+		
+		const _form = forms.find((form, i) =>	form.approver_id === user_id && 
+                                          //form.status !== 'declined' && // TODO make this transfer forms to requestHistory instead of disappearing here. this disappearance causes sudden errors upon declining btw
+                                          (i == 0 ? true : forms[i-1].status === 'approved'));
+		if (_form) { 
+			req.status = getTotalStatus(approvalsInfo.displayNames, approvalsInfo.statuses);
+      req.approvalsInfo = approvalsInfo;
+			_requestsDisplay.push(req);
+		}
+	}
+	
+	return _requestsDisplay;
 }
