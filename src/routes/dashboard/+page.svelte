@@ -4,9 +4,9 @@
 	export let data;
     import AdminView from "./admin-view.svelte";
     import NonAdminView from "./non-admin-view.svelte";
-    let isAdmin = (data.current_user.workgroup < 5);
+    let isAdmin = (data.current_user.access_level < 5);
     
-    // console.log(`workgroup: ${data.current_user.workgroup}, ${isAdmin}`)
+    // console.log(`access_level: ${data.current_user.access_level}, ${isAdmin}`)
     function handleClick() {
         window.location.href = "/";
     }
