@@ -14,6 +14,9 @@
     equipmentTypes = equipmentTypes.map((item) => ({ ...item, value: item.type, name: item.type }));
     console.log(equipmentTypes)
 
+    user_access_level = data.current_user.access_level
+    $: isFLCD = user_access_level == 5;
+
     let selectedDept = "";
     $: isOther = selectedDept == "other";
     let depts = [
@@ -96,14 +99,18 @@
                                 required
                             />
                         </Label>
-                        <Label class="space-y-2">
-                            <span>Name of Coordinating Faculty/Admin</span>
-                            <Input type="faculty_name" name="name" required />
-                        </Label>
-                        <Label class="space-y-2">
-                            <span>Email of Coordinating Faculty/Admin</span>
-                            <Input type="faculty_email" name="email" required />
-                        </Label>
+                        {#key !isFLCD}
+                            <Label class="space-y-2">
+                                <span>Office/Company (for non-FLCD students)</span>
+                                <Input type="text" name="affiliation" required />
+                            </Label>
+                        {/key}
+                        {#key isFLCD}
+                            <Label class="space-y-2">
+                                <span>Email of Coordinating Faculty/Admin</span>
+                                <Input type="email" name="instructor_email" required />
+                            </Label>
+                        {/key}
                     </div>
                     <GradientButton shadow color="green"  type="submit">
                         Request
