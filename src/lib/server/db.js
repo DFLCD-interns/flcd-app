@@ -240,6 +240,7 @@ export async function getFromTableDB(table_name, searchFormData, limit = 100) {
 }
   // console.log(qText, values.concat(limit));
   const res = await query(qText, values.concat(limit));    
+  console.log(res);
   return res;
 }
 
@@ -266,4 +267,51 @@ export async function updateTableDB(table_name, searchFormData, updateFormData) 
   // console.log(qText, updateValues.concat(searchValues));
   const res = await query(qText, updateValues.concat(searchValues));    
   return res;
+}
+
+// Formdata should contain approver_id to search
+export async function getApprovalsInfo(searchFormData) { 
+  const formsQuery = await getFromTableDB("approvals", searchFormData); 
+
+  const statuses = [];
+  formsQuery.body.result.rows.map(async row => {
+      statuses.push(row?.status);
+  })
+
+  const displayNames = [];
+  searchFormData.delete('request_id');
+  searchFormData.append('id', 0);
+  const searchFormData2 = new FormData();
+  searchFormData2.append('access_level', 5);
+  for (const row of formsQuery.body.result.rows) {
+      searchFormData.set('id', row.approver_id);
+      const approverQuery = await getFromTableDB("users", searchFormData);
+      if (!approverQuery?.body) throw new Error(`no appover matching the id ${searchFormData.get('id')}`);  
+      const workgroup = approverQuery?.body.result.rows[0].workgroup;
+
+      searchFormData2.set('access_level', workgroup-1);
+      const workgroupQuery = await getFromTableDB("admin_types", searchFormData2);
+      const displayName = workgroupQuery.body.result.rows[0].description;
+
+      displayNames.push(displayName);
+  }
+  
+  return { 
+      statuses: statuses, 
+      displayNames: displayNames
+  };
+}
+
+// For requests
+export function getTotalStatus(names, statuses) {
+  if (statuses.includes("Declined"))
+      return "Declined";
+  else if (statuses.includes("Pending"))
+      return "Pending with " + names[statuses.findIndex((status) => status === 'Pending')];
+  else if (statuses.every((elem) => elem === "Approved"))
+      return "Approved";
+  else {
+      console.error("Total status of form cannot be determined.")
+      return "Cannot be determined";
+  } 
 }

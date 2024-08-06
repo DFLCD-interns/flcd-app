@@ -1,35 +1,4 @@
-import { insertIntoTableDB, getFromTableDB, updateTableDB, getRequestDetailsDB, getUserFromSessionDB } from '$lib/server/db';
-
-async function getApprovalsInfo(searchFormData) { 
-    const formsQuery = await getFromTableDB("approvals", searchFormData); 
-
-    const statuses = [];
-    formsQuery.body.result.rows.map(async row => {
-        statuses.push(row?.status);
-    })
-
-    const displayNames = [];
-    searchFormData.delete('request_id');
-    searchFormData.append('id', 0);
-    const searchFormData2 = new FormData();
-    searchFormData2.append('access_level', 5);
-    for (const row of formsQuery.body.result.rows) {
-        searchFormData.set('id', row.approver_id);
-        const approverQuery = await getFromTableDB("users", searchFormData);
-        const workgroup = approverQuery.body.result.rows[0].workgroup;
-
-        searchFormData2.set('access_level', workgroup-1);
-        const workgroupQuery = await getFromTableDB("admin_types", searchFormData2);
-        const displayName = workgroupQuery.body.result.rows[0].description;
-
-        displayNames.push(displayName);
-    }
-    
-    return { success: true, body: {
-        statuses: statuses, 
-        displayNames: displayNames
-    }};
-}
+import { insertIntoTableDB, getFromTableDB, updateTableDB, getRequestDetailsDB, getUserFromSessionDB } from '$lib/server/db'; 
 
 /** @type {import('./$types.js').LayoutServerLoad} */
 export const load = async ( {cookies, params} ) => {
@@ -37,17 +6,24 @@ export const load = async ( {cookies, params} ) => {
         const formData = new FormData(); // user input
         formData.append('request_id', params.reqid);
         const approvalsInfo = await getApprovalsInfo(formData);
-        const reqDetails = await getRequestDetailsDB(params.table, params.reqid);
+        const requestDetails = await getRequestDetailsDB(params.table, params.reqid);
 
-        return { success: true, body: { 
-            approvalFormStatuses: approvalsInfo.body.statuses, 
-            approverNames: approvalsInfo.body.displayNames,
-			type: params.table,
-			reqdetails: reqDetails
-        }}; 
+        const approvalStatuses = approvalsInfo.statuses;
+        const approverNames = approvalsInfo.displayNames;
+        const totalStatus = getTotalStatus(approverNames, approvalStatuses);
+        
+        return {
+            approvalForms: {
+                totalStatus: totalStatus,
+                statuses: approvalStatuses, 
+                displayNames: approverNames,
+            },
+            requestType: params.table,
+            requestDetails: requestDetails
+        }; 
     } catch (error) {   
         console.error("Action failed:", error.message);
-        return { success: false, body: { result: error}}; 
+        return { error: error }; 
     }
 }
 
