@@ -285,6 +285,11 @@ export async function getApprovalsInfo(searchFormData) {
       statuses.push(row?.status);
   })
 
+  const remarks = [];
+  formsQuery.body.result.rows.map(async row => {
+    remarks.push(row?.remarks);
+  })
+
   const displayNames = [];
   searchFormData.delete('request_id');
   searchFormData.append('id', 0);
@@ -305,6 +310,7 @@ export async function getApprovalsInfo(searchFormData) {
   
   return { 
       statuses: statuses, 
+      remarks: remarks,
       displayNames: displayNames
   };
 }
@@ -312,14 +318,14 @@ export async function getApprovalsInfo(searchFormData) {
 // For requests
 export function getTotalStatus(names, statuses) {
   if (statuses.includes("declined"))
-      return "Declined";
+      return "declined";
   else if (statuses.includes("pending"))
-      return "Pending with " + names[statuses.findIndex((status) => status === 'pending')];
+      return "pending with " + names[statuses.findIndex((status) => status === 'pending')];
   else if (statuses.every((elem) => elem === "approved"))
-      return "Approved";
+      return "approved";
   else {
       console.error("Total status of form cannot be determined.")
-      return "Cannot be determined";
+      return "cannot be determined";
   } 
 }
 

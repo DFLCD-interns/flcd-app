@@ -12,6 +12,7 @@ export const load = async ( {cookies, params, parent} ) => {
                 totalStatus: request.status,
                 statuses: request.approvalsInfo.statuses,
                 displayNames: request.approvalsInfo.displayNames,
+                remarks: request.approvalsInfo.remarks,
             },
             requestName: request.name,
             requestType: params.table,

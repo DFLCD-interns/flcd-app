@@ -22,14 +22,11 @@
     if (requestDetails.studentno == null){
         requestDetails.studentno = "none";
     }
-    // console.log('What')
-    // console.log(requestInfo)
-    // console.log(data)
-    
 
     $: totalStatus = data?.approvalForms.totalStatus;
     $: approvalStatuses = data?.approvalForms.statuses;
     $: approverNames = data?.approvalForms.displayNames;
+    $: approverRemarks = data?.approvalForms.remarks;
     
     // let requestInfo = {
     //     reqid: data.reqdetails.reqid,
@@ -82,7 +79,7 @@
     <div class="w-full items-center justify-between">
         <a href="/dashboard"><Button class="bg-white text-gray-500 hover:bg-white drop-shadow-md"><ArrowLeftOutline/></Button></a>
         <h2 class="pt-3 text-2xl font-semibold text-gray-600">{request_type}: {data.requestName}</h2>
-        <Badge class="mt-2" large border color='{totalStatus === 'Approved' ? statusColors.approved : totalStatus === 'Declined' ? statusColors.declined : statusColors.pending}'>{totalStatus}</Badge>
+        <Badge class="mt-2" large border color='{totalStatus === 'approved' ? statusColors.approved : totalStatus === 'declined' ? statusColors.declined : statusColors.pending}'>{totalStatus.charAt(0).toUpperCase() + totalStatus.slice(1)}</Badge>
     </div>
     <div class="min-w-full md:flex pt-5 gap-10 justify-center">
         <div class="bg-white flex items-center justify-center rounded-lg shadow-lg p-6">
@@ -106,10 +103,6 @@
                     <td class="py-3 px-4">{requestDetails.contactno}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
-                    <td class="py-3 px-4 font-semibold">Name of admin/faculty in charge or coordinating teacher</td>
-                    <td class="py-3 px-4">{requestDetails.admin_firstname} {requestDetails.admin_lastname}</td>
-                </tr>
-                <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Department/section</td>
                     <td class="py-3 px-4">{requestDetails.dept}</td>
                 </tr>
@@ -122,16 +115,20 @@
                     <td class="py-3 px-4">{requestDetails.dateneeded}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
+                    <td class="py-3 px-4 font-semibold">Equipment return date</td>
+                    <td class="py-3 px-4">{requestDetails.returndate}</td>
+                </tr>
+                <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Room where the equipment will be used</td>
                     <td class="py-3 px-4">{requestDetails.room}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
-                    <td class="py-3 px-4 font-semibold">Email address of admin/faculty in charge or coordinating teacher</td>
-                    <td class="py-3 px-4">{requestDetails.adminemail}</td>
+                    <td class="py-3 px-4 font-semibold">Name of admin/faculty in charge or coordinating teacher</td>
+                    <td class="py-3 px-4">{requestDetails.admin_firstname} {requestDetails.admin_lastname}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
-                    <td class="py-3 px-4 font-semibold">Equipment return date</td>
-                    <td class="py-3 px-4">{requestDetails.returndate}</td>
+                    <td class="py-3 px-4 font-semibold">Email address of admin/faculty in charge or coordinating teacher</td>
+                    <td class="py-3 px-4">{requestDetails.adminemail}</td>
                 </tr>
                 </tbody>
             </table>
@@ -149,46 +146,53 @@
                         status === 'pending' ?  '⌛ Pending with' : 
                                                 'Status unknown with'}
                     {approverNames[index]}
-
                 </p>
             {/each}
         </div>
         <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
             <h1 class="text-gray-600 text-lg mb-1 font-medium title-font">Remarks</h1>
-            <h2> "Must be approved ASAP" </h2>
-            <h3 class="text-gray-600 font-small">- Jenny Daez (Faculty-in-Charge)</h3>
-            <h3> PLACEHOLDER/IDEA ONLY ^</h3>
-            <h3> Could also be coloredd or smthn like the status (this time based on the response and not the total current status)</h3>
+            {#each approverRemarks as remarks, index}
+                <p> { '"' + remarks + '"' } </p>
+                <p class="text-gray-500 font-small"> - {approverNames[index]}</p>
+            {/each}
         </div>
         {#if data.current_user.access_level < 5}
             <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
                 <h1 class="text-gray-600 text-lg mb-1 font-medium title-font">Form Approval</h1>
-                <form bind:this={form} action="?/approve" method="POST">
-                    <div class="relative mb-4">
-                        <input 
-                            id="remarks" 
-                            name="remarks" 
-                            placeholder="To requester and next approver."
-                            class="w-full bg-white rounded border border-gray-300 focus:border-green-600 focus:ring-2 focus:ring-green-600 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"/>
-                    </div>
-                    <div class="flex justify-center">
-                        <!-- Hidden input field to store the status -->
-                        <input type="hidden" id="status" name="status" />
-                        <button 
-                            on:click={() => form.querySelector('input[name="status"]').value = "approved"}
-                            type="submit" 
-                            class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
-                            Approve
-                        </button>
-                        <button
-                            on:click={() => form.querySelector('input[name="status"]').value = "declined"}
-                            type="submit" 
-                            class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
-                            Decline
-                        </button>
-                    </div>
-                </form>
-            </div>
+                {#if (totalStatus !== 'approved' && totalStatus !== 'declined') && (
+                        data.user_access_level === approverNames[Math.max(approvalStatuses.findLastIndex(status => status === 'approved'), 0)] || 
+                        data.user_access_level === approverNames[Math.max(approvalStatuses.findIndex(status => status === 'pending'), 0)] )}
+                    <form bind:this={form} action="?/approve" method="POST">
+                        <div class="relative mb-4">
+                            <input 
+                                id="remarks" 
+                                name="remarks" 
+                                placeholder="To requester and next approver"
+                                class="w-full bg-white rounded border border-gray-300 focus:border-green-600 focus:ring-2 focus:ring-green-600 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"/>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-1 font-small">You can change your response as long as the next approver has not responded yet and the request is open.</p>
+
+                        <div class="flex justify-center">
+                            <!-- Hidden input field to store the status -->
+                            <input type="hidden" id="status" name="status" />
+                            <button 
+                                on:click={() => form.querySelector('input[name="status"]').value = "approved"}
+                                type="submit" 
+                                class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
+                                Approve
+                            </button>
+                            <button
+                                on:click={() => form.querySelector('input[name="status"]').value = "declined"}
+                                type="submit" 
+                                class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
+                                Decline
+                            </button>
+                        </div>
+                    </form>
+                {:else}
+                    <p class="text-gray-600 text-sm mb-1 font-small">You can no longer modify your response for this request.</p>
+                {/if}
+            </div>            
         {/if}
     </div>
   </div>
