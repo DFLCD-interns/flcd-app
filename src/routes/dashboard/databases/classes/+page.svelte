@@ -26,7 +26,6 @@
     let editBatch = data.batches_only_table[0];
     let editClass = data.classes_only_table[0];
     let editChild = batches[0];
-    let deleteRow;
   </script>
     
   <div class="p-10">
@@ -69,7 +68,7 @@
                 <button on:click={() => {EditChildModal = true; editChild = batch}}><EditOutline  class="text-green-600"/></button>
             </TableBodyCell>
           <TableBodyCell>
-            <button on:click={() => {DeleteModal = true; batchName = batch}}><TrashBinOutline class="text-green-600"/></button>
+            <button on:click={() => {DeleteModal = true}}><TrashBinOutline class="text-green-600"/></button>
           </TableBodyCell>
           <TableBodyCell>{batch.batch_name}</TableBodyCell>
           <TableBodyCell>{batch.batch_description}</TableBodyCell>
@@ -283,5 +282,12 @@
             <GradientButton  on:click={() => {AddClassModal = false}} color="green">Cancel</GradientButton>
         </div>
       </form>
+  </Modal>
+
+  <Modal title="Delete this row from database?" bind:open={DeleteModal} autoclose>
+    <div class="flex gap-5 justify-center">
+        <GradientButton color="green">Confirm</GradientButton>
+        <GradientButton color="green">Cancel</GradientButton>
+    </div>
   </Modal>
     
