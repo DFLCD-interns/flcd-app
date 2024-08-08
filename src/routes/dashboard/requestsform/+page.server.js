@@ -169,7 +169,7 @@ export const actions = {
         // console.log('total requested equipment: ' + total)
 
 
-        console.log("REQUEST FORM SUBMITTED SUCCESSFULLY");
+        // console.log("REQUEST FORM SUBMITTED SUCCESSFULLY");
         return {
             status: 200,
             body: {

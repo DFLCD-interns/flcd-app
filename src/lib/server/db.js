@@ -140,25 +140,23 @@ export async function getUserEquipmentRequests(user){
 
 // Equipment yet to be assigned
 export async function getEquipmentRequestsDB() {
-  const res = await query('SELECT * FROM equipment_requests JOIN base_requests ON equipment_requests.request_id = base_requests.id');
+  const res = await query('SELECT * FROM base_requests JOIN equipment_requests ON equipment_requests.request_id = base_requests.id ORDER BY equipment_requests.id ASC');
   return res.body.result.rows;
 }
 
 export async function getVenueRequestsDB() {
-  const res = await query('SELECT * FROM venue_requests JOIN venues ON venue_requests.venue_id = venues.id JOIN base_requests ON venue_requests.request_id = base_requests.id');
-  // console.log(res);
+  const res = await query('SELECT * FROM base_requests JOIN venue_requests ON venue_requests.request_id = base_requests.id JOIN venues ON venue_requests.venue_id = venues.id ORDER BY venue_requests.id ASC');
+  // console.log(res.body.result.rows);
   return res.body.result.rows;
 }
 
 export async function getChildRequestsDB() {
-  const res = await query('SELECT * FROM child_requests JOIN childs ON child_requests.child_id = childs.id JOIN base_requests ON child_requests.request_id = base_requests.id');
-  // console.log(res);
+  const res = await query('SELECT * FROM base_requests JOIN child_requests ON child_requests.request_id = base_requests.id JOIN childs ON child_requests.child_id = childs.id ORDER BY child_requests.id ASC');
   return res.body.result.rows;
 }
 
 export async function getClassRequestsDB() {
-  const res = await query('SELECT * FROM class_requests JOIN classes ON class_requests.class_id = classes.id JOIN base_requests ON class_requests.request_id = base_requests.id');
-  // console.log(res);
+  const res = await query('SELECT * FROM base_requests JOIN class_requests ON class_requests.request_id = base_requests.id JOIN classes ON class_requests.class_id = classes.id ORDER BY class_requests.id ASC');
   return res.body.result.rows;
 }
 
@@ -266,8 +264,8 @@ export async function updateTableDB(table_name, searchFormData, updateFormData) 
 
   const searchAttributes = [...searchFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection
   const updateAttributes = [...updateFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection
-  const searchValues = [...searchFormData.values()].map((val) => val); // will be for parametrization
-  const updateValues = [...updateFormData.values()].map((val) => val); // will be for parametrization
+  const searchValues = [...searchFormData.values()].map((val) => val === 'null' ? null : val); // will be for parametrization
+  const updateValues = [...updateFormData.values()].map((val) => val === 'null' ? null : val); // will be for parametrization
 
   const setText = updateAttributes.map((attributeName, index) => `${attributeName} = \$${index+1}`).join(', ')
   const whereText = searchAttributes.map((attributeName, index) => `(${attributeName} = \$${updateAttributes.length + index+1})`).join(' AND ')
@@ -277,7 +275,7 @@ export async function updateTableDB(table_name, searchFormData, updateFormData) 
     SET ${setText}
     WHERE ${whereText}`
 
-  // console.log(qText, updateValues.concat(searchValues));
+  console.log(qText, updateValues.concat(searchValues));
   const res = await query(qText, updateValues.concat(searchValues));    
   return res;
 }
@@ -352,19 +350,28 @@ export async function getRequestsInfo(user_id, user_access_level) {
 
 	const allRequests = [];
 	Object.values(equipReqsGroupedDict).forEach(function (groupedItem) {
-		allRequests.push({
+    const desiredEquipments = groupedItem.reduce((equipTypeDict, item) => {
+      if (Object.keys(equipTypeDict).includes(item?.equipment_type))  
+        equipTypeDict[item?.equipment_type]++; // increment total
+      else equipTypeDict[item?.equipment_type] = 1; // else add to dict
+      return equipTypeDict;
+    }, {}) // key-value pair of each equip as key and the count as value
+    const requestName = Object.entries(desiredEquipments).map(entry => entry.join(' (') + ')').join(', ');
+    
+		allRequests.push ({
 			type: 'Equipment Request',
 			table:'equipment_requests',
-			id: null,
+			id: groupedItem[0]?.request_id,
 			requester_id: groupedItem[0]?.requester_id,
-			// name: groupedItem.reduce((item, currVal) => item.equipment_type ? currVal ) .join(', '),
-			name: groupedItem.map(item => item.equipment_type).join(', '),
+			name: requestName,
 			date: groupedItem[0]?.promised_start_time,
 			// max_approval_layer: groupedItem[0]?.max_approval_layer,
 			status: null,
       approvalsInfo: null,
+      requestedItems: desiredEquipments, // these are equipment types
+      equipmentRequestRows: equipment_requests,
 		})
-	});
+  });
 	
 	venue_requests.forEach(function (item) {
 		allRequests.push({
@@ -401,7 +408,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
 			id: item.request_id,
       requester_id: item?.requester_id,
 			name: item.name,
-			date: item.schedule,
+			date: item.timeslot + ' ' + item.observe_date,
 			// max_approval_layer: item.max_approval_layer,
 			status: null,
       approvalsInfo: null,

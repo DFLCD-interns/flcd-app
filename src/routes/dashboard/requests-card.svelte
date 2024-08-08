@@ -5,8 +5,7 @@
   import { statusColors } from '$lib';
   export let info;
   export let data;
-  const isAdmin = (data.current_user.access_level < 5);
- </script>
+</script>
 
 <Card class="w-full max-w-full" href="#">
   <div class="flex items-center justify-between">
