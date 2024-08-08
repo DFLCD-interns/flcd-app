@@ -116,7 +116,7 @@
                             />
                         </Label>
                         <Label class="space-y-2">
-                            <span>Email of Coordinating Faculty/Admin</span>
+                            <span>Email of Coordinating FLCD Instructor</span>
                             <div class="input-container">
                                 <Input 
                                     disabled={!isFLCD}
