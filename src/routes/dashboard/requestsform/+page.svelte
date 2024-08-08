@@ -8,7 +8,9 @@
     import { enhance } from '$app/forms';
 
     let equipmentTypes = data.equipmentTypes;
+    let venues = data.venue;
     let selectedEq = [];
+    let selectedVenue;
     let promised_start_time = "";
     let promised_end_time = "";
 
@@ -46,7 +48,7 @@
         <TabItem open>
             <span slot="title" class="flex gap-2"><ComputerSpeakerSolid/>Equipment</span>
             <Card class="max-w-full">
-            <form class="flex flex-col space-y-6" method="POST" action="?/submitEquipmentRequest" 
+                <form class="flex flex-col space-y-6" method="POST" action="?/submitEquipmentRequest" 
                 use:enhance={() => {return async ({result}) => { alert(result.data?.body?.message); }}}>
                     <h3
                         class="text-xl font-medium text-gray-900 dark:text-white"
@@ -154,7 +156,7 @@
             <Card class="max-w-full">
                 <form class="flex flex-col space-y-6" action="?/submitVenueRequest"
                     use:enhance={() => {return async ({result}) => { alert(result.data?.body?.message); }}}>
-                    <h3
+                    <h3 
                         class="text-xl font-medium text-gray-900 dark:text-white"
                     >
                         Reserve a Venue
@@ -163,10 +165,26 @@
                     <div>
                         <Label class="space-y-2">
                             <span>Room/Area Requesting</span>
+                            <Select
+                              tabindex=0
+                              name="venue"
+                              class="mt-2"
+                              bind:value={selectedVenue}
+                              required
+                            >
+                              {#each venues as venue}
+                                <option value={venue.name}>{venue.name}</option>
+                              {/each}
+                            </Select>
+                        </Label>
+                    </div>
+                    <div>
+                        <Label class="space-y-2">
+                            <span>Room/Area Requesting</span>
                             <Input type="text" name="room" required />
                         </Label>
                     </div>
-                    
+
                     <hr />
                     <div class="grid gap-6 mb-6 md:grid-cols-2">
                         <Label class="space-y-2">
