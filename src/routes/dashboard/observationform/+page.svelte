@@ -100,7 +100,7 @@
     let month = (date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}`: date.getMonth() + 1);
     let year = date.getFullYear();
     let currentDate = `${year}-${month}-${day}`;
-    console.log(currentDate)
+    // console.log(currentDate)
 </script>
 
 <div class="px-10 py-10">

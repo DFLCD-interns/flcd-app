@@ -276,7 +276,7 @@ export async function updateTableDB(table_name, searchFormData, updateFormData) 
     SET ${setText}
     WHERE ${whereText}`
 
-  console.log(qText, updateValues.concat(searchValues));
+  // console.log(qText, updateValues.concat(searchValues));
   const res = await query(qText, updateValues.concat(searchValues));    
   return res;
 }

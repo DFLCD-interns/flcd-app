@@ -2,7 +2,7 @@
     /** @type {import('./$types').PageData} */
     export let data;
     export let form;
-    console.log('da,', data)
+    // console.log('da,', data)
 
     import {Badge, Button, GradientButton, Dropdown, DropdownItem, DropdownDivider, DropdownHeader} from 'flowbite-svelte'
     import { ArrowLeftOutline, CodeBranchSolid, ChevronDownOutline, ChevronRightOutline } from 'flowbite-svelte-icons';

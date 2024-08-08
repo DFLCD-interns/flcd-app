@@ -17,7 +17,7 @@ export const actions = {
               instructorEmail = `${instructorEmail}@up.edu.ph`;
             }
             instructor = await getUserWithMatchingEmail(instructorEmail);
-            console.log(instructor[0].email)
+            // console.log(instructor[0].email)
 
             // check if instructor email is valid
             if (instructor.length < 1 || instructor[0].access_level !== 4) {
@@ -188,5 +188,12 @@ export const actions = {
         const data = await request.formData();
         const staff = await getUsersWithAccessLevel(3);
         const isFLCD = (user.access_level === 5)
+
+        return {
+            status: 500,
+            body: {
+                message: 'Owo',
+            }
+        };
     },
 };
