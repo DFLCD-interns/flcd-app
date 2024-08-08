@@ -97,6 +97,11 @@ export async function getUserWithMatchingEmail(email) {
   return res.body.result.rows;
 }
 
+export async function getUsersWithAccessLevel(access_level) {
+  const res = await query('SELECT * FROM users WHERE access_level = $1', [access_level]);
+  return res.body.result.rows;
+}
+
 export async function getEquipmentDB() {
   const result = await query("SELECT * FROM equipments");
   return result.body.result.rows;

@@ -1,31 +1,30 @@
 <script>
     /** @type {import('./$types').PageData} */
 	export let data;
+    import { onMount } from 'svelte';
     import { browser } from "$app/environment";
     import { Button, Card, GradientButton, Input, Label, MultiSelect, Select, Textarea, Tabs, TabItem, } from "flowbite-svelte";
     import { AddressBookOutline, ArrowLeftOutline, BuildingSolid, ChevronLeftOutline, ComputerSpeakerSolid, UserAddSolid, } from "flowbite-svelte-icons";
     
     let equipmentTypes = data.equipmentTypes;
     let selectedEq = [];
-    let start_time = "";
+    let promised_start_time = "";
     let promised_end_time = "";
 
-    // Add a 'value' property to each object in the array
+    let currentDateTime;
+    onMount(() => {
+      const now = new Date();
+      currentDateTime = now.toISOString().slice(0, 16); // Get the current date and time in the correct format
+    });
+
+    // Add a 'value' & 'name' property to each object in the array (for Svelte each behavior)
     equipmentTypes = equipmentTypes.map((item) => ({ ...item, value: item.type, name: item.type }));
+
+    // Function to ensure promised_end_time is always after promised_start_time
+    $: promised_end_time_min = promised_start_time || currentDateTime;
 
     const user_access_level = data.current_user.access_level
     $: isFLCD = user_access_level == 5;
-
-    let selectedDept = "";
-    $: isOther = selectedDept == "other";
-    let depts = [
-        { value: "DCTID", name: "Department of Clothing, Textiles, and Interior Design" },
-        { value: "DFLCD", name: "Department of Family Life and Child Development" },
-        { value: "DFSN", name: "Department of Food Science and Nutrition" },
-        { value: "DHeEd", name: "Department of Home Economics Education" },
-        { value: "DHRIM", name: "Department of Hotel, Restaurant, and Institution Management" },
-        { value: "other", name: "Other..." },
-    ];
 </script>
 
 <div class="px-10 py-10">
@@ -67,11 +66,17 @@
                     <div class="grid gap-6 mb-6 md:grid-cols-4">
                         {#each selectedEq as eq}
                             <Label>
-                                <span>Quantity of {equipmentTypes.find(
-                                    (x) => x.value == eq,
-                                ).name}</span
-                            >
-                            <Input type="number" name={eq} min=1 max={equipmentTypes.find((x) => x.value == eq, ).count} required /> 
+                                <span>Quantity of {equipmentTypes.find((x) => x.value == eq).name}</span>
+                                <div class="input-container">
+                                  <Input 
+                                    type="number" 
+                                    name={eq} 
+                                    min="1" 
+                                    max={equipmentTypes.find((x) => x.value == eq).count} 
+                                    required 
+                                  />
+                                  <span class="input-desc">out of {equipmentTypes.find((x) => x.value == eq).count}</span>
+                                </div>
                             </Label>
                         {/each}
                     </div>
@@ -79,11 +84,23 @@
                     <div class="grid gap-6 mb-6 md:grid-cols-2">
                         <Label class="space-y-2">
                             <span>Borrow Time</span>
-                            <Input type="datetime-local" name="promised_start_time" bind:value={start_time} required />
+                            <Input
+                                type="datetime-local"
+                                name="promised_start_time"
+                                bind:value={promised_start_time}
+                                min={currentDateTime}
+                                required
+                            />
                         </Label>
                         <Label class="space-y-2">
                             <span>Return Time</span>
-                            <Input type="datetime-local" name="promised_end_time" bind:value={promised_end_time} required />
+                            <Input
+                                type="datetime-local"
+                                name="promised_end_time"
+                                bind:value={promised_end_time}
+                                min={promised_end_time_min}
+                                required
+                            />
                         </Label>
                         <Label class="space-y-2">
                             <span>Location of Equipment Usage</span>
@@ -99,6 +116,18 @@
                             />
                         </Label>
                         <Label class="space-y-2">
+                            <span>Email of Coordinating FLCD Instructor</span>
+                            <div class="input-container">
+                                <Input 
+                                    disabled={!isFLCD}
+                                    type="text" 
+                                    name="instructor_email" 
+                                    required
+                                />
+                                <span class="input-desc">@up.edu.ph</span>
+                            </div>
+                        </Label>
+                        <Label class="space-y-2">
                             <span>Office/Company (for non-FLCD students)</span>
                             <Input 
                                 disabled={isFLCD}
@@ -106,21 +135,20 @@
                                 name="affiliation" 
                                 required />
                         </Label>
-                        <Label class="space-y-2">
-                            <span>Email of Coordinating Faculty/Admin</span>
-                            <Input 
-                                disabled={!isFLCD}
-                                type="email" 
-                                name="instructor_email" 
-                                required />
-                        </Label>
                     </div>
-                    <GradientButton shadow color="green"  type="submit">
-                        Request
+                    <GradientButton shadow color="green" type="submit" style="margin-top: 40px; margin-bottom: 20px; padding: 13px;">
+                        Submit Request
                     </GradientButton>
                 </form>
             </Card>
         </TabItem>
+
+
+
+
+
+
+
         <TabItem>
             <span slot="title" class="flex gap-2"><BuildingSolid/>Venue</span>
             <Card class="max-w-full">
@@ -167,26 +195,6 @@
                         </Label>
                     </div>
                     <hr />
-                    <div class="grid gap-6 mb-6 md:grid-cols-2">
-                        <Label>
-                            <span>Department</span>
-                            <Select
-                                class="mt-2"
-                                items={depts}
-                                bind:value={selectedDept}
-                            />
-                        </Label>
-                        {#key isOther}
-                            <Label class="space-y-2">
-                                <span>(Non-CHE) Department</span>
-                                <Input
-                                    disabled={!isOther}
-                                    type="text"
-                                    name="department"
-                                />
-                            </Label>
-                        {/key}
-                    </div>
                     <GradientButton shadow color="green" type="submit">
                         Request
                     </GradientButton>
@@ -197,3 +205,21 @@
 
     <!--actual form-->
 </div>
+
+<style>
+    .input-container {
+      position: relative;
+      width: 100%;
+    }
+  
+    .input-desc {
+      position: absolute;
+      right: 26px;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 0 5px;
+      font-size: 0.9em;
+      color: grey;
+      pointer-events: none;
+    }
+  </style>

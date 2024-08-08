@@ -1,4 +1,4 @@
-import { insertIntoTableDB, getLatestBaseRequestID, getUserFromSessionDB, getUserWithMatchingEmail } from '$lib/server/db.js';
+import { insertIntoTableDB, getLatestBaseRequestID, getUserFromSessionDB, getUserWithMatchingEmail, getUsersWithAccessLevel } from '$lib/server/db.js';
 
 /** @type {import('./$types').Actions} */
 export const actions = {    
@@ -6,33 +6,42 @@ export const actions = {
         const session = cookies.get("session_id");
         const user = await getUserFromSessionDB(session);
         const data = await request.formData();
+        const staff = await getUsersWithAccessLevel(3);
+        const isFLCD = (user.access_level === 5)
 
-        const instructor = await getUserWithMatchingEmail(data.get('instructor_email'));
-        if (user.access_level === 5) { // if FLCD student
-            // check if instructor email exists
-            if (instructor.length < 1) {
+        if (isFLCD) {
+            let instructorEmail = data.get('instructor_email');
+            // Append the domain to the email if it's not already there
+            if (!instructorEmail.endsWith('@up.edu.ph')) {
+              instructorEmail = `${instructorEmail}@up.edu.ph`;
+            }
+            const instructor = await getUserWithMatchingEmail(instructorEmail);
+            // console.log(instructor[0].email)
+
+            // check if instructor email is valid
+            if (instructor.length < 1 || instructor[0].access_level !== 4) {
+                console.log("INVALID INSTRUCTOR EMAIL")
                 return {
                     status: 409,
                     body: {
-                        message: 'Instructor email does not exist.',
+                        message: 'Email of coordinating faculty is not valid.',
                         error: undefined
                     }
                 }
             }
         }
-        
+
         // BASE-REQUESTS INSERT
 
         var base_fd = new FormData();
         base_fd.append('requester_id', user.user_id);
-        base_fd.append('instructor_id', instructor[0]?.id);
+        if (isFLCD) { base_fd.append('instructor_id', instructor[0].id); }
         base_fd.append('purpose', data.get('purpose'));
+        if (!isFLCD) { base_fd.append('affiliation', data.get('affiliation')); }
         base_fd.append('max_approval_layer', 2); // faculty-in-charge
 
         try {
-            // Insert the form data into the database
-            await insertIntoTableDB('base_requests', base_fd);
-            
+            await insertIntoTableDB('base_requests', base_fd);    
         } 
         catch (error) {
             console.error('Error writing to database:', error);
@@ -45,22 +54,42 @@ export const actions = {
             };
         }
         
+
         // get newly added base-request id 
         const request_id = await getLatestBaseRequestID(user.user_id);
         // console.log("\nREQUEST ID: " + request_id + "\n");
 
         // APPROVALS INSERT
 
-        for (let i = 0; i < 3; i++) { // 3 is max_approval_layer for equipment requests
+        if (isFLCD) {  // for FLCD Instructor
             var fd = new FormData();
             fd.append('status', 'pending');  // pending, approved, declined
-            fd.append('approver_id', 1);  // placeholder
             fd.append('request_id', request_id);
+            fd.append('approver_id', instructor[0].id);
 
             try {
-                // Insert the form data into the database
                 await insertIntoTableDB('approvals', fd);
+            } 
+            catch (error) {
+                console.error('Error writing to database:', error);
+                return {
+                    status: 500,
+                    body: {
+                        message: 'Error writing to database',
+                        error: error.message
+                    }
+                };
+            }
+        } 
+ 
+        for (let i = 0; i < staff.length; i++) {  // for Faculty/Staff (can be multiple)
+            var fd = new FormData();
+            fd.append('status', 'pending');  // pending, approved, declined
+            fd.append('request_id', request_id);
+            fd.append('approver_id', staff[i].id);
 
+            try {
+                await insertIntoTableDB('approvals', fd);
             } 
             catch (error) {
                 console.error('Error writing to database:', error);
@@ -74,7 +103,28 @@ export const actions = {
             }
         }
 
+        const fic = await getUsersWithAccessLevel(2); // for FIC
+        var fd = new FormData();  
+        fd.append('status', 'pending');  // pending, approved, declined
+        fd.append('request_id', request_id);
+        fd.append('approver_id', fic[0].id);
+        try {
+            await insertIntoTableDB('approvals', fd);
+        } 
+        catch (error) {
+            console.error('Error writing to database:', error);
+            return {
+                status: 500,
+                body: {
+                    message: 'Error writing to database',
+                    error: error.message
+                }
+            };
+        }
+
+
         // EQUIPMENT-REQUESTS INSERT
+
         const promised_start_time = data.get('promised_start_time');
         const promised_end_time = data.get('promised_end_time');
         const location = data.get('location');
@@ -102,9 +152,7 @@ export const actions = {
                 // console.log([...form_data.values()]);
 
                 try {
-                    // Insert the form data into the database
                     insertIntoTableDB('equipment_requests', form_data);
-                    
                 } 
                 catch (error) {
                     console.error('Error writing to database:', error);
@@ -122,6 +170,7 @@ export const actions = {
         // console.log('total requested equipment: ' + total)
 
 
+        console.log("REQUEST FORM SUBMITTED SUCCESSFULLY");
         return {
             status: 200,
             body: {
