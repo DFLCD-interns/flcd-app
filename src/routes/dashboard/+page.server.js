@@ -8,6 +8,6 @@ export async function load({ cookies }) {
 
 	const requests = await getUserBaseRequests(user_id);	
 	return {
-		requests: requests,
+		requests: requests
 	};
 }
