@@ -1,5 +1,6 @@
 import { createObservationRequestServer } from "./requests.server"
 import {SESSION_COOKIE_NAME} from "$lib/server/constants.js"
+import { getSections, getUnavailable, getUnavailableWSection } from "../../../lib/server/db.js";
 
 export const actions = {
     createObservationRequest: async ({request, cookies}) => {
@@ -36,4 +37,14 @@ export const actions = {
             base_request_uuid: server_req
         };
     },
+}
+
+
+/** @type {import('./$types').PageServerLoad} */
+export async function load() {
+    return{
+        amclasses: await getSections('AM'),
+        pmclasses: await getSections('PM'),
+        unavailable: await getUnavailable()
+    }
 }

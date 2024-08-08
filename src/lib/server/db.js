@@ -322,3 +322,30 @@ export function getTotalStatus(names, statuses) {
       return "Cannot be determined";
   } 
 }
+
+export async function getSections(sched){
+  const result = await query('SELECT * FROM classes WHERE schedule = $1', [sched]);
+  return result.body.result.rows;
+}
+
+export async function getUnavailable(){
+  const result = await query(`SELECT class_id, timeslot, TO_CHAR(observe_date, 'YYYY-MM-DD') AS observe_date FROM unavailable_slots`)
+  return result.body.result.rows;
+}
+
+export async function getUnavailableWSection(){
+  const result = await query(`SELECT unavailable_slots.id, class_id, timeslot, TO_CHAR(observe_date, 'YYYY-MM-DD') AS observe_date,
+    classes.name AS name, classes.schedule AS schedule
+    FROM unavailable_slots
+    JOIN classes ON unavailable_slots.class_id = classes.id
+    ORDER BY observe_date, schedule, timeslot, name`)
+  return result.body.result.rows;
+}
+
+export async function addUnavailableSlot(class_id, observe_date, timeslot){
+  const res = await query('INSERT INTO unavailable_slots (timeslot, observe_date, class_id) VALUES ($1, $2, $3)', [timeslot, observe_date, class_id])
+}
+
+export async function deleteUnavailableSlot(id){
+  const res = await query('DELETE FROM unavailable_slots WHERE id = $1', [id])
+}
