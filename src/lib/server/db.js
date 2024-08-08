@@ -329,9 +329,14 @@ export function getTotalStatus(names, statuses) {
   } 
 }
 
-// For admin request cards
-export async function getAdminCards(user_id, equipment_requests, venue_requests, child_requests, class_requests) {
+// For dashboard
+export async function getRequestsInfo(user_id, user_access_level) {
 	
+	const equipment_requests = await getEquipmentRequestsDB();
+	const venue_requests = await getVenueRequestsDB();
+	const child_requests = await getChildRequestsDB();
+	const class_requests = await getClassRequestsDB();
+
 	const equipReqsGroupedDict = {};
 	equipment_requests.forEach(row => {
 		if (Object.keys(equipReqsGroupedDict).includes(row.request_id.toString())) 
@@ -339,12 +344,13 @@ export async function getAdminCards(user_id, equipment_requests, venue_requests,
 		else equipReqsGroupedDict[row.request_id] = [row]; // new key-value pair
 	});
 
-	const requestsDisplay = [];
+	const allRequests = [];
 	Object.values(equipReqsGroupedDict).forEach(function (groupedItem) {
-		requestsDisplay.push({
+		allRequests.push({
 			type: 'Equipment Request',
 			table:'equipment_requests',
 			id: groupedItem[0]?.request_id,
+			requester_id: groupedItem[0]?.requester_id,
 			name: groupedItem.map(item => item.name).join(', '),
 			date: groupedItem[0]?.promised_start_time,
 			max_approval_layer: groupedItem[0]?.max_approval_layer,
@@ -354,10 +360,11 @@ export async function getAdminCards(user_id, equipment_requests, venue_requests,
 	});
 	
 	venue_requests.forEach(function (item) {
-		requestsDisplay.push({
+		allRequests.push({
 			type: 'Venue Request',
 			table:'venue_requests',
 			id: item.request_id,
+      requester_id: item?.requester_id,
 			name: item.name,
 			date: item.date_needed_start,
 			max_approval_layer: item.max_approval_layer,
@@ -367,10 +374,11 @@ export async function getAdminCards(user_id, equipment_requests, venue_requests,
 	});
 	
 	child_requests.forEach(function (item) {
-		requestsDisplay.push({
+		allRequests.push({
 			type: 'Child Observation Request',
 			table:'child_requests',
 			id: item.request_id,
+      requester_id: item?.requester_id,
 			name: item.name,
 			date: item.observation_time,
 			max_approval_layer: item.max_approval_layer,
@@ -380,10 +388,11 @@ export async function getAdminCards(user_id, equipment_requests, venue_requests,
 	});
 	 
 	class_requests.forEach(function (item) {
-		requestsDisplay.push({
+		allRequests.push({
 			type: 'Class Observation Request',
 			table:'class_requests',
 			id: item.request_id,
+      requester_id: item?.requester_id,
 			name: item.name,
 			date: item.schedule,
 			max_approval_layer: item.max_approval_layer,
@@ -392,24 +401,29 @@ export async function getAdminCards(user_id, equipment_requests, venue_requests,
 		})
 	});
 	
-	const _requestsDisplay = [];
-	for (const req of requestsDisplay) {
+	const requestsInfo = [];
+	for (const req of allRequests) {
 		const formData = new FormData(); 
 		formData.append('request_id', req.id);
 		const approvalFormsQuery = await getFromTableDB('approvals', formData);
 		const forms = approvalFormsQuery.body.result.rows;
 		
 		const approvalsInfo = await getApprovalsInfo(formData);
-		
-		const _form = forms.find((form, i) =>	form.approver_id === user_id && 
-                                          //form.status !== 'declined' && // TODO make this transfer forms to requestHistory instead of disappearing here. this disappearance causes sudden errors upon declining btw
-                                          (i == 0 ? true : forms[i-1].status === 'approved'));
-		if (_form) { 
-			req.status = getTotalStatus(approvalsInfo.displayNames, approvalsInfo.statuses);
+    
+    let valid;
+    if (user_access_level < 5) // if admin
+      valid = forms.find((form, i) =>	form.approver_id === user_id && 
+                                            //form.status !== 'declined' && // TODO make this transfer forms to requestHistory instead of disappearing here. this disappearance causes sudden errors upon declining btw
+                                            (i == 0 ? true : forms[i-1].status === 'approved'));
+    else 
+      valid = req.requester_id === user_id;
+    
+    if (valid) {
+      req.status = getTotalStatus(approvalsInfo.displayNames, approvalsInfo.statuses);
       req.approvalsInfo = approvalsInfo;
-			_requestsDisplay.push(req);
-		}
+      requestsInfo.push(req);
+    }
 	}
-	
-	return _requestsDisplay;
+
+	return requestsInfo;
 }

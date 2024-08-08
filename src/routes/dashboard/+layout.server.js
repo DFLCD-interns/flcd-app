@@ -10,18 +10,8 @@ export async function load({ cookies }) {
 	searchFormData.append('access_level', await db.getUserPriv(session));
 	const user_access_level_label = await db.getFromTableDB('user_types', searchFormData);
 
-	let requestsInfo;
-	if (user.access_level < 5) {
-		const eqReqs = await db.getEquipmentRequestsDB();
-		const venueReqs = await db.getVenueRequestsDB();
-		const childReqs = await db.getChildRequestsDB();
-		const classReqs = await db.getClassRequestsDB();
-		requestsInfo = await db.getAdminCards(user.user_id, eqReqs, venueReqs, childReqs, classReqs);
-	}	
-	else {
-		// for non admin
-	}
-
+	let requestsInfo = await db.getRequestsInfo(user.user_id, user.access_level);
+	
 	return {
 		requestsInfo: requestsInfo,
 		equipment: await db.getEquipmentDB(),
