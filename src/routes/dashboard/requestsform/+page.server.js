@@ -187,13 +187,6 @@ export const actions = {
         const user = await getUserFromSessionDB(session);
         const data = await request.formData();
         const staff = await getUsersWithAccessLevel(3);
-        const isFLCD = (user.access_level === 5)
-
-        return {
-            status: 500,
-            body: {
-                message: 'Owo',
-            }
-        };
+        const isFLCD = (user.access_level === 5);
     },
 };

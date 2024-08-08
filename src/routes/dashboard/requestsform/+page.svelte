@@ -154,9 +154,8 @@
         <TabItem>
             <span slot="title" class="flex gap-2"><BuildingSolid/>Venue</span>
             <Card class="max-w-full">
-                <form class="flex flex-col space-y-6" action="?/submitVenueRequest"
-                    use:enhance={() => {return async ({result}) => { alert(result.data?.body?.message); }}}>
-                    <h3 
+                <form class="flex flex-col space-y-6" action="?/submitVenueRequest">
+                    <h3
                         class="text-xl font-medium text-gray-900 dark:text-white"
                     >
                         Reserve a Venue
