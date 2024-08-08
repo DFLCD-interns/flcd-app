@@ -9,9 +9,13 @@
   console.log('v:', data.venues)
 
   let venues = data.venue;
-
-  let tableHead = Object.keys(venues[0]);
-
+  let tableHead = []
+  if (venues.length === 0){
+    venues =[]
+  } else {
+    tableHead = Object.keys(venues[0]);
+  }
+  
   let venueName="venue"
 
   let EditModal = false;
@@ -33,6 +37,7 @@
     <GradientButton on:click={() => {AddModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Venue</GradientButton>
   </div>
   <div class="pb-5">
+  {#if venues.length != 0 }
   <Table shadow>
     <TableHead>
       <TableHeadCell></TableHeadCell>
@@ -58,6 +63,9 @@
       {/each}
     </TableBody>
   </Table>
+  {:else}
+  <p  class="content-center text-gray-700">No venues in database</p>
+  {/if}
   </div>
   
 </div>
@@ -68,11 +76,11 @@
       <Input value={editVenue.name} />
   </div>
   <div class="mb-6">
-      <Label class="block mb-2">Type</Label>
+      <Label class="block mb-2">Description</Label>
       <Input value={editVenue.description} />
   </div>
   <div class="mb-6">
-    <Label class="block mb-2">Location</Label>
+    <Label class="block mb-2">Date Created</Label>
     <Input value={editVenue.created} />
   </div>
   <div class="mb-6 flex gap-5 justify-center">
@@ -96,6 +104,7 @@
   <div class="mb-6">
       <Label class="block mb-2">Description</Label>
       <Input placeholder="Venue type" />
+  </div>
   <div class="mb-6">
     <Label class="block mb-2">Date Created</Label>
     <Input type="datetime-local"/>

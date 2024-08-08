@@ -6,8 +6,13 @@
   import { EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid } from 'flowbite-svelte-icons';
 
   let equipments = data.equipment;
-
-  let tableHead = Object.keys(equipments[0]);
+  let tableHead = []
+  if (equipments.length === 0){
+    equipments =[]
+  } else {
+    tableHead = Object.keys(equipments[0]);
+  }
+  
 
   let equipmentName="equipment"
 
@@ -30,6 +35,7 @@
     <GradientButton on:click={() => {AddModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Equipment</GradientButton>
   </div>
   <div class="pb-5">
+  {#if equipments.length != 0 }
   <Table shadow>
     <TableHead>
       <TableHeadCell></TableHeadCell>
@@ -37,7 +43,6 @@
       {#each tableHead as head}
       <TableHeadCell>{head}</TableHeadCell>
       {/each}
-      <TableHeadCell></TableHeadCell>
     </TableHead>
     <TableBody tableBodyClass="divide-y">
       {#each equipments as equipment}
@@ -59,6 +64,9 @@
       {/each}
     </TableBody>
   </Table>
+  {:else}
+  <p  class="content-center text-gray-500">No equipments in database</p>
+  {/if}
   </div>
   
 </div>

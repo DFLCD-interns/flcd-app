@@ -3,7 +3,6 @@
   import { Card, Button, Drawer, CloseButton, Badge, GradientButton } from 'flowbite-svelte';
   import { ArrowRightOutline, InfoCircleSolid } from 'flowbite-svelte-icons';
   import { sineIn } from 'svelte/easing';
-  import Sidebar from './sidebar.svelte';
   import RequestsCard from './requests-card.svelte';
   //placeholder for now
   // let requestInfo = data.

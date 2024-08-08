@@ -24,6 +24,7 @@
     <p  class="font-semibold text-xl text-gray-700">Users Database</p>
   </div>
   <div class="pb-5">
+  {#if users.length != 0 }
   <Table shadow>
     <TableHead>
       <TableHeadCell></TableHeadCell>
@@ -60,6 +61,9 @@
       {/each}
     </TableBody>
   </Table>
+  {:else}
+  <p  class="content-center text-gray-500">No users in database</p>
+  {/if}
   </div>
   
 </div>
