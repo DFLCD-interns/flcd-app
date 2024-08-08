@@ -50,13 +50,13 @@
     </a>
   </div>
   
-  {#if data.requests.length != 0}
+  {#if data.requestsInfo.length != 0 && data.requestsInfo != undefined}
     <div class="space-y-3">
-      {#each data.requestsDisplay as info}
-      <RequestsCard info={info} data={data}></RequestsCard>
+      {#each data.requestsInfo as info}
+        <RequestsCard info={info} data={data}></RequestsCard>
       {/each}
     </div>
   {:else}
-  <p class="text-gray-500">No Pending Requests</p>
+    <p class="text-gray-500">No Pending Requests</p>
   {/if}
 </div>

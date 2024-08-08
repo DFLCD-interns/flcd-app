@@ -63,9 +63,9 @@ export async function getUsersDB() {
   return result;
 }
 
-export async function createUserDB(uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level) {
+export async function createUserDB(uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level) {
   // TODO: check if email is already in used if it is then throw an error
-  const res = await query('INSERT INTO users (uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level]);
+  const res = await query('INSERT INTO users (uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level]);
   //console.log("res:", res);
   return res;
 }
@@ -97,6 +97,11 @@ export async function getUserWithMatchingEmail(email) {
   return res.body.result.rows;
 }
 
+export async function getUsersWithAccessLevel(access_level) {
+  const res = await query('SELECT * FROM users WHERE access_level = $1', [access_level]);
+  return res.body.result.rows;
+}
+
 export async function getEquipmentDB() {
   const result = await query("SELECT * FROM equipments");
   return result.body.result.rows;
@@ -125,7 +130,7 @@ export async function getUserBaseRequests(user){
 }
 
 export async function getUserEquipmentRequests(user){
-  const res = await query(`SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id, equipments.name, base_requests.max_approval_layer, base_requests.created
+  const res = await query(`SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id, equipments.name, base_requests.created
     FROM base_requests
     JOIN equipment_requests ON base_requests.id = equipment_requests.request_id
     JOIN equipments ON equipment_requests.equipment_id = equipments.id
@@ -181,7 +186,7 @@ export async function getRequestDetailsDB(table, reqid) {
     FROM base_requests br 
     LEFT JOIN ${table} t ON br.id = t.request_id
 	  LEFT JOIN ${type} e ON t.equipment_id = e.id 
-    LEFT JOIN users AS faculty ON br.faculty_id = faculty.id
+    LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
     LEFT JOIN users AS requester ON br.requester_id = requester.id
     WHERE br.id = ${reqid}`);
   // console.log(res);
@@ -189,8 +194,8 @@ export async function getRequestDetailsDB(table, reqid) {
 }
 
 
-export async function createBaseRequestDB(staff_assistant_id, purpose, max_approval_layer, requester_id) {
-  const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, max_approval_layer, requester_id) VALUES ($1, $2, $3, $4)', [staff_assistant_id, purpose, max_approval_layer, requester_id]);
+export async function createBaseRequestDB(staff_assistant_id, purpose, requester_id) {
+  const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, requester_id) VALUES ($1, $2, $3, $4)', [staff_assistant_id, purpose, requester_id]);
   return res;
 }
 
@@ -285,6 +290,11 @@ export async function getApprovalsInfo(searchFormData) {
       statuses.push(row?.status);
   })
 
+  const remarks = [];
+  formsQuery.body.result.rows.map(async row => {
+    remarks.push(row?.remarks);
+  })
+
   const displayNames = [];
   searchFormData.delete('request_id');
   searchFormData.append('id', 0);
@@ -294,17 +304,18 @@ export async function getApprovalsInfo(searchFormData) {
       searchFormData.set('id', row.approver_id);
       const approverQuery = await getFromTableDB("users", searchFormData);
       if (!approverQuery?.body) throw new Error(`no appover matching the id ${searchFormData.get('id')}`);  
-      const access_level = approverQuery?.body.result.rows[0].access_level;
+      const access_level = approverQuery?.body.result.rows[0]?.access_level;
 
       searchFormData2.set('access_level', access_level);
-      const access_levelQuery = await getFromTableDB("admin_types", searchFormData2);
-      const displayName = access_levelQuery.body.result.rows[0].description;
+      const access_levelQuery = await getFromTableDB("user_types", searchFormData2);
+      const displayName = access_levelQuery.body.result.rows[0]?.description;
 
       displayNames.push(displayName);
   }
   
   return { 
       statuses: statuses, 
+      remarks: remarks,
       displayNames: displayNames
   };
 }
@@ -312,15 +323,148 @@ export async function getApprovalsInfo(searchFormData) {
 // For requests
 export function getTotalStatus(names, statuses) {
   if (statuses.includes("declined"))
-      return "Declined";
+      return "declined";
   else if (statuses.includes("pending"))
-      return "Pending with " + names[statuses.findIndex((status) => status === 'pending')];
+      return "pending with " + names[statuses.findIndex((status) => status === 'pending')];
   else if (statuses.every((elem) => elem === "approved"))
-      return "Approved";
+      return "approved";
   else {
       console.error("Total status of form cannot be determined.")
-      return "Cannot be determined";
+      return "cannot be determined";
   } 
+}
+
+// For dashboard
+export async function getRequestsInfo(user_id, user_access_level) {
+	
+	const equipment_requests = await getEquipmentRequestsDB();
+	const venue_requests = await getVenueRequestsDB();
+	const child_requests = await getChildRequestsDB();
+	const class_requests = await getClassRequestsDB();
+
+	const equipReqsGroupedDict = {};
+	equipment_requests.forEach(row => {
+		if (Object.keys(equipReqsGroupedDict).includes(row.request_id.toString())) 
+			equipReqsGroupedDict[row.request_id].push(row); // add to existing key-value pair
+		else equipReqsGroupedDict[row.request_id] = [row]; // new key-value pair
+	});
+
+	const allRequests = [];
+	Object.values(equipReqsGroupedDict).forEach(function (groupedItem) {
+		allRequests.push({
+			type: 'Equipment Request',
+			table:'equipment_requests',
+			id: groupedItem[0]?.request_id,
+			requester_id: groupedItem[0]?.requester_id,
+			name: groupedItem.map(item => item.name).join(', '),
+			date: groupedItem[0]?.promised_start_time,
+			// max_approval_layer: groupedItem[0]?.max_approval_layer,
+			status: null,
+      approvalsInfo: null,
+		})
+	});
+	
+	venue_requests.forEach(function (item) {
+		allRequests.push({
+			type: 'Venue Request',
+			table:'venue_requests',
+			id: item.request_id,
+      requester_id: item?.requester_id,
+			name: item.name,
+			date: item.date_needed_start,
+			// max_approval_layer: item.max_approval_layer,
+			status: null,
+      approvalsInfo: null,
+		})
+	});
+	
+	child_requests.forEach(function (item) {
+		allRequests.push({
+			type: 'Child Observation Request',
+			table:'child_requests',
+			id: item.request_id,
+      requester_id: item?.requester_id,
+			name: item.name,
+			date: item.observation_time,
+			// max_approval_layer: item.max_approval_layer,
+			status: null,
+      approvalsInfo: null,
+		})
+	});
+	 
+	class_requests.forEach(function (item) {
+		allRequests.push({
+			type: 'Class Observation Request',
+			table:'class_requests',
+			id: item.request_id,
+      requester_id: item?.requester_id,
+			name: item.name,
+			date: item.schedule,
+			// max_approval_layer: item.max_approval_layer,
+			status: null,
+      approvalsInfo: null,
+		})
+	});
+	
+	const requestsInfo = [];
+	for (const req of allRequests) {
+		const formData = new FormData(); 
+		formData.append('request_id', req.id);
+		const approvalFormsQuery = await getFromTableDB('approvals', formData);
+		const forms = approvalFormsQuery.body.result.rows;
+		
+		const approvalsInfo = await getApprovalsInfo(formData);
+    
+    let valid;
+    if (user_access_level < 5) // if admin
+      valid = forms.find((form, i) =>	form.approver_id === user_id && 
+                                            //form.status !== 'declined' && // TODO make this transfer forms to requestHistory instead of disappearing here. this disappearance causes sudden errors upon declining btw
+                                            (i == 0 ? true : forms[i-1].status === 'approved'));
+    else 
+      valid = req.requester_id === user_id;
+    
+    if (valid) {
+      req.status = getTotalStatus(approvalsInfo.displayNames, approvalsInfo.statuses);
+      req.approvalsInfo = approvalsInfo;
+      requestsInfo.push(req);
+    }
+	}
+
+	return requestsInfo;
+}
+
+export async function getAllClassesDB() {
+  const res = await query(`SELECT 
+    batches.name AS batch_name,
+    batches.description AS batch_description,
+    batches.created AS batch_created,
+    classes."name" AS class_name,
+    users.first_name AS handler_firstname,
+    users.last_name AS handler_lastname,
+    classes.description AS class_description,
+    classes."schedule",
+    classes.created AS classes_created,
+    childs.name AS child_name,
+    childs.birthdate AS child_birthdate,
+    childs.tracking_id AS child_trackingid,
+    childs.created AS child_created
+    FROM batches JOIN classes ON batches.id = classes.batch_id 
+    JOIN childs ON classes.id = childs.class_id 
+    JOIN users ON classes.handler_id = users.id`);
+  // console.log(res);
+  return res.body.result.rows;
+}
+
+export async function getBatchesDB() {
+  const res = await query(`SELECT * FROM batches`);
+  // console.log(res);
+  return res.body.result.rows;
+}
+
+export async function getClassesDB() {
+  const res = await query(`SELECT * FROM classes`);
+  // console.log(res);
+  return res.body.result.rows;
 }
 
 export async function getSections(sched){

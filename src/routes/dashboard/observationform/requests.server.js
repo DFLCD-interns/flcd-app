@@ -29,9 +29,9 @@ export async function createObservationRequestServer(session_id, staff_assistant
     // console.log("requests.js - user ", user);
     
     // create a base request
-    //createBaseRequestDB(faculty_id, staff_assistant_id, purpose, office, company, admin_approve_layer, requester_id, completion_time)
+    //createBaseRequestDB(instructor_id, staff_assistant_id, purpose, office, company, requester_id, completion_time)
     
-    // staff_assistant_id, purpose, admin_approve_layer, requester_id, completion_time
+    // staff_assistant_id, purpose, requester_id, completion_time
     const br = await createBaseRequestDB(staff_assistant_id, purpose, 3, user.id);
 
     // fetch the newly created base request via its id so we can get the id of that base_request??? sorry 
