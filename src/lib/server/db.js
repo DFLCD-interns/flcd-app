@@ -27,7 +27,8 @@ const table_names = [
   'user_types',
   'venues',
   'venue_requests',
-  'unavailable_slots'
+  'unavailable_slots',
+  'venue_reservations'
 ]
 
 
