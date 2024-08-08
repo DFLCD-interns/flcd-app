@@ -138,8 +138,9 @@ export async function getUserEquipmentRequests(user){
   return res.body.result.rows
 }
 
+// Equipment yet to be assigned
 export async function getEquipmentRequestsDB() {
-  const res = await query('SELECT * FROM equipment_requests JOIN equipments ON equipment_requests.equipment_id = equipments.id JOIN base_requests ON equipment_requests.request_id = base_requests.id');
+  const res = await query('SELECT * FROM equipment_requests JOIN base_requests ON equipment_requests.request_id = base_requests.id');
   return res.body.result.rows;
 }
 
@@ -354,9 +355,10 @@ export async function getRequestsInfo(user_id, user_access_level) {
 		allRequests.push({
 			type: 'Equipment Request',
 			table:'equipment_requests',
-			id: groupedItem[0]?.request_id,
+			id: null,
 			requester_id: groupedItem[0]?.requester_id,
-			name: groupedItem.map(item => item.name).join(', '),
+			// name: groupedItem.reduce((item, currVal) => item.equipment_type ? currVal ) .join(', '),
+			name: groupedItem.map(item => item.equipment_type).join(', '),
 			date: groupedItem[0]?.promised_start_time,
 			// max_approval_layer: groupedItem[0]?.max_approval_layer,
 			status: null,
