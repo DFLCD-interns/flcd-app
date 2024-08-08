@@ -185,7 +185,7 @@ CREATE TABLE venue_reservations (
     request_id INT, -- NULL if slot was blocked off by admin
     FOREIGN KEY (request_id) REFERENCES venue_requests(id),
     admin_id INT, -- NULL if reservation came from student request
-    FOREIGN KEY (admin_id) REFERENCES users(id),
+    FOREIGN KEY (admin_id) REFERENCES users(id)
 );
 
 CREATE TABLE equipment_requests ( -- one entry for each equipment in a request
