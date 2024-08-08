@@ -2,7 +2,7 @@ import { insertIntoTableDB, getLatestBaseRequestID, getUserFromSessionDB, getUse
 
 /** @type {import('./$types').Actions} */
 export const actions = {    
-    default: async ({ request, cookies }) => {
+    submitEquipmentRequest: async ({ request, cookies }) => {
         const session = cookies.get("session_id");
         const user = await getUserFromSessionDB(session);
         const data = await request.formData();
@@ -38,7 +38,6 @@ export const actions = {
         if (isFLCD) { base_fd.append('instructor_id', instructor[0].id); }
         base_fd.append('purpose', data.get('purpose'));
         if (!isFLCD) { base_fd.append('affiliation', data.get('affiliation')); }
-        base_fd.append('max_approval_layer', 2); // faculty-in-charge
 
         try {
             await insertIntoTableDB('base_requests', base_fd);    
@@ -175,8 +174,19 @@ export const actions = {
             status: 200,
             body: {
                 message: 'Form submitted successfully!',
-                data: {selectedEq, total, promised_start_time, promised_end_time}
+                data: '{selectedEq, total, promised_start_time, promised_end_time}'
             }
         };
-    }
+    },
+
+
+
+
+    submitVenueRequest: async ({ request, cookies }) => {
+        const session = cookies.get("session_id");
+        const user = await getUserFromSessionDB(session);
+        const data = await request.formData();
+        const staff = await getUsersWithAccessLevel(3);
+        const isFLCD = (user.access_level === 5)
+    },
 };

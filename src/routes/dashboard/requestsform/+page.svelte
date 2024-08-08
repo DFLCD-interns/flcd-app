@@ -45,7 +45,7 @@
         <TabItem open>
             <span slot="title" class="flex gap-2"><ComputerSpeakerSolid/>Equipment</span>
             <Card class="max-w-full">
-                <form class="flex flex-col space-y-6" method="POST">
+                <form class="flex flex-col space-y-6" method="POST" action="?/submitEquipmentRequest">
                     <h3
                         class="text-xl font-medium text-gray-900 dark:text-white"
                     >
@@ -116,7 +116,7 @@
                             />
                         </Label>
                         <Label class="space-y-2">
-                            <span>Email of Coordinating FLCD Instructor</span>
+                            <span>Email of Coordinating FLCD Teacher</span>
                             <div class="input-container">
                                 <Input 
                                     disabled={!isFLCD}
@@ -128,7 +128,7 @@
                             </div>
                         </Label>
                         <Label class="space-y-2">
-                            <span>Office/Company (for non-FLCD students)</span>
+                            <span>Affiliation (for non-FLCD students)</span>
                             <Input 
                                 disabled={isFLCD}
                                 type="text" 
@@ -147,12 +147,10 @@
 
 
 
-
-
         <TabItem>
             <span slot="title" class="flex gap-2"><BuildingSolid/>Venue</span>
             <Card class="max-w-full">
-                <form class="flex flex-col space-y-6" action="/">
+                <form class="flex flex-col space-y-6" action="?/submitVenueRequest">
                     <h3
                         class="text-xl font-medium text-gray-900 dark:text-white"
                     >
@@ -161,7 +159,7 @@
                     <hr />
                     <div>
                         <Label class="space-y-2">
-                            <span>Room</span>
+                            <span>Room/Area Requesting</span>
                             <Input type="text" name="room" required />
                         </Label>
                     </div>
@@ -195,8 +193,8 @@
                         </Label>
                     </div>
                     <hr />
-                    <GradientButton shadow color="green" type="submit">
-                        Request
+                    <GradientButton shadow color="green" type="submit" style="margin-top: 40px; margin-bottom: 20px; padding: 13px;">
+                        Submit Request
                     </GradientButton>
                 </form>
             </Card>

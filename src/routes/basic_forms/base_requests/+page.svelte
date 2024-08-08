@@ -25,11 +25,6 @@
     <input name="affiliation" type="text" required />
   </label>
 
-  <label>
-    Max Approval Layer:
-    <input name="max_approval_layer" type="number" required />
-  </label>
-
   <button type="submit" class="button-style">Create Base Request</button>
 </form>
 
