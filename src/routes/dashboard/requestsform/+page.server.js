@@ -8,7 +8,14 @@ export const actions = {
         const data = await request.formData();
         const staff = await getUsersWithAccessLevel(3);
         const isFLCD = (user.access_level === 5)
-        const instructor = await getUserWithMatchingEmail(data.get('instructor_email'));
+
+        let instructorEmail = data.get('instructor_email');
+        // Append the domain to the email if it's not already there
+        if (!instructorEmail.endsWith('@up.edu.ph')) {
+          instructorEmail = `${instructorEmail}@up.edu.ph`;
+        }
+        const instructor = await getUserWithMatchingEmail(instructorEmail);
+        // console.log(instructor[0].email)
 
         if (isFLCD) {
             // check if instructor email is valid

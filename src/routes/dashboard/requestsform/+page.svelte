@@ -120,7 +120,7 @@
                             <div class="input-container">
                                 <Input 
                                     disabled={!isFLCD}
-                                    type="email" 
+                                    type="text" 
                                     name="instructor_email" 
                                     required
                                 />
