@@ -16,6 +16,10 @@ DROP TABLE IF EXISTS "preferred_times_child" CASCADE;
 DROP TABLE IF EXISTS "approvals" CASCADE;
 DROP TABLE IF EXISTS "sessions" CASCADE;
 DROP TABLE IF EXISTS "transaction_log" CASCADE;
+DROP TABLE IF EXISTS "unavailable_slots" CASCADE;
+
+
+
 
 CREATE TABLE user_types (
     description VARCHAR(128),
@@ -227,4 +231,12 @@ CREATE TABLE transaction_log (
     FOREIGN KEY (user_id) REFERENCES users(id),
     log_time TIMESTAMP DEFAULT NOW(),
     transaction_description VARCHAR(1024)
+);
+
+CREATE TABLE unavailable_slots (
+    id SERIAL PRIMARY KEY,
+    timeslot VARCHAR(128), -- timeslot of the class selected in this format: 13:00-14:00
+    observe_date DATE,
+    class_id INT,
+    FOREIGN KEY (class_id) REFERENCES classes(id)
 );
