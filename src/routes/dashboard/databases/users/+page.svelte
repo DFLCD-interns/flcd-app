@@ -36,7 +36,6 @@
       <TableHeadCell>student_number</TableHeadCell>
       <TableHeadCell>course</TableHeadCell>
       <TableHeadCell>department</TableHeadCell>
-      <TableHeadCell>min_approval_layer</TableHeadCell>
       <TableHeadCell>access_level</TableHeadCell>
       <TableHeadCell>created</TableHeadCell>
     </TableHead>
@@ -54,7 +53,6 @@
         <TableBodyCell>{user.student_number}</TableBodyCell>
         <TableBodyCell>{user.course}</TableBodyCell>
         <TableBodyCell>{user.department}</TableBodyCell>
-        <TableBodyCell>{user.min_approval_layer}</TableBodyCell>
         <TableBodyCell><Input type="number" min=1 max=5 value={user.access_level}></Input></TableBodyCell>
         <TableBodyCell>{user.created}</TableBodyCell>
       </TableBodyRow>

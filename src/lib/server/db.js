@@ -63,9 +63,9 @@ export async function getUsersDB() {
   return result;
 }
 
-export async function createUserDB(uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level) {
+export async function createUserDB(uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level) {
   // TODO: check if email is already in used if it is then throw an error
-  const res = await query('INSERT INTO users (uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level]);
+  const res = await query('INSERT INTO users (uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level]);
   //console.log("res:", res);
   return res;
 }
@@ -130,7 +130,7 @@ export async function getUserBaseRequests(user){
 }
 
 export async function getUserEquipmentRequests(user){
-  const res = await query(`SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id, equipments.name, base_requests.max_approval_layer, base_requests.created
+  const res = await query(`SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id, equipments.name, base_requests.created
     FROM base_requests
     JOIN equipment_requests ON base_requests.id = equipment_requests.request_id
     JOIN equipments ON equipment_requests.equipment_id = equipments.id
@@ -194,8 +194,8 @@ export async function getRequestDetailsDB(table, reqid) {
 }
 
 
-export async function createBaseRequestDB(staff_assistant_id, purpose, max_approval_layer, requester_id) {
-  const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, max_approval_layer, requester_id) VALUES ($1, $2, $3, $4)', [staff_assistant_id, purpose, max_approval_layer, requester_id]);
+export async function createBaseRequestDB(staff_assistant_id, purpose, requester_id) {
+  const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, requester_id) VALUES ($1, $2, $3, $4)', [staff_assistant_id, purpose, requester_id]);
   return res;
 }
 
@@ -358,7 +358,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
 			requester_id: groupedItem[0]?.requester_id,
 			name: groupedItem.map(item => item.name).join(', '),
 			date: groupedItem[0]?.promised_start_time,
-			max_approval_layer: groupedItem[0]?.max_approval_layer,
+			// max_approval_layer: groupedItem[0]?.max_approval_layer,
 			status: null,
       approvalsInfo: null,
 		})
@@ -372,7 +372,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
       requester_id: item?.requester_id,
 			name: item.name,
 			date: item.date_needed_start,
-			max_approval_layer: item.max_approval_layer,
+			// max_approval_layer: item.max_approval_layer,
 			status: null,
       approvalsInfo: null,
 		})
@@ -386,7 +386,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
       requester_id: item?.requester_id,
 			name: item.name,
 			date: item.observation_time,
-			max_approval_layer: item.max_approval_layer,
+			// max_approval_layer: item.max_approval_layer,
 			status: null,
       approvalsInfo: null,
 		})
@@ -400,7 +400,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
       requester_id: item?.requester_id,
 			name: item.name,
 			date: item.schedule,
-			max_approval_layer: item.max_approval_layer,
+			// max_approval_layer: item.max_approval_layer,
 			status: null,
       approvalsInfo: null,
 		})
