@@ -30,7 +30,7 @@ const table_names = [
 ]
 
 
-export async function connectToDB() {
+async function connectToDB() {
   try {
     const client = await pool.connect();
     return client;
