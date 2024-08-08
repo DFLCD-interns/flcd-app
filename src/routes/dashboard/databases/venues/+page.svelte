@@ -81,7 +81,7 @@
   </div>
   <div class="mb-6">
     <Label class="block mb-2">Date Created</Label>
-    <Input value={editVenue.created} />
+    <Input value={editVenue.created} onfocus="(this.type='date')" />
   </div>
   <div class="mb-6 flex gap-5 justify-center">
       <GradientButton color="green">Confirm</GradientButton>

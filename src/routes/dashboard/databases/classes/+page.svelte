@@ -20,10 +20,13 @@
     let DeleteModal=false;
     let AddBatchModal = false;
     let AddClassModal = false;
+    let EditChildModal = false;
+    let AddChildModal = false;
   
     let editBatch = data.batches_only_table[0];
     let editClass = data.classes_only_table[0];
-    let batchName
+    let editChild = batches[0];
+    let deleteRow;
   </script>
     
   <div class="p-10">
@@ -46,12 +49,14 @@
             <DropdownItem on:click={() => {AddClassModal=true}}>Add Class</DropdownItem>
             <DropdownItem on:click={() => {EditClassModal=true}}>Edit/Delete Class</DropdownItem>
         </Dropdown>
+        <GradientButton on:click={() => {AddChildModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Child</GradientButton>
         </div>
     </div>
     <div class="pb-5">
     {#if batches.length != 0 }
     <Table shadow>
       <TableHead>
+        <TableHeadCell></TableHeadCell>
         <TableHeadCell></TableHeadCell>
         {#each tableHead as head}
         <TableHeadCell>{head}</TableHeadCell>
@@ -60,6 +65,9 @@
       <TableBody tableBodyClass="divide-y">
         {#each batches as batch}
         <TableBodyRow>
+            <TableBodyCell>
+                <button on:click={() => {EditChildModal = true; editChild = batch}}><EditOutline  class="text-green-600"/></button>
+            </TableBodyCell>
           <TableBodyCell>
             <button on:click={() => {DeleteModal = true; batchName = batch}}><TrashBinOutline class="text-green-600"/></button>
           </TableBodyCell>
@@ -112,7 +120,7 @@
         </div>
         <div class="mb-6">
             <Label class="block mb-2">Date Created</Label>
-            <Input name="description" type="text" value={editBatch.created} />
+            <Input name="description" type="text" value={editBatch.created} onfocus="(this.type='date')" onblur="(this.type='text')"/>
         </div>
         <div class="mb-6 flex gap-2 justify-center">
             <GradientButton color="green">Confirm</GradientButton>
@@ -148,11 +156,15 @@
         </div>
         <div class="mb-6">
             <Label class="block mb-2">Description</Label>
-            <Input name="description" type="text" value={editClass.description} size="lg"/>
+            <Input name="description" type="text" value={editClass.description}/>
         </div>
         <div class="mb-6">
             <Label class="block mb-2">Schedule</Label>
             <Input name="schedule" type="text" value={editClass.schedule}/>
+        </div>
+        <div class="mb-6">
+            <Label class="block mb-2">Date Created</Label>
+            <Input name="description" type="text" value={editClass.created} onfocus="(this.type='date')" onblur="(this.type='text')"/>
         </div>
         <div class="mb-6 flex gap-2 justify-center">
             <GradientButton type="submit" class="button-style" color="green">Confirm</GradientButton>
@@ -194,11 +206,11 @@
         </div>
         <div class="mb-6">
             <Label class="block mb-2">Description</Label>
-            <Input name="description" type="text" placeholder="(eg, Section 1)" size="lg"/>
+            <Input name="description" type="text" placeholder="(eg, Section 1)"/>
         </div>
         <div class="mb-6">
             <Label class="block mb-2">Schedule</Label>
-            <Input name="schedule" type="text" placeholder="" size="lg"/>
+            <Input name="schedule" type="text" placeholder="" />
         </div>
         <div class="mb-6 flex gap-2 justify-center">
             <GradientButton type="submit" class="button-style" color="green">Confirm</GradientButton>
@@ -207,4 +219,69 @@
       </form>
   </Modal>
 
+  <Modal title="Edit Child Details" bind:open={EditChildModal} autoclose>
+    <form>
+        <div class="mb-6">
+            <Label class="block mb-2">Batch Name</Label>
+            <Input disabled=true type="text" value={editChild.batch_name} required />
+        </div>
+        <div class="mb-6">
+            <Label class="block mb-2">Class Name</Label>
+            <Input disabled=true type="text" value={editChild.class_name}/>
+        </div>
+        <div class="mb-6">
+            <Label class="block mb-2">Handler</Label>
+            <Input disabled=true type="text" value={editChild.handler_firstname+" "+editChild.handler_lastname}/>
+        </div>
+        <div class="mb-6">
+            <Label class="block mb-2">Child Name</Label>
+            <Input type="text" value={editChild.child_name}/>
+        </div>
+        <div class="mb-6">
+            <Label class="block mb-2">Child Birthdate</Label>
+            <Input name="description" type="text" value={editChild.child_birthdate} onfocus="(this.type='date')" onblur="(this.type='text')"/>
+        </div>
+        <div class="mb-6">
+            <Label class="block mb-2">Child Tracking ID</Label>
+            <Input name="schedule" type="text" value={editChild.child_trackingid}/>
+        </div>
+        <div class="mb-6">
+            <Label class="block mb-2">Date Created</Label>
+            <Input name="schedule" type="text" value={editChild.child_created} onfocus="(this.type='date')" onblur="(this.type='text')"/>
+        </div>
+        <div class="mb-6 flex gap-2 justify-center">
+            <GradientButton type="submit" class="button-style" color="green">Confirm</GradientButton>
+            <GradientButton  on:click={() => {EditClassModal = false}} color="green">Cancel</GradientButton>
+        </div>
+    </form>
+  </Modal>
+
+  <Modal title="Add Child" bind:open={AddChildModal} autoclose>
+    <form>
+        <div class="mb-6">
+            <Label class="block mb-2">Name</Label>
+            <Input type="text" placeholder="Child Name" required/>
+        </div>
+        <div class="mb-6">
+            <Label class="block mb-2">Birthdate</Label>
+            <Input type="datetime-local" placeholder="Child Birthdate"/>
+        </div>
+        <div class="mb-6">
+            <Label class="block mb-2">Tracking ID</Label>
+            <Input type="number" placeholder="Child Tracking ID"/>
+        </div>
+        <div class="mb-6">
+            <Label class="block mb-2">Class ID</Label>
+            <Input type="text" placeholder="Class ID"/>
+        </div>
+        <div class="mb-6">
+            <Label class="block mb-2">Created</Label>
+            <Input type="datetime-local" />
+        </div>
+        <div class="mb-6 flex gap-2 justify-center">
+            <GradientButton type="submit" class="button-style" color="green">Confirm</GradientButton>
+            <GradientButton  on:click={() => {AddClassModal = false}} color="green">Cancel</GradientButton>
+        </div>
+      </form>
+  </Modal>
     
