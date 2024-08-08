@@ -9,14 +9,15 @@ export const actions = {
         const staff = await getUsersWithAccessLevel(3);
         const isFLCD = (user.access_level === 5)
 
+        let instructor;
         if (isFLCD) {
             let instructorEmail = data.get('instructor_email');
             // Append the domain to the email if it's not already there
             if (!instructorEmail.endsWith('@up.edu.ph')) {
               instructorEmail = `${instructorEmail}@up.edu.ph`;
             }
-            const instructor = await getUserWithMatchingEmail(instructorEmail);
-            // console.log(instructor[0].email)
+            instructor = await getUserWithMatchingEmail(instructorEmail);
+            console.log(instructor[0].email)
 
             // check if instructor email is valid
             if (instructor.length < 1 || instructor[0].access_level !== 4) {
@@ -167,7 +168,6 @@ export const actions = {
             total += parseInt(data.get(selectedEq[i]))
         }
         // console.log('total requested equipment: ' + total)
-
 
         // console.log("REQUEST FORM SUBMITTED SUCCESSFULLY");
         return {
