@@ -1,4 +1,4 @@
-import { insertIntoTableDB, getLatestBaseRequestID, getUserFromSessionDB, getUserWithMatchingEmail } from '$lib/server/db.js';
+import { insertIntoTableDB, getLatestBaseRequestID, getUserFromSessionDB, getUserWithMatchingEmail, getUsersWithAccessLevel } from '$lib/server/db.js';
 
 /** @type {import('./$types').Actions} */
 export const actions = {    
@@ -6,7 +6,7 @@ export const actions = {
         const session = cookies.get("session_id");
         const user = await getUserFromSessionDB(session);
         const data = await request.formData();
-        const no_of_faculty = 2;
+        const staff = await getUsersWithAccessLevel(3);
         const isFLCD = (user.access_level === 5)
         const instructor = await getUserWithMatchingEmail(data.get('instructor_email'));
 
@@ -74,12 +74,12 @@ export const actions = {
                 };
             }
         } 
-
-        for (let i = 0; i < no_of_faculty; i++) {  // for Faculty/Staff
+ 
+        for (let i = 0; i < staff.length; i++) {  // for Faculty/Staff (can be multiple)
             var fd = new FormData();
             fd.append('status', 'pending');  // pending, approved, declined
             fd.append('request_id', request_id);
-            fd.append('approver_id', getUsersWithAccessLevel(3)[i].id);
+            fd.append('approver_id', staff[i].id);
 
             try {
                 await insertIntoTableDB('approvals', fd);
@@ -96,10 +96,11 @@ export const actions = {
             }
         }
 
-        var fd = new FormData();  // for FIC
+        const fic = await getUsersWithAccessLevel(2); // for FIC
+        var fd = new FormData();  
         fd.append('status', 'pending');  // pending, approved, declined
         fd.append('request_id', request_id);
-        fd.append('approver_id', getUsersWithAccessLevel(2)[0].id);
+        fd.append('approver_id', fic[0].id);
         try {
             await insertIntoTableDB('approvals', fd);
         } 
