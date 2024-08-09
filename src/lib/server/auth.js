@@ -283,7 +283,32 @@ export async function changePassword(email, newpassword) {
     }   
 }
 
-async function resolvePW(password, email, force = false) {
+export async function hashItem(toHash, nsalt = null) {
+    let salt;
+
+    if (!nsalt) {
+        salt = randomBytes(64).toString('hex');
+    } else {
+        salt = nsalt;
+    }
+
+    let finalkey = scryptSync(toHash, salt, 64).toString("hex"); // salting first
+    finalkey = scryptSync(finalkey, PEPPA_PIG, 64).toString("hex");
+    return {
+        salt: salt,
+        finalkey: finalkey,
+    }
+}
+
+export async function isCorrect(hash, salt, toverify) {
+    const result = await hashItem(toverify, salt);
+    if (result.finalkey === hash) {
+        return true;
+    }
+    return false;
+}
+
+async function resolvePW(password, email, force = false) { //TODO change this to reflect using isCorrect and hashItem fucntions
     // console.log("auth.js - password and email", password, email);
     let salt;
     let pw_hash;
