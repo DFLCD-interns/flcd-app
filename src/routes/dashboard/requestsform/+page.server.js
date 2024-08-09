@@ -1,4 +1,5 @@
 import { insertIntoTableDB, getLatestBaseRequestID, getUserFromSessionDB, getUserWithMatchingEmail, getUsersWithAccessLevel } from '$lib/server/db.js';
+import { mailuser } from '$lib/server/emails.js'
 
 async function insertBaseRequest(user, data, isFLCD, instructor = null) {
     const base_fd = new FormData();
@@ -48,8 +49,9 @@ export const actions = {
         const isFLCD = user.access_level === 5;
 
         let instructor;
+        let instructorEmail;
         if (isFLCD) {
-            let instructorEmail = data.get('instructor_email');
+            instructorEmail = data.get('instructor_email');
             if (!instructorEmail.endsWith('@up.edu.ph')) {
                 instructorEmail = `${instructorEmail}@up.edu.ph`;
             }
@@ -111,6 +113,10 @@ export const actions = {
                     error: error.message
                 }
             };
+        } finally {
+            await mailuser(`[FLCD APP] New pending request!`, 
+                `Hello, new pending request by ${user.first_name + user.last_name}. Please proceed to the web app to issue a response.`,
+                `${instructorEmail}`); 
         }
     },
 

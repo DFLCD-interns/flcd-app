@@ -119,16 +119,14 @@ export async function createUser(first_name, last_name, email, password, phone, 
     // console.log("newuuid", new_uuid);
 
     const pw_hash_response = await resolvePW(password, null);
-
+    
     // console.log("hashresponse", pw_hash_response);
-
-
+    
     const pw_hash = pw_hash_response.body.finalHash.concat(pw_hash_response.body.salt);
-
+    
     // console.log("auth.js - createUser before newuser.");
-
+    
     const newUser = await createUserDB(new_uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level);
-
 
     if (!newUser) {
         throw new Error("Error occured when creating a new user.");
@@ -357,8 +355,8 @@ async function resolvePW(password, email, force = false) { //TODO change this to
                 body: {
                     userid: user.id,
                     useruuid: user.uuid,
-                    // finalHash: finalkey,
-                    // salt: salt,
+                    finalHash: finalkey,
+                    salt: salt,
                 }
             }
         } else {
@@ -368,8 +366,8 @@ async function resolvePW(password, email, force = false) { //TODO change this to
                 body: {
                     userid: user.id,
                     useruuid: user.uuid,
-                    // finalHash: finalkey,
-                    // salt: salt,
+                    finalHash: finalkey,
+                    salt: salt,
                 }
             }
         }
@@ -380,8 +378,8 @@ async function resolvePW(password, email, force = false) { //TODO change this to
             body: {
                 userid: null,
                 useruuid: null,
-                // finalHash: finalkey,
-                // salt: salt,
+                finalHash: finalkey,
+                salt: salt,
             }
         }
     }

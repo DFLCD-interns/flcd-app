@@ -1,4 +1,5 @@
 import { getApprovalsInfo, getTotalStatus, insertIntoTableDB, getFromTableDB, updateTableDB, getRequestDetailsDB, getUserFromSessionDB } from '$lib/server/db'; 
+import { mailuser } from '$lib/server/emails.js';
 
 /** @type {import('./$types.js').LayoutServerLoad} */
 export const load = async ( {cookies, params, parent} ) => {
@@ -51,6 +52,9 @@ export const actions = {
 
             // Updating assigned equipment ids
             
+            const status = inputFormData.get('status')
+            const remarks = inputFormData.get('remarks')
+            const approverID = inputFormData.get('approver_id')
             inputFormData.delete('remarks');
             inputFormData.delete('status');
             inputFormData.delete('request_id');
@@ -71,10 +75,17 @@ export const actions = {
                 response2 = await updateTableDB("equipment_requests", _searchFormData, _updateFormData);
             }
            
-            return {success: response.success && response2.success}; 
+            // emailing
+
+            await mailuser(
+                `[FLCD APP] New response to your request`,
+                `Hi, your request (ID #${params.reqid}) has a new response. '${remarks}' - by [user with ID ${approverID}]. Kindly check the web app for the exact status of your request.`,
+                `legara.cedric@gmail.com`) //TODO placeholder, change to student id
+
+            return {success: response?.success && response2?.success}; 
         } catch (error) {   
             console.error("Action failed:", error.message);
-            return {success: response.success && response2.success}; 
+            return {success: response?.success && response2?.success}; 
         }
     }
 }

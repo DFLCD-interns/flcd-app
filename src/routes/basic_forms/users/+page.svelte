@@ -45,11 +45,6 @@
   </label>
 
   <label>
-    Minimum Approval Layer:
-    <input name="min_approve_layer" type="number" />
-  </label>
-
-  <label>
     Access Level:
     <input name="access_level" type="number" />
   </label>

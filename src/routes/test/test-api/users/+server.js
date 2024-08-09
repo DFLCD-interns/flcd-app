@@ -36,8 +36,8 @@ export async function GET(request) {
 export async function POST({ request, cookies }) {
   // console.log(request);
   try {
-    const { first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, access_level } = await request.json();
-    const newUsers = await createUserDB(first_name, last_name, email, pw_hash, phone, student_number, course, department, superior_id, access_level);
+    const { first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level } = await request.json();
+    const newUsers = await createUserDB(first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level);
     return json({newUsers}, {status: 201});
   } catch (error) {
     return json({ status: 503 })

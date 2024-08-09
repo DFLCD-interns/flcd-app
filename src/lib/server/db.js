@@ -47,7 +47,6 @@ async function query(sqlQuery, args) {
     const client = await connectToDB();
     const result = await client.query(sqlQuery, args);
     client.release();
-    // console.log("db.js result", result);
     return { success: true,
       body:{
         result: result,
@@ -67,8 +66,7 @@ export async function getUsersDB() {
 
 export async function createUserDB(uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level) {
   // TODO: check if email is already in used if it is then throw an error
-  const res = await query('INSERT INTO users (uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level]);
-  //console.log("res:", res);
+  const res = await query('INSERT INTO users (uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level]);
   return res;
 }
 
@@ -196,11 +194,12 @@ export async function getRequestDetailsDB(table, reqid) {
 
 
 export async function createBaseRequestDB(staff_assistant_id, purpose, requester_id) {
-  const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, requester_id) VALUES ($1, $2, $3, $4)', [staff_assistant_id, purpose, requester_id]);
+  const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, requester_id) VALUES ($1, $2, $3)', [staff_assistant_id, purpose, requester_id]);
   return res;
 }
 
 export async function createClassRequestDB(class_id, request_id, timeslot, observe_date) {
+  // console.log(class_id, request_id, timeslot, observe_date)
   const res = await query('INSERT INTO class_requests (timeslot, class_id, request_id, observe_date) VALUES ($1, $2, $3, $4)', [timeslot, class_id, request_id, observe_date])
 
 }
@@ -367,7 +366,6 @@ export async function getRequestsInfo(user_id, user_access_level) {
 			requester_id: groupedItem[0]?.requester_id,
 			name: requestName,
 			date: groupedItem[0]?.promised_start_time,
-			// max_approval_layer: groupedItem[0]?.max_approval_layer,
 			status: null,
       approvalsInfo: null,
       requestedItems: desiredEquipments, // these are equipment types
@@ -383,7 +381,6 @@ export async function getRequestsInfo(user_id, user_access_level) {
       requester_id: item?.requester_id,
 			name: item.name,
 			date: item.date_needed_start,
-			// max_approval_layer: item.max_approval_layer,
 			status: null,
       approvalsInfo: null,
 		})
@@ -397,12 +394,11 @@ export async function getRequestsInfo(user_id, user_access_level) {
       requester_id: item?.requester_id,
 			name: item.name,
 			date: item.observation_time,
-			// max_approval_layer: item.max_approval_layer,
 			status: null,
       approvalsInfo: null,
 		})
 	});
-	 
+  
 	class_requests.forEach(function (item) {
 		allRequests.push({
 			type: 'Class Observation Request',
@@ -411,7 +407,6 @@ export async function getRequestsInfo(user_id, user_access_level) {
       requester_id: item?.requester_id,
 			name: item.name,
 			date: item.timeslot + ' ' + item.observe_date,
-			// max_approval_layer: item.max_approval_layer,
 			status: null,
       approvalsInfo: null,
 		})
