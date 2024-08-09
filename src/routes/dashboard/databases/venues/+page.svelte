@@ -5,8 +5,8 @@
   import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton } from 'flowbite-svelte';
   import { EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid } from 'flowbite-svelte-icons';
 
-  console.log('d:', data)
-  console.log('v:', data.venues)
+  // console.log('d:', data)
+  // console.log('v:', data.venues)
 
   let venues = data.venue;
   let tableHead = []
@@ -81,7 +81,7 @@
   </div>
   <div class="mb-6">
     <Label class="block mb-2">Date Created</Label>
-    <Input value={editVenue.created} />
+    <Input value={editVenue.created} onfocus="(this.type='date')" />
   </div>
   <div class="mb-6 flex gap-5 justify-center">
       <GradientButton color="green">Confirm</GradientButton>

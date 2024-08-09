@@ -94,7 +94,7 @@
   </div>
   <div class="mb-6">
     <Label class="block mb-2">Date Registered</Label>
-    <Input value={editEquipment.date_registered} />
+    <Input value={editEquipment.date_registered} onfocus="(this.type='date')" onblur="(this.type='text')"/>
   </div>
   <div class="mb-6 flex gap-5 justify-center">
       <GradientButton color="green">Confirm</GradientButton>
@@ -132,7 +132,7 @@
   </div>
   <div class="mb-6">
     <Label class="block mb-2">Date Registered</Label>
-    <Input type="datetime-local"/>
+    <Input type="datetime-local" />
   </div>
   <div class="mb-6 flex gap-5 justify-center">
       <GradientButton color="green">Confirm</GradientButton>

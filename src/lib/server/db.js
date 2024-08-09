@@ -26,7 +26,9 @@ const table_names = [
   'users',
   'user_types',
   'venues',
-  'venue_requests'
+  'venue_requests',
+  'unavailable_slots',
+  'venue_reservations'
 ]
 
 
@@ -63,9 +65,9 @@ export async function getUsersDB() {
   return result;
 }
 
-export async function createUserDB(uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level) {
+export async function createUserDB(uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level) {
   // TODO: check if email is already in used if it is then throw an error
-  const res = await query('INSERT INTO users (uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level]);
+  const res = await query('INSERT INTO users (uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, min_approval_layer, access_level]);
   //console.log("res:", res);
   return res;
 }
@@ -130,7 +132,7 @@ export async function getUserBaseRequests(user){
 }
 
 export async function getUserEquipmentRequests(user){
-  const res = await query(`SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id, equipments.name, base_requests.max_approval_layer, base_requests.created
+  const res = await query(`SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id, equipments.name, base_requests.created
     FROM base_requests
     JOIN equipment_requests ON base_requests.id = equipment_requests.request_id
     JOIN equipments ON equipment_requests.equipment_id = equipments.id
@@ -138,26 +140,25 @@ export async function getUserEquipmentRequests(user){
   return res.body.result.rows
 }
 
+// Equipment yet to be assigned
 export async function getEquipmentRequestsDB() {
-  const res = await query('SELECT * FROM equipment_requests JOIN equipments ON equipment_requests.equipment_id = equipments.id JOIN base_requests ON equipment_requests.request_id = base_requests.id');
+  const res = await query('SELECT * FROM base_requests JOIN equipment_requests ON equipment_requests.request_id = base_requests.id ORDER BY equipment_requests.id ASC');
   return res.body.result.rows;
 }
 
 export async function getVenueRequestsDB() {
-  const res = await query('SELECT * FROM venue_requests JOIN venues ON venue_requests.venue_id = venues.id JOIN base_requests ON venue_requests.request_id = base_requests.id');
-  // console.log(res);
+  const res = await query('SELECT * FROM base_requests JOIN venue_requests ON venue_requests.request_id = base_requests.id JOIN venues ON venue_requests.venue_id = venues.id ORDER BY venue_requests.id ASC');
+  // console.log(res.body.result.rows);
   return res.body.result.rows;
 }
 
 export async function getChildRequestsDB() {
-  const res = await query('SELECT * FROM child_requests JOIN childs ON child_requests.child_id = childs.id JOIN base_requests ON child_requests.request_id = base_requests.id');
-  // console.log(res);
+  const res = await query('SELECT * FROM base_requests JOIN child_requests ON child_requests.request_id = base_requests.id JOIN childs ON child_requests.child_id = childs.id ORDER BY child_requests.id ASC');
   return res.body.result.rows;
 }
 
 export async function getClassRequestsDB() {
-  const res = await query('SELECT * FROM class_requests JOIN classes ON class_requests.class_id = classes.id JOIN base_requests ON class_requests.request_id = base_requests.id');
-  // console.log(res);
+  const res = await query('SELECT * FROM base_requests JOIN class_requests ON class_requests.request_id = base_requests.id JOIN classes ON class_requests.class_id = classes.id ORDER BY class_requests.id ASC');
   return res.body.result.rows;
 }
 
@@ -194,8 +195,8 @@ export async function getRequestDetailsDB(table, reqid) {
 }
 
 
-export async function createBaseRequestDB(staff_assistant_id, purpose, max_approval_layer, requester_id) {
-  const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, max_approval_layer, requester_id) VALUES ($1, $2, $3, $4)', [staff_assistant_id, purpose, max_approval_layer, requester_id]);
+export async function createBaseRequestDB(staff_assistant_id, purpose, requester_id) {
+  const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, requester_id) VALUES ($1, $2, $3, $4)', [staff_assistant_id, purpose, requester_id]);
   return res;
 }
 
@@ -265,8 +266,8 @@ export async function updateTableDB(table_name, searchFormData, updateFormData) 
 
   const searchAttributes = [...searchFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection
   const updateAttributes = [...updateFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection
-  const searchValues = [...searchFormData.values()].map((val) => val); // will be for parametrization
-  const updateValues = [...updateFormData.values()].map((val) => val); // will be for parametrization
+  const searchValues = [...searchFormData.values()].map((val) => val === 'null' ? null : val); // will be for parametrization
+  const updateValues = [...updateFormData.values()].map((val) => val === 'null' ? null : val); // will be for parametrization
 
   const setText = updateAttributes.map((attributeName, index) => `${attributeName} = \$${index+1}`).join(', ')
   const whereText = searchAttributes.map((attributeName, index) => `(${attributeName} = \$${updateAttributes.length + index+1})`).join(' AND ')
@@ -351,18 +352,28 @@ export async function getRequestsInfo(user_id, user_access_level) {
 
 	const allRequests = [];
 	Object.values(equipReqsGroupedDict).forEach(function (groupedItem) {
-		allRequests.push({
+    const desiredEquipments = groupedItem.reduce((equipTypeDict, item) => {
+      if (Object.keys(equipTypeDict).includes(item?.equipment_type))  
+        equipTypeDict[item?.equipment_type]++; // increment total
+      else equipTypeDict[item?.equipment_type] = 1; // else add to dict
+      return equipTypeDict;
+    }, {}) // key-value pair of each equip as key and the count as value
+    const requestName = Object.entries(desiredEquipments).map(entry => entry.join(' (') + ')').join(', ');
+    
+		allRequests.push ({
 			type: 'Equipment Request',
 			table:'equipment_requests',
 			id: groupedItem[0]?.request_id,
 			requester_id: groupedItem[0]?.requester_id,
-			name: groupedItem.map(item => item.name).join(', '),
+			name: requestName,
 			date: groupedItem[0]?.promised_start_time,
-			max_approval_layer: groupedItem[0]?.max_approval_layer,
+			// max_approval_layer: groupedItem[0]?.max_approval_layer,
 			status: null,
       approvalsInfo: null,
+      requestedItems: desiredEquipments, // these are equipment types
+      equipmentRequestRows: equipment_requests,
 		})
-	});
+  });
 	
 	venue_requests.forEach(function (item) {
 		allRequests.push({
@@ -372,7 +383,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
       requester_id: item?.requester_id,
 			name: item.name,
 			date: item.date_needed_start,
-			max_approval_layer: item.max_approval_layer,
+			// max_approval_layer: item.max_approval_layer,
 			status: null,
       approvalsInfo: null,
 		})
@@ -386,7 +397,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
       requester_id: item?.requester_id,
 			name: item.name,
 			date: item.observation_time,
-			max_approval_layer: item.max_approval_layer,
+			// max_approval_layer: item.max_approval_layer,
 			status: null,
       approvalsInfo: null,
 		})
@@ -399,8 +410,8 @@ export async function getRequestsInfo(user_id, user_access_level) {
 			id: item.request_id,
       requester_id: item?.requester_id,
 			name: item.name,
-			date: item.schedule,
-			max_approval_layer: item.max_approval_layer,
+			date: item.timeslot + ' ' + item.observe_date,
+			// max_approval_layer: item.max_approval_layer,
 			status: null,
       approvalsInfo: null,
 		})
@@ -465,4 +476,31 @@ export async function getClassesDB() {
   const res = await query(`SELECT * FROM classes`);
   // console.log(res);
   return res.body.result.rows;
+}
+
+export async function getSections(sched){
+  const result = await query('SELECT * FROM classes WHERE schedule = $1', [sched]);
+  return result.body.result.rows;
+}
+
+export async function getUnavailable(){
+  const result = await query(`SELECT class_id, timeslot, TO_CHAR(observe_date, 'YYYY-MM-DD') AS observe_date FROM unavailable_slots`)
+  return result.body.result.rows;
+}
+
+export async function getUnavailableWSection(){
+  const result = await query(`SELECT unavailable_slots.id, class_id, timeslot, TO_CHAR(observe_date, 'YYYY-MM-DD') AS observe_date,
+    classes.name AS name, classes.schedule AS schedule
+    FROM unavailable_slots
+    JOIN classes ON unavailable_slots.class_id = classes.id
+    ORDER BY observe_date, schedule, timeslot, name`)
+  return result.body.result.rows;
+}
+
+export async function addUnavailableSlot(class_id, observe_date, timeslot){
+  const res = await query('INSERT INTO unavailable_slots (timeslot, observe_date, class_id) VALUES ($1, $2, $3)', [timeslot, observe_date, class_id])
+}
+
+export async function deleteUnavailableSlot(id){
+  const res = await query('DELETE FROM unavailable_slots WHERE id = $1', [id])
 }

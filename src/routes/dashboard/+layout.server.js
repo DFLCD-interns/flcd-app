@@ -14,7 +14,7 @@ export async function load({ cookies }) {
 	
 	return {
 		requestsInfo: requestsInfo,
-		equipment: await db.getEquipmentDB(),
+		equipments: await db.getEquipmentDB(),
 		equipmentTypes: await db.getEquipmentTypesDB(),
 		venue: await db.getVenueDB(),
 		current_user: user, 

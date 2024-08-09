@@ -2,8 +2,8 @@
     
     /** @type {import('./$types').PageData} */
 	//export let data;
-    import amclassesdata from "../../../lib/amclassesdata.json";
-    import pmclassesdata from "../../../lib/pmclassesdata.json";
+    //import amclassesdata from "../../../lib/amclassesdata.json";
+    //import pmclassesdata from "../../../lib/pmclassesdata.json";
     import { browser } from "$app/environment";
     import { Button, Card, GradientButton, Input, Label, MultiSelect, Select, Textarea, Tabs, TabItem, Radio, Alert } from "flowbite-svelte";
     import { AddressBookOutline, AddressBookSolid, ArrowLeftOutline, BuildingSolid, CheckCircleSolid, ChevronLeftOutline, ComputerSpeakerSolid, MoonSolid, SunSolid, TrashBinSolid, UserAddSolid, } from "flowbite-svelte-icons";
@@ -11,6 +11,11 @@
     function navBack() {
         if (browser) window.history.back();
     }
+
+    export let data;
+    let amclasses = data.amclasses;
+    let pmclasses = data.pmclasses;
+    
     // function printStuff(){
     //     console.log(dateTimeRows)
     // }
@@ -23,9 +28,8 @@
         dateTimeRows = dateTimeRows.filter((_, i) => i !== index);
     }
     let classtime = ""
+    $: classlist = ((classtime == "AM") ? amclasses : pmclasses)
     let selectedClass = ""
-    let selectedDate = ""
-    let selectedSlot = ""
     let sections = [
         {
             name: "FLCD 123",
@@ -68,7 +72,9 @@
             value: "3-4"
         }
     ]
-    let unavailable = ["AM-TC 2024-07-25 8-9", "AM-TC 2024-07-25 10-11", "PM-TC 2024-07-25 8-9"]
+    
+    let unavailable = []
+    data.unavailable.map(slot => {unavailable.push(`${slot.class_id} ${slot.observe_date} ${slot.timeslot}`)})
     function isSlotAvailable(section, date, time) {
         // console.log(dateTimeRows)
         return !unavailable.includes(`${section} ${date} ${time}`);
@@ -77,15 +83,24 @@
     function updateAvailability(index, date, time) {
         dateTimeRows[index].available = isSlotAvailable(selectedClass, date, time);
     }
-    $: canRequest = dateTimeRows.length >= 1 && dateTimeRows.every(row => row.available);
+    function updateAll(){
+        dateTimeRows.map(dtr => {dtr.available = isSlotAvailable(selectedClass, dtr.date, dtr.time)})
+        dateTimeRows = dateTimeRows;
+    }
+    function reset(){
+        selectedClass = "";
+        dateTimeRows.map(dtr => {dtr.available = false; dtr.time = ""; dtr.date = ""})
+        dateTimeRows = dateTimeRows;
+    }
+    $: canRequest = dateTimeRows.length >= 1 && dateTimeRows.every(row => (row.available && row.time != "" && row.date != ""));
 
     const date = new Date();
 
-    let day = date.getDate();
+    let day = (date.getDate() < 10 ? `0${date.getDate()}`: date.getDate());
     let month = (date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}`: date.getMonth() + 1);
     let year = date.getFullYear();
     let currentDate = `${year}-${month}-${day}`;
-    // console.log(currentDate);
+    // console.log(currentDate)
 </script>
 
 <div class="px-10 py-10">
@@ -123,8 +138,8 @@
                         <Label class="space-y-2">
                             <span>Class time to be observed</span>
                             <ul class="items-center w-full rounded-lg border border-gray-200 sm:flex dark:bg-gray-800 dark:border-gray-600 divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-600 h-min">
-                                <li class="w-full"><Radio value="AM" name="classTime" class="p-3" bind:group={classtime} on:change={()=>{selectedClass = ""; selectedDate =""; selectedSlot=""}}>AM</Radio></li>
-                                <li class="w-full"><Radio value="PM"name="classTime" class="p-3" bind:group={classtime} on:change={()=>{selectedClass = ""; selectedDate =""; selectedSlot=""}}>PM</Radio></li>
+                                <li class="w-full"><Radio value="AM" name="classTime" class="p-3" bind:group={classtime} on:change={()=>{reset()}}>AM</Radio></li>
+                                <li class="w-full"><Radio value="PM"name="classTime" class="p-3" bind:group={classtime} on:change={()=>{reset()}}>PM</Radio></li>
                               </ul>
                         </Label>
                         {#key classtime}
@@ -132,17 +147,22 @@
                             <span color="black">{classtime} Class</span>
                             <Select 
                                 class="mt-2"
-                                items={(classtime == "AM" ? amclassesdata : pmclassesdata)}
                                 disabled={(classtime == "")}
                                 required
-                                name="selectedClass"
-                                bind:value={selectedClass} />
+                                name="class_id"
+                                bind:value={selectedClass}
+                                on:change={(e) => updateAll()}>
+                                {#each classlist as section}
+                                        <option value={section.id}> {section.name}</option>
+                                    {/each}
+                                
+                                </Select>
+                                
                         </Label>
                         {/key}
                         </div>
                         <hr>
-                        <Button size="sm" class="md:col-span-2" on:click={addRow}>Add Slot ({dateTimeRows.length})</Button>
-
+                        
                         {#each dateTimeRows as row, index}
                         <div>
                             <div class="flex justify-end">
@@ -168,11 +188,11 @@
                                     required
                                     name="selectedSlot"
                                     bind:value={row.time}
-                                    on:change={(e) => updateAvailability(index, row.date, e.target.value)} />
+                                    on:change={(e) => updateAvailability(index, row.date, e.target.value)}/>
                             </Label>
                         {/key}
                         <div class="md:col-span-2">
-                            {#key row.available, row.date, row.time}
+                            {#key row, classtime}
                             {#if row.date != '' && row.time != ''}
                                 {#if row.available}
                                     <Alert border color="green" dismissable>
@@ -196,7 +216,14 @@
                     
                     </div>
                     <hr>
+                    
                     {/each}
+                    <Button size="sm" class="md:col-span-2" on:click={addRow}>Add Slot ({dateTimeRows.length})</Button>
+
+                    <p>selected:</p>
+                    <ul>
+                        {#each dateTimeRows as dtr}<li>{dtr.date} : {dtr.time} {classtime} {#if !(dtr.available)}(unavailable){/if}</li> {/each}
+                    </ul>
                     <!-- <Button on:click={()=>{printStuff()}}>check</Button> -->
                     <GradientButton shadow color="green"  type="submit" disabled={!canRequest}>
                         Request

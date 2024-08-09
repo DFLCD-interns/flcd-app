@@ -59,6 +59,9 @@
                         <li>
                         <a href="/dashboard/databases/venues" class="flex items-center w-full p-2 text-gray-600 transition duration-75 rounded-lg pl-12 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Venues</a>
                         </li>
+                        <li>
+                        <a href="/dashboard/databases/schedules" class="flex items-center w-full p-2 text-gray-600 transition duration-75 rounded-lg pl-12 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Schedules</a>
+                        </li>
                     </ul>
                 </div>
             </li>
