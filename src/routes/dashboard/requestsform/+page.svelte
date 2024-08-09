@@ -10,7 +10,7 @@
     let equipmentTypes = data.equipmentTypes;
     let venues = data.venue;
     let selectedEq = [];
-    let selectedVenue = "";
+    let selectedVenue = [];
     let promised_start_time = "";
     let promised_end_time = "";
 
@@ -27,6 +27,7 @@
 
     // Add a 'value' & 'name' property to each object in the array (for Svelte each behavior)
     equipmentTypes = equipmentTypes.map((item) => ({ ...item, value: item.type, name: item.type }));
+    venues = venues.map((item) => ({ ...item, value: item.id, name: item.name }));
 
     // Function to ensure promised_end_time is always after promised_start_time
     $: promised_end_time_min = promised_start_time || currentDateTime;
@@ -160,22 +161,19 @@
             <Card class="max-w-full">
                 <form class="flex flex-col space-y-6" action="?/submitVenueRequest" method="post"
                 use:enhance={() => {return async ({result}) => { alert(result.data?.body?.message); }}}>
-                    <h3 class="text-xl font-medium text-gray-900 dark:text-white">Reserve a Venue</h3>
+                    <h3 class="text-xl font-medium text-gray-900 dark:text-white">Venue Reservation</h3>
                     <hr />
                     <div>
                         <Label class="space-y-2">
                             <span>Room/Area Requesting</span>
-                            <Select
-                              tabindex=0
-                              name="selectedVenue"
-                              class="mt-2"
-                              bind:value={selectedVenue}
-                              required
-                            >
-                              {#each venues as venue}
-                                <option value={venue.id}>{venue.name}</option>
-                              {/each}
-                            </Select>
+                            <MultiSelect
+                            tabindex=0
+                                name="selectedVenue"
+                                class="mt-2"
+                                items={venues}
+                                bind:value={selectedVenue}
+                                required
+                            />
                         </Label>
                     </div>
                     <hr />
