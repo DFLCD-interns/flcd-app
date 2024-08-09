@@ -274,7 +274,7 @@ export async function validateSession(id) {
 
 export async function changePassword(email, newpassword) {
     const res = await resolvePW(newpassword, email, true)
-    console.log(res);
+    // console.log(res);
     return {
         success: true,
         message: "Password has been changed."
