@@ -36,7 +36,6 @@
 </script>
 
 <div class="px-10 py-10">
-    <!--header-->
     <div class="flex items-center gap-4 mb-5">
         <Button
             color="alternative"
@@ -159,19 +158,16 @@
         <TabItem>
             <span slot="title" class="flex gap-2"><BuildingSolid/>Venue</span>
             <Card class="max-w-full">
-                <form class="flex flex-col space-y-6" action="?/submitVenueRequest">
-                    <h3
-                        class="text-xl font-medium text-gray-900 dark:text-white"
-                    >
-                        Reserve a Venue
-                    </h3>
+                <form class="flex flex-col space-y-6" action="?/submitVenueRequest" method="post"
+                use:enhance={() => {return async ({result}) => { alert(result.data?.body?.message); }}}>
+                    <h3 class="text-xl font-medium text-gray-900 dark:text-white">Reserve a Venue</h3>
                     <hr />
                     <div>
                         <Label class="space-y-2">
                             <span>Room/Area Requesting</span>
                             <Select
                               tabindex=0
-                              name="venue"
+                              name="selectedVenue"
                               class="mt-2"
                               bind:value={selectedVenue}
                               required
@@ -225,11 +221,9 @@
                         Submit Request
                     </GradientButton>
                 </form>
-            </Card>
+            </Card>            
         </TabItem>
     </Tabs>
-
-    <!--actual form-->
 </div>
 
 <style>

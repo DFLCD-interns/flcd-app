@@ -100,7 +100,7 @@ export const actions = {
                 status: 200,
                 body: {
                     message: 'Form submitted successfully!',
-                    data: 'owo this is Clarisse speaking',
+                    data: 'owo this is Clarisse',
                 }
             };
         } catch (error) {
@@ -169,7 +169,7 @@ export const actions = {
                 status: 200,
                 body: {
                     message: 'Form submitted successfully!',
-                    data: 'owo this is Clarisse speaking',
+                    data: 'owo this is Clarisse',
                 }
             };
         } catch (error) {
