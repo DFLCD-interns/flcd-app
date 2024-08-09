@@ -97,6 +97,8 @@ CREATE TABLE venues (
     date_registered TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
+INSERT INTO venues (name) VALUES ('Room 302'), ('Room 303'); 
+
 CREATE TABLE childs (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
@@ -168,8 +170,9 @@ CREATE TABLE class_requests (
 
 CREATE TABLE venue_requests (
     id SERIAL PRIMARY KEY,
-    date_needed_start TIMESTAMP, -- date needed start
-    date_needed_end TIMESTAMP, -- date needed end/expected return date
+    date_needed DATE,
+    start_time TIME,
+    end_time TIME,
     venue_id INT,
     FOREIGN KEY (venue_id) REFERENCES venues(id),
     request_id INT,
