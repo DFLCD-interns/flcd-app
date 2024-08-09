@@ -53,14 +53,6 @@ export async function validateEmail(email) { // checking of inputs is done here
     const emailRegexExec = emailRegex.exec(email);
 
     if (emailRegexExec && emailRegexExec[0] === email) {
-        // check if email exists
-        const matches = await getUserWithMatchingEmail(email);
-        if (matches.length > 1) {
-            return {
-                error: true,
-                message: "Email already in use.",
-            }
-        } 
         return {
             success: true,
         };
@@ -110,6 +102,16 @@ export async function createUser(first_name, last_name, email, password, phone, 
     //     password,
     //     id: uuid(),
     // };
+
+    // check if email exists
+    const matches = await getUserWithMatchingEmail(email);
+    if (matches.length > 1) {
+        throw new Error("Email already in use.");
+        // return {
+        //     error: true,
+        //     message: "Email already in use.",
+        // }
+    }
 
     const new_uuid = uuid();
 
@@ -258,27 +260,61 @@ export async function validateSession(id) {
     };
 }
 
-export async function signOut(id) {
-    const sessions = get(sessionsStore);
+// export async function signOut(id) {
+//     const sessions = get(sessionsStore);
 
-    const sessionFound = sessions.find((session) => session.id === id);
+//     const sessionFound = sessions.find((session) => session.id === id);
 
-    if (!sessionFound) {
-        throw new Error("Session not found");
-    }
+//     if (!sessionFound) {
+//         throw new Error("Session not found");
+//     }
 
-    sessionsStore.update((previousSessions) => {
-        return previousSessions.filter((session) => session !== sessionFound);
-    });
+//     sessionsStore.update((previousSessions) => {
+//         return previousSessions.filter((session) => session !== sessionFound);
+//     });
+// }
+
+export async function changePassword(email, newpassword) {
+    const res = await resolvePW(newpassword, email, true)
+    console.log(res);
+    return {
+        success: true,
+        message: "Password has been changed."
+    }   
 }
 
-async function resolvePW(password, email) {
+export async function hashItem(toHash, nsalt = null) {
+    let salt;
+
+    if (!nsalt) {
+        salt = randomBytes(64).toString('hex');
+    } else {
+        salt = nsalt;
+    }
+
+    let finalkey = scryptSync(toHash, salt, 64).toString("hex"); // salting first
+    finalkey = scryptSync(finalkey, PEPPA_PIG, 64).toString("hex");
+    return {
+        salt: salt,
+        finalkey: finalkey,
+    }
+}
+
+export async function isCorrect(hash, salt, toverify) {
+    const result = await hashItem(toverify, salt);
+    if (result.finalkey === hash) {
+        return true;
+    }
+    return false;
+}
+
+async function resolvePW(password, email, force = false) { //TODO change this to reflect using isCorrect and hashItem fucntions
     // console.log("auth.js - password and email", password, email);
     let salt;
     let pw_hash;
     const user = await authUserDB(email);
     // console.log("authUser - ", user)
-    if (!email) {
+    if (!email || force) {
         salt = randomBytes(64).toString('hex');
         // console.log("auth.js - salt inside if", salt);
     } else {
@@ -294,45 +330,59 @@ async function resolvePW(password, email) {
     finalkey = scryptSync(finalkey, PEPPA_PIG, 64).toString("hex");
     // console.log("auth.js -- final key",finalkey);
     // console.log("correct hash", correctHash);
-    if (email) {
+    if (email && !force) {
         if (finalkey !== pw_hash.slice(0,128)) {
             // console.log("resolve fail");
             throw new Error("Authentication Failed!, incorrect password!");
-            return {
-                success: false,
-                message: "Authentication failed, incorrect password?",
-                body: {
-                    userid: null,
-                    useruuid: null,
-                    finalHash: finalkey,
-                    salt: salt,
-                    // correctHash: correctHash
-                }
-            }
+            // return {
+            //     success: false,
+            //     message: "Authentication failed, incorrect password?",
+            //     body: {
+            //         userid: null,
+            //         useruuid: null,
+            //         finalHash: finalkey,
+            //         salt: salt,
+            //         // correctHash: correctHash
+            //     }
+            // }
         }
     }
     // console.log("resolve success");
-    if (user)
-    {return { 
+    if (user) {
+        if (!force) {
+            return {
 
-        success: true,
-        message: "Successfully authenticated.",
-        body: {
-            userid: user.id,
-            useruuid: user.uuid,
-            finalHash: finalkey,
-            salt: salt,
+                success: true,
+                message: "Successfully authenticated.",
+                body: {
+                    userid: user.id,
+                    useruuid: user.uuid,
+                    // finalHash: finalkey,
+                    // salt: salt,
+                }
+            }
+        } else {
+            return {
+                success: true,
+                message: "Password changed.",
+                body: {
+                    userid: user.id,
+                    useruuid: user.uuid,
+                    // finalHash: finalkey,
+                    // salt: salt,
+                }
+            }
         }
-     }} else {
-        return { 
+    } else {
+        return {
             success: true,
             message: "Account Creation.",
             body: {
                 userid: null,
                 useruuid: null,
-                finalHash: finalkey,
-                salt: salt,
+                // finalHash: finalkey,
+                // salt: salt,
             }
-         }
-     }
+        }
+    }
 }
