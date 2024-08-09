@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS "base_requests" CASCADE;
 DROP TABLE IF EXISTS "child_requests" CASCADE;
 DROP TABLE IF EXISTS "class_requests" CASCADE;
 DROP TABLE IF EXISTS "venue_requests" CASCADE;
+DROP TABLE IF EXISTS "venue_reservations" CASCADE;
 DROP TABLE IF EXISTS "equipment_requests" CASCADE;
 DROP TABLE IF EXISTS "preferred_times_class" CASCADE;
 DROP TABLE IF EXISTS "preferred_times_child" CASCADE;
@@ -93,8 +94,10 @@ CREATE TABLE venues (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
     description VARCHAR(512),
-    created TIMESTAMP DEFAULT NOW() NOT NULL
+    date_registered TIMESTAMP DEFAULT NOW() NOT NULL
 );
+
+INSERT INTO venues (name) VALUES ('Room 302'), ('Room 303'), ('Room 304'); 
 
 CREATE TABLE childs (
     id SERIAL PRIMARY KEY,
@@ -167,12 +170,25 @@ CREATE TABLE class_requests (
 
 CREATE TABLE venue_requests (
     id SERIAL PRIMARY KEY,
-    date_needed_start TIMESTAMP, -- date needed start
-    date_needed_end TIMESTAMP, -- date needed end/expected return date
+    date_needed DATE,
+    start_time TIME,
+    end_time TIME,
     venue_id INT,
     FOREIGN KEY (venue_id) REFERENCES venues(id),
     request_id INT,
     FOREIGN KEY (request_id) REFERENCES base_requests(id)
+);
+
+CREATE TABLE venue_reservations (
+    id SERIAL PRIMARY KEY,
+    venue_id INT,
+    FOREIGN KEY (venue_id) REFERENCES venues(id),
+    date DATE,
+    timeslot VARCHAR(128), -- timeslot selected in this format: 13:00-14:00
+    request_id INT, -- NULL if slot was blocked off by admin
+    FOREIGN KEY (request_id) REFERENCES venue_requests(id),
+    admin_id INT, -- NULL if reservation came from student request
+    FOREIGN KEY (admin_id) REFERENCES users(id)
 );
 
 CREATE TABLE equipment_requests ( -- one entry for each equipment in a request

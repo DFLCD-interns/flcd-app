@@ -5,7 +5,7 @@
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton, Dropdown, DropdownItem } from 'flowbite-svelte';
     import { EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid, AngleDownOutline, TrashBinSolid } from 'flowbite-svelte-icons';
 
-    console.log("v:", data.classes_only_table)
+    // console.log("v:", data.classes_only_table)
   
     let batches = data.batches;
     let tableHead = []
