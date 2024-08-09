@@ -10,6 +10,7 @@
   let userName;
 
   let DeleteModal=false;
+ // console.log(users.length)
 
 </script>
   
@@ -60,7 +61,7 @@
     </TableBody>
   </Table>
   {:else}
-  <p  class="content-center text-gray-500">No users in database</p>
+  <p  class="content-center text-gray-500">No blocked slots yet</p>
   {/if}
   </div>
   

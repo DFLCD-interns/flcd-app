@@ -97,7 +97,7 @@ CREATE TABLE venues (
     date_registered TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
-INSERT INTO venues (name) VALUES ('Room 302'), ('Room 303'); 
+INSERT INTO venues (name) VALUES ('Room 302'), ('Room 303'), ('Room 304'); 
 
 CREATE TABLE childs (
     id SERIAL PRIMARY KEY,

@@ -102,7 +102,7 @@ export const actions = {
                 status: 200,
                 body: {
                     message: 'Form submitted successfully!',
-                    data: 'owo this is Clarisse speaking',
+                    data: 'owo this is Clarisse',
                 }
             };
         } catch (error) {
@@ -158,24 +158,28 @@ export const actions = {
             await insertApprovals(request_id, instructor, staff, fic[0], chair[0]);
 
             // Insert venue request
-            const fd = {
-                date_needed: data.get('date_needed'),
-                start_time: data.get('start_time'),
-                end_time: data.get('end_time'),
-                venue_id: data.get('selectedVenue'),
-                request_id,
-            };
-            const form_data = new FormData();
-            for (let key in fd) {
-                form_data.append(key, fd[key]);
-            }
-            await insertIntoTableDB('venue_requests', form_data);
+            const selectedVenue = data.getAll('selectedVenue');
 
+            for (let venueID of selectedVenue) {
+                const fd = {
+                    date_needed: data.get('date_needed'),
+                    start_time: data.get('start_time'),
+                    end_time: data.get('end_time'),
+                    venue_id: parseInt(venueID),
+                    request_id,
+                };
+                const form_data = new FormData();
+                for (let key in fd) {
+                    form_data.append(key, fd[key]);
+                }
+                await insertIntoTableDB('venue_requests', form_data);
+            }
+            
             return {
                 status: 200,
                 body: {
                     message: 'Form submitted successfully!',
-                    data: 'owo this is Clarisse speaking',
+                    data: 'owo this is Clarisse',
                 }
             };
         } catch (error) {

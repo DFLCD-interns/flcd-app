@@ -6,6 +6,7 @@ export const actions = {
         const sections = formData.getAll("section");
         const timeslots = formData.getAll("timeslot");
         const dates = formData.getAll("date");
+        console.log(sections.length);
         for (let i=0; i < sections.length; i++){
             const us = await addUnavailableSlot(sections[i], dates[i], timeslots[i]);
         }
