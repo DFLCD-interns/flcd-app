@@ -9,19 +9,27 @@ export const load = async ( {cookies, params, parent} ) => {
         const request = parentData.requestsInfo.find(req => req.id == params.reqid && req.table === params.table);
         const equipmentRequestRows = request.equipmentRequestRows?.filter(row => row.request_id == params.reqid)
 
+        const totalStatus = request.status;
+        const displayNames = request.approvalsInfo.displayNames;
+        const statuses = request.approvalsInfo.statuses;
+        const canRespond = (totalStatus !== 'approved' && totalStatus !== 'declined') && (
+            parentData.user_access_level_label === displayNames[Math.max(statuses.findLastIndex(status => status === 'approved'), 0)] || 
+            parentData.user_access_level_label === displayNames[Math.max(statuses.findIndex(status => status === 'pending'), 0)]);
+
         return {
             approvalForms: {
-                totalStatus: request.status,
-                statuses: request.approvalsInfo.statuses,
-                displayNames: request.approvalsInfo.displayNames,
+                totalStatus: totalStatus,
+                statuses: statuses,
+                displayNames: displayNames,
                 remarks: request.approvalsInfo.remarks,
+                canRespond: canRespond
             },
             requestName: request.name,
             requestType: params.table,
             requestID: params.reqid,
             requestDetails: requestDetails,
             requestedItems: request.requestedItems,
-            equipmentRequestRows: equipmentRequestRows
+            equipmentRequestRows: equipmentRequestRows,
         }
     } catch (error) {   
         console.error("Load failed:", error.message);

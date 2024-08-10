@@ -31,6 +31,7 @@ const table_names = [
   'venue_reservations'
 ]
 
+const timeFormat = 'Month DD, YYYY at HH12:MI PM';
 
 async function connectToDB() {
   try {
@@ -140,33 +141,30 @@ export async function getUserEquipmentRequests(user){
 
 // Equipment yet to be assigned
 export async function getEquipmentRequestsDB() {
-  const res = await query('SELECT * FROM base_requests JOIN equipment_requests ON equipment_requests.request_id = base_requests.id ORDER BY equipment_requests.id ASC');
+  const res = await query(`SELECT *, TO_CHAR(promised_start_time, '${timeFormat}') AS promised_start_time FROM base_requests JOIN equipment_requests ON equipment_requests.request_id = base_requests.id ORDER BY equipment_requests.id ASC`);
   return res.body.result.rows;
 }
 
 export async function getVenueRequestsDB() {
-  const res = await query('SELECT * FROM base_requests JOIN venue_requests ON venue_requests.request_id = base_requests.id JOIN venues ON venue_requests.venue_id = venues.id ORDER BY venue_requests.id ASC');
+  const res = await query(`SELECT *, TO_CHAR(date_needed_start, '${timeFormat}') AS date_needed_start FROM base_requests JOIN venue_requests ON venue_requests.request_id = base_requests.id JOIN venues ON venue_requests.venue_id = venues.id ORDER BY venue_requests.id ASC`);
   // console.log(res.body.result.rows);
   return res.body.result.rows;
 }
 
 export async function getChildRequestsDB() {
-  const res = await query('SELECT * FROM base_requests JOIN child_requests ON child_requests.request_id = base_requests.id JOIN childs ON child_requests.child_id = childs.id ORDER BY child_requests.id ASC');
+  const res = await query(`SELECT * FROM base_requests JOIN child_requests ON child_requests.request_id = base_requests.id JOIN childs ON child_requests.child_id = childs.id ORDER BY child_requests.id ASC`);
   return res.body.result.rows;
 }
 
 export async function getClassRequestsDB() {
-  const res = await query('SELECT * FROM base_requests JOIN class_requests ON class_requests.request_id = base_requests.id JOIN classes ON class_requests.class_id = classes.id ORDER BY class_requests.id ASC');
+  const res = await query(`SELECT * FROM base_requests JOIN class_requests ON class_requests.request_id = base_requests.id JOIN classes ON class_requests.class_id = classes.id ORDER BY class_requests.id ASC`);
   return res.body.result.rows;
 }
 
 
 // missing fields: class, requests, staff, course, purpose
 export async function getRequestDetailsDB(table, reqid) {
-  var type = ""
-  if (table = "equipment_requests"){
-    type = "equipments";
-  }
+  var type = table == "equipment_requests" ? 'equipments' : '';
   const res = await query(`SELECT 
     br.id AS reqid,
     requester.first_name AS requester_firstname,
@@ -174,21 +172,20 @@ export async function getRequestDetailsDB(table, reqid) {
     requester.email,
     requester.student_number AS studentno,
     requester.phone AS contactno,
-    t.promised_start_time AS dateneeded,
+    TO_CHAR(t.promised_start_time, '${timeFormat}') AS dateneeded,
     faculty.first_name AS admin_firstname,
     faculty.last_name AS admin_lastname,
     requester.department AS dept,
     e.name AS material,
     t.location AS room,
     faculty.email AS adminemail,
-    t.promised_end_time AS returndate
+    TO_CHAR(t.promised_end_time, '${timeFormat}') AS returndate
     FROM base_requests br 
     LEFT JOIN ${table} t ON br.id = t.request_id
 	  LEFT JOIN ${type} e ON t.equipment_id = e.id 
     LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
     LEFT JOIN users AS requester ON br.requester_id = requester.id
     WHERE br.id = ${reqid}`);
-  // console.log(res);
   return res.body.result.rows;
 }
 

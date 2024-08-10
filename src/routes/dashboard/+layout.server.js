@@ -18,6 +18,6 @@ export async function load({ cookies }) {
 		equipmentTypes: await db.getEquipmentTypesDB(),
 		venue: await db.getVenueDB(),
 		current_user: user, 
-		user_access_level: user_access_level_label.body.result.rows[0]?.description
+		user_access_level_label: user_access_level_label.body.result.rows[0]?.description
 	};
 }

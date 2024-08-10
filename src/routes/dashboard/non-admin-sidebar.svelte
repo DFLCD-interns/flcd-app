@@ -4,7 +4,7 @@
     let userData = {
         firstName: data.current_user.first_name,
         lastName: data.current_user.last_name,
-        userType: data.user_access_level.charAt(0).toUpperCase() + data.user_access_level.slice(1) // first letter capitalized
+        userType: data.user_access_level_label.charAt(0).toUpperCase() + data.user_access_level_label.slice(1) // first letter capitalized
     }
     let dropdownVisible = false;
 </script>
@@ -48,7 +48,7 @@
                 <div class:hidden={!dropdownVisible} class="hidden" aria-labelledby="accordion-collapse-heading-1">
                     <ul>
                         <li>
-                        <a href="/dashboard/requestsform" class="flex items-center w-full p-2 text-gray-600 transition duration-75 rounded-lg pl-12 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Equipments or Venues</a>
+                        <a href="/dashboard/requests-form" class="flex items-center w-full p-2 text-gray-600 transition duration-75 rounded-lg pl-12 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Equipments or Venues</a>
                         </li>
                         <li>
                         <a href="/dashboard/observationform" class="flex items-center w-full p-2 text-gray-600 transition duration-75 rounded-lg pl-12 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Observation</a>
