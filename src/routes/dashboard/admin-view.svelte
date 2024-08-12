@@ -1,18 +1,20 @@
 <script>
   /** @type {import('./$types').PageData} */
 	export let data;
-  import { Search, Card, GradientButton, MultiSelect, Select} from 'flowbite-svelte';
-  import { SearchOutline, FilterSolid} from 'flowbite-svelte-icons';
+  import { Search, MultiSelect, Select} from 'flowbite-svelte';
+  import { FilterSolid } from 'flowbite-svelte-icons';
   import RequestsCard from './requests-card.svelte';
   import { sineIn } from 'svelte/easing';
   import { page } from '$app/stores';
   import { parse, format } from 'date-fns';
   // import { isTemplateSpan } from 'typescript';
+
   let selectedType = ['Equipment Request', 'Venue Request'];
   let type = [
   { value: 'Equipment Request', name: 'equipment' },
   { value: 'Venue Request', name: 'venue' },
   { value: 'observation', name: 'observation' }]
+
   let selectedSort = '';
   let sort=[
   { value: 'newest to oldest', name: 'created: newest to oldest' },
@@ -21,8 +23,8 @@
   { value: 'least urgent to most urgent', name: 'needed: least urgent to most urgent' }
   ]
 
-  console.log(data)
-  let allRequests=[]; 
+  let allRequests=data.requestsInfo; 
+  let searchQuery = '';
 
   function parseDateTime(dateTimeStr) {
     // Remove 'at' and extra spaces from the string
@@ -34,55 +36,44 @@
 
 
   $: {
-    // Filter requests based on selected types
-    let filteredRequests = data.requestsInfo.filter(item => selectedType.includes(item.type));
-    
-    // Parse date-time strings and sort
-    allRequests = filteredRequests
+    // Filter and sort based on selected type and search query
+    let filteredRequests = data.requestsInfo
+      .filter(item => selectedType.includes(item.type)) // Filter by type
       .map(request => ({
         ...request,
-        parsedDate: parseDateTime(request.date), // Assuming date is the field
-        createdDate: new Date(request.created) // Convert ISO 8601 string to Date object
+        parsedDate: parseDateTime(request.date), // Parse date_needed
+        createdDate: new Date(request.created) // Parse created date
       }))
-      .sort((a, b) => {
-        if (selectedSort === 'newest to oldest') {
-          return b.createdDate - a.createdDate; // Descending order by created
-        } else if (selectedSort === 'oldest to newest') {
-          return a.createdDate - b.createdDate; // Ascending order by created
-        } else if (selectedSort === 'least urgent to most urgent') {
-          return b.parsedDate - a.parsedDate; // Descending order by date_needed
-        } else if (selectedSort === 'most urgent to least urgent') {
-          return a.parsedDate - b.parsedDate; // Ascending order by date_needed
-        } else {
-          return 0; // Default case
-        }
-      });
+      .filter(item =>
+        searchQuery === '' || // If searchQuery is empty, include all
+        Object.values(item).some(value =>
+          typeof value === 'string' && value.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
 
-    console.log(allRequests)
+    // Sort based on selected sort option
+    allRequests = filteredRequests.sort((a, b) => {
+      if (selectedSort === 'newest to oldest') {
+        return b.createdDate - a.createdDate;
+      } else if (selectedSort === 'oldest to newest') {
+        return a.createdDate - b.createdDate;
+      } else if (selectedSort === 'least urgent to most urgent') {
+        return b.parsedDate - a.parsedDate;
+      } else if (selectedSort === 'most urgent to least urgent') {
+        return a.parsedDate - b.parsedDate;
+      } else {
+        return 0; // Default case
+      }
+    });
   }
 
-  // data.requestsInfo.forEach(function (item) {
-  //   if(selectedType.includes(item.type)){
-  //     allRequests.push(item)
-  //   }
-  // })
-
-  console.log(data)
-  console.log(selectedType)
 </script>
   
 <div class="space-y-3 px-10 py-10 w-full min-h-screen">
 
   <form class="gap-2 w-full pb-5">
-    <!-- <GradientButton color="green">
-        <span class="pr-1">Filter </span>
-        <FilterSolid></FilterSolid>
-    </GradientButton> -->
     <div class="flex gap-2 w-full items-start pb-2">
-      <Search size="md"/>
-      <GradientButton size="sm" color="green" class="h-10">
-        search
-      </GradientButton>
+      <Search size="md" bind:value={searchQuery}/>
     </div>
 
     <div class="flex gap-2 pb-2  w-full">
