@@ -5,13 +5,12 @@
   import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton } from 'flowbite-svelte';
   import { EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid } from 'flowbite-svelte-icons';
 
-  let equipments = data.equipment;
+  let equipments = data.equipments;
   let tableHead = []
-  if (equipments.length === 0){
-    equipments =[]
-  } else {
+  if (equipments != null){
     tableHead = Object.keys(equipments[0]);
   }
+  
   
 
   let equipmentName="equipment"
@@ -35,7 +34,7 @@
     <GradientButton on:click={() => {AddModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Equipment</GradientButton>
   </div>
   <div class="pb-5">
-  {#if equipments.length != 0 }
+  {#if equipments != null}
   <Table shadow>
     <TableHead>
       <TableHeadCell></TableHeadCell>
