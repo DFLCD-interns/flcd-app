@@ -163,8 +163,30 @@ export async function getClassRequestsDB() {
 
 
 // missing fields: class, requests, staff, course, purpose
+// TODO make compatible for class requests!!
 export async function getRequestDetailsDB(table, reqid) {
   var type = table == "equipment_requests" ? 'equipments' : '';
+  if (table == "class_requests"){
+    const res = await query(`SELECT 
+      br.id AS reqid,
+      requester.first_name AS requester_firstname,
+      requester.last_name AS requester_lastname,
+      requester.email,
+      requester.student_number AS studentno,
+      requester.phone AS contactno,
+      faculty.first_name AS admin_firstname,
+      faculty.last_name AS admin_lastname,
+      requester.department AS dept,
+      t.location AS room,
+      faculty.email AS adminemail,
+      TO_CHAR(t.promised_end_time, '${timeFormat}') AS returndate
+      FROM base_requests br 
+      LEFT JOIN ${table} t ON br.id = t.request_id
+      LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
+      LEFT JOIN users AS requester ON br.requester_id = requester.id
+      WHERE br.id = ${reqid}`);
+  }
+  else{
   const res = await query(`SELECT 
     br.id AS reqid,
     requester.first_name AS requester_firstname,
@@ -185,7 +207,7 @@ export async function getRequestDetailsDB(table, reqid) {
 	  LEFT JOIN ${type} e ON t.equipment_id = e.id 
     LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
     LEFT JOIN users AS requester ON br.requester_id = requester.id
-    WHERE br.id = ${reqid}`);
+    WHERE br.id = ${reqid}`);}
   return res.body.result.rows;
 }
 
