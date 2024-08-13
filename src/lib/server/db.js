@@ -141,12 +141,12 @@ export async function getUserEquipmentRequests(user){
 
 // Equipment yet to be assigned
 export async function getEquipmentRequestsDB() {
-  const res = await query(`SELECT *, TO_CHAR(promised_start_time, '${timeFormat}') AS promised_start_time FROM base_requests JOIN equipment_requests ON equipment_requests.request_id = base_requests.id ORDER BY equipment_requests.id ASC`);
+  const res = await query(`SELECT *, TO_CHAR(promised_start_time, '${timeFormat}') AS promised_start_time1 FROM base_requests JOIN equipment_requests ON equipment_requests.request_id = base_requests.id ORDER BY equipment_requests.id ASC`);
   return res.body.result.rows;
 }
 
 export async function getVenueRequestsDB() {
-  const res = await query(`SELECT *, TO_CHAR(date_needed_start, '${timeFormat}') AS date_needed_start FROM base_requests JOIN venue_requests ON venue_requests.request_id = base_requests.id JOIN venues ON venue_requests.venue_id = venues.id ORDER BY venue_requests.id ASC`);
+  const res = await query(`SELECT *,  TO_CHAR(venue_requests.date_needed, 'Month DD, YYYY') || ' at ' || TO_CHAR(venue_requests.start_time, 'HH12:MI PM') AS date_needed1 FROM base_requests JOIN venue_requests ON venue_requests.request_id = base_requests.id JOIN venues ON venue_requests.venue_id = venues.id ORDER BY venue_requests.id ASC`);
   // console.log(res.body.result.rows);
   return res.body.result.rows;
 }
@@ -165,7 +165,31 @@ export async function getClassRequestsDB() {
 // missing fields: class, requests, staff, course, purpose
 // TODO make compatible for class requests!!
 export async function getRequestDetailsDB(table, reqid) {
-  var type = table == "equipment_requests" ? 'equipments' : '';
+  var type = table == "equipment_requests" ? 'equipments' : (table == "venue_requests" ? 'venues' : '');
+  var idtype = table == "equipment_requests" ? 'equipment' : (table == "venue_requests" ? 'venue' : '');
+
+  console.log(`SELECT 
+    br.id AS reqid,
+    requester.first_name AS requester_firstname,
+    requester.last_name AS requester_lastname,
+    requester.email,
+    requester.student_number AS studentno,
+    requester.phone AS contactno,
+    TO_CHAR(t.promised_start_time, '${timeFormat}') AS dateneeded,
+    faculty.first_name AS admin_firstname,
+    faculty.last_name AS admin_lastname,
+    requester.department AS dept,
+    e.name AS material,
+    t.location AS room,
+    faculty.email AS adminemail,
+    TO_CHAR(t.promised_end_time, '${timeFormat}') AS returndate
+    FROM base_requests br 
+    LEFT JOIN ${table} t ON br.id = t.request_id
+	  LEFT JOIN ${type} e ON t.${idtype}_id = e.id 
+    LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
+    LEFT JOIN users AS requester ON br.requester_id = requester.id
+    WHERE br.id = ${reqid}`)
+
   if (table == "class_requests"){
     const res = await query(`SELECT 
       br.id AS reqid,
@@ -204,7 +228,7 @@ export async function getRequestDetailsDB(table, reqid) {
     TO_CHAR(t.promised_end_time, '${timeFormat}') AS returndate
     FROM base_requests br 
     LEFT JOIN ${table} t ON br.id = t.request_id
-	  LEFT JOIN ${type} e ON t.equipment_id = e.id 
+	  LEFT JOIN ${type} e ON t.${idtype}_id = e.id 
     LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
     LEFT JOIN users AS requester ON br.requester_id = requester.id
     WHERE br.id = ${reqid}`);}
@@ -384,7 +408,8 @@ export async function getRequestsInfo(user_id, user_access_level) {
 			id: groupedItem[0]?.request_id,
 			requester_id: groupedItem[0]?.requester_id,
 			name: requestName,
-			date: groupedItem[0]?.promised_start_time,
+      created: groupedItem[0]?.created,
+			date: groupedItem[0]?.promised_start_time1,
 			status: null,
       approvalsInfo: null,
       requestedItems: desiredEquipments, // these are equipment types
@@ -399,7 +424,8 @@ export async function getRequestsInfo(user_id, user_access_level) {
 			id: item.request_id,
       requester_id: item?.requester_id,
 			name: item.name,
-			date: item.date_needed_start,
+      created: item.created,
+			date: item.date_needed1,
 			status: null,
       approvalsInfo: null,
 		})

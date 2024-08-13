@@ -9,9 +9,7 @@
   
     let batches = data.batches;
     let tableHead = []
-    if (batches.length === 0){
-      batches =[]
-    } else {
+    if (batches[0] != null){
       tableHead = Object.keys(batches[0]);
     }
   
@@ -52,7 +50,7 @@
         </div>
     </div>
     <div class="pb-5">
-    {#if batches.length != 0 }
+    {#if batches != null }
     <Table shadow>
       <TableHead>
         <TableHeadCell></TableHeadCell>

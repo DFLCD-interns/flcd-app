@@ -25,7 +25,7 @@
     <p  class="font-semibold text-xl text-gray-700">Users Database</p>
   </div>
   <div class="pb-5">
-  {#if users.length != 0 }
+  {#if users != null }
   <Table shadow>
     <TableHead>
       <TableHeadCell></TableHeadCell>

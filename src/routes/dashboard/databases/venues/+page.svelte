@@ -10,9 +10,7 @@
 
   let venues = data.venue;
   let tableHead = []
-  if (venues.length === 0){
-    venues =[]
-  } else {
+  if (venues.length != null){
     tableHead = Object.keys(venues[0]);
   }
   
@@ -37,7 +35,7 @@
     <GradientButton on:click={() => {AddModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Venue</GradientButton>
   </div>
   <div class="pb-5">
-  {#if venues.length != 0 }
+  {#if venues != null }
   <Table shadow>
     <TableHead>
       <TableHeadCell></TableHeadCell>
