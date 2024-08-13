@@ -2,15 +2,14 @@
   /** @type {import('./$types').PageData} */
 	export let data;
 
-  import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton } from 'flowbite-svelte';
-  import { EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid } from 'flowbite-svelte-icons';
+  import { MultiSelect, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton } from 'flowbite-svelte';
+  import { FilterSolid, EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid, ChevronSortOutline } from 'flowbite-svelte-icons';
 
   let equipments = data.equipments;
   let tableHead = []
   if (equipments != null){
     tableHead = Object.keys(equipments[0]);
   }
-  
   
 
   let equipmentName="equipment"
@@ -20,15 +19,99 @@
   let AddModal = false;
 
   let editEquipment;
+
+  let searchQuery='';
+  let selectedType = [];
+  let type = data.equipmentTypes.map(item => ({
+    value: item.type,
+    name: item.type
+  }));
+
+  let selectedStatus = [];
+  let status = [{ value: 'available', name: 'available' }, { value: 'unavailable', name: 'unavailable' }]
+
+  $: equipments = data.equipments
+    .filter(item => 
+      selectedType.length === 0 || selectedType.includes(item.type)
+    )
+    .filter(item => 
+      selectedStatus.length === 0 || selectedStatus.includes(item.status)
+    )
+    .filter(item =>
+      searchQuery === '' || Object.values(item).some(value =>
+        // Search all string fields
+        typeof value === 'string' && value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    );
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const optionsDate = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      };
+      const optionsTime = {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true, // AM/PM format
+      };
+
+      const formattedDate = date.toLocaleDateString('en-US', optionsDate);
+      const formattedTime = date.toLocaleTimeString('en-US', optionsTime);
+
+      return `${formattedDate} at ${formattedTime}`;}
+
+      let sortDirection = 'asc'; // Default sort direction
+      let column='id';
+      function handleSort(column) {
+        equipments = equipments.sort((a, b) => {
+        let aValue = a[column];
+        let bValue = b[column];
+
+        console.log(aValue, bValue)
+
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+          console.log('str')
+          // Sort strings alphabetically
+          if (sortDirection === 'asc') {
+            return aValue.localeCompare(bValue);
+          } else {
+            return bValue.localeCompare(aValue);
+          }
+        } else {
+          console.log('num')
+        // Sort numbers numerically
+          if (sortDirection === 'asc') {
+            return aValue - bValue;
+          } else {
+            return bValue - aValue;
+          }}
+        // } else {
+        // // If the types don't match, sort by the type (strings first, then numbers)
+        //   if (typeof aValue === 'string') return -1;
+        //   if (typeof bValue === 'string') return 1;
+        //   return 0;
+        // }
+      });
+      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    }
+
 </script>
   
 <div class="p-10">
-  <form class="flex gap-2 pb-5">
-    <Search size="md" />
-    <GradientButton color="green" class="!p-2.5">
-      <SearchOutline class="w-6 h-6" />
-    </GradientButton>
-  </form>
+  <div class="gap-2 w-full pb-5">
+    <div class="flex gap-2 w-full items-start pb-2">
+      <Search size="md" bind:value={searchQuery}/>
+    </div>
+
+    <div class="flex gap-2 pb-2  w-full">
+      <span class="flex text-gray-700 gap-1 pr-1 items-center"><FilterSolid/>Filter:</span>
+      <MultiSelect class="w-full bg-white text-gray-400 text-sm" placeholder="select type" items={type} bind:value={selectedType} />
+      <MultiSelect class="w-full bg-white text-gray-400 text-sm" placeholder="select status" items={status} bind:value={selectedStatus} />
+    </div>
+    <hr>
+  </div>
   <div class="flex items-center justify-between pb-5">
     <p  class="font-semibold text-xl text-gray-700">Equipments Database</p>
     <GradientButton on:click={() => {AddModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Equipment</GradientButton>
@@ -40,7 +123,12 @@
       <TableHeadCell></TableHeadCell>
       <TableHeadCell></TableHeadCell>
       {#each tableHead as head}
-      <TableHeadCell>{head}</TableHeadCell>
+      <TableHeadCell>
+        <button type='button' class="flex cursor-pointer" on:click={() => handleSort(head)}>
+          {head}
+          <ChevronSortOutline size='sm'/>
+        </button>
+      </TableHeadCell>
       {/each}
     </TableHead>
     <TableBody tableBodyClass="divide-y">
@@ -58,7 +146,7 @@
         <TableBodyCell>{equipment.location}</TableBodyCell>
         <TableBodyCell>{equipment.status}</TableBodyCell>
         <TableBodyCell>{equipment.notes}</TableBodyCell>
-        <TableBodyCell>{equipment.date_registered}</TableBodyCell>
+        <TableBodyCell>{formatDate(equipment.date_registered)}</TableBodyCell>
       </TableBodyRow>
       {/each}
     </TableBody>
