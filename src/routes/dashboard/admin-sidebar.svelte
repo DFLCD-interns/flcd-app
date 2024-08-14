@@ -2,9 +2,9 @@
     export let data;
     import { GridSolid } from "flowbite-svelte-icons";
     let userData = {
-        firstName: data.current_user?.first_name,
-        lastName: data.current_user?.last_name,
-        userType: data.user_access_level_label.charAt(0).toUpperCase() + data.user_access_level_label.slice(1) // first letter capitalized
+        firstName: data?.current_user?.first_name,
+        lastName: data?.current_user?.last_name,
+        userType: data?.user_access_level_label.charAt(0).toUpperCase() + data.user_access_level_label.slice(1) // first letter capitalized
     }
     let dropdownVisible = false;
 </script>

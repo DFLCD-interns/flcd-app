@@ -312,6 +312,44 @@ export async function updateTableDB(table_name, searchFormData, updateFormData) 
   return res;
 }
 
+// Provide searchFormData for to specify which row/s you want deleting
+export async function deleteFromTableDB(table_name, searchFormData) { 
+  if (!table_names.includes(table_name)) {
+    throw new Error('Trying to update non-existent table (possibly misidentified/mispelled/malicious injection):', table_name);
+  }
+
+  const searchAttributes = [...searchFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection
+  let searchValues = [...searchFormData.values()].map((val) => val === 'null' ? null : val); // will be for parametrization
+
+  const whereText = searchAttributes.map((attributeName, index) => `(${attributeName} ${searchValues[index] ? `= \$${index+1}` : 'IS NULL'})`).join(' AND ')
+  searchValues = searchValues.filter(val => val != null)
+
+  const qText = 
+    `DELETE FROM ${table_name}
+    WHERE ${whereText}`
+
+  const res = await query(qText, searchValues);    
+  return res;
+}
+
+export async function deleteRequest(request_table_name, request_id) {
+  const searchFormData = new FormData();
+  searchFormData.append('request_id', request_id)
+  
+  // delete approval forms
+  const result = await deleteFromTableDB("approvals", searchFormData);
+  
+  // delete particular request entries
+  const result2 = await deleteFromTableDB(request_table_name, searchFormData);
+  
+  // delete base request
+  searchFormData.delete('request_id')
+  searchFormData.append('id', request_id)
+  const result3 = await deleteFromTableDB("base_requests", searchFormData);
+
+  return result?.success && result2?.success && result3?.success;
+}
+
 // Formdata should contain approver_id to search
 export async function getApprovalsInfo(searchFormData) { 
   const formsQuery = await getFromTableDB("approvals", searchFormData); 
@@ -328,9 +366,7 @@ export async function getApprovalsInfo(searchFormData) {
 
   const displayNames = [];
   searchFormData.delete('request_id');
-  searchFormData.append('id', 0);
   const searchFormData2 = new FormData();
-  searchFormData2.append('access_level', 5);
   for (const row of formsQuery.body.result.rows) {
     let access_level = undefined;
     if (row.approver_id) {

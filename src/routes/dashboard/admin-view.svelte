@@ -1,6 +1,7 @@
 <script>
   /** @type {import('./$types').PageData} */
 	export let data;
+	export let form;
   import { Search, MultiSelect, Select} from 'flowbite-svelte';
   import { FilterSolid } from 'flowbite-svelte-icons';
   import RequestsCard from './requests-card.svelte';
@@ -96,7 +97,7 @@
   {#if data.requestsInfo.length != 0 && data.requestsInfo != undefined}
     <div class="space-y-3">
       {#each allRequests as info}
-        <RequestsCard info={info}></RequestsCard>
+        <RequestsCard info={info} data={data}></RequestsCard>
       {/each}
     </div>
   {:else}

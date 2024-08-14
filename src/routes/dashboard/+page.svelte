@@ -4,7 +4,7 @@
 	export let data;
     import AdminView from "./admin-view.svelte";
     import NonAdminView from "./non-admin-view.svelte";
-    let isAdmin = (data.current_user?.access_level < 5);
+    let isAdmin = (data?.current_user?.access_level < 5);
     
     // console.log(`access_level: ${data.current_user.access_level}, ${isAdmin}`)
     function handleClick() {
