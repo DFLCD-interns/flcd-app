@@ -141,12 +141,12 @@ export async function getUserEquipmentRequests(user){
 
 // Equipment yet to be assigned
 export async function getEquipmentRequestsDB() {
-  const res = await query(`SELECT *, TO_CHAR(promised_start_time, '${timeFormat}') AS promised_start_time1 FROM base_requests JOIN equipment_requests ON equipment_requests.request_id = base_requests.id ORDER BY equipment_requests.id ASC`);
+  const res = await query(`SELECT * FROM base_requests JOIN equipment_requests ON equipment_requests.request_id = base_requests.id ORDER BY equipment_requests.id ASC`);
   return res.body.result.rows;
 }
 
 export async function getVenueRequestsDB() {
-  const res = await query(`SELECT *,  TO_CHAR(venue_requests.date_needed, 'Month DD, YYYY') || ' at ' || TO_CHAR(venue_requests.start_time, 'HH12:MI PM') AS date_needed1 FROM base_requests JOIN venue_requests ON venue_requests.request_id = base_requests.id JOIN venues ON venue_requests.venue_id = venues.id ORDER BY venue_requests.id ASC`);
+  const res = await query(`SELECT * FROM base_requests JOIN venue_requests ON venue_requests.request_id = base_requests.id JOIN venues ON venue_requests.venue_id = venues.id ORDER BY venue_requests.id ASC`);
   // console.log(res.body.result.rows);
   return res.body.result.rows;
 }
@@ -174,14 +174,14 @@ export async function getRequestDetailsDB(table, reqid) {
     requester.email,
     requester.student_number AS studentno,
     requester.phone AS contactno,
-    TO_CHAR(t.promised_start_time, '${timeFormat}') AS dateneeded,
+    t.promised_start_time AS dateneeded,
     faculty.first_name AS admin_firstname,
     faculty.last_name AS admin_lastname,
     requester.department AS dept,
     e.name AS material,
     t.location AS room,
     faculty.email AS adminemail,
-    TO_CHAR(t.promised_end_time, '${timeFormat}') AS returndate
+    t.promised_end_time AS returndate
     FROM base_requests br 
     LEFT JOIN ${table} t ON br.id = t.request_id
 	  LEFT JOIN ${type} e ON t.${idtype}_id = e.id 
@@ -196,14 +196,14 @@ export async function getRequestDetailsDB(table, reqid) {
     requester.email,
     requester.student_number AS studentno,
     requester.phone AS contactno,
-    TO_CHAR(t.promised_start_time, '${timeFormat}') AS dateneeded,
+    t.promised_start_time AS dateneeded,
     faculty.first_name AS admin_firstname,
     faculty.last_name AS admin_lastname,
     requester.department AS dept,
     e.name AS material,
     t.location AS room,
     faculty.email AS adminemail,
-    TO_CHAR(t.promised_end_time, '${timeFormat}') AS returndate
+    t.promised_end_time AS returndate
     FROM base_requests br 
     LEFT JOIN ${table} t ON br.id = t.request_id
 	  LEFT JOIN ${type} e ON t.${idtype}_id = e.id 
@@ -387,7 +387,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
 			requester_id: groupedItem[0]?.requester_id,
 			name: requestName,
       created: groupedItem[0]?.created,
-			date: groupedItem[0]?.promised_start_time1,
+			date: groupedItem[0]?.promised_start_time,
 			status: null,
       approvalsInfo: null,
       requestedItems: desiredEquipments, // these are equipment types
@@ -403,7 +403,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
       requester_id: item?.requester_id,
 			name: item.name,
       created: item.created,
-			date: item.date_needed1,
+			date: item.date_needed,
 			status: null,
       approvalsInfo: null,
 		})
@@ -414,6 +414,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
 			type: 'Child Observation Request',
 			table:'child_requests',
 			id: item.request_id,
+      created: item.created,
       requester_id: item?.requester_id,
 			name: item.name,
 			date: item.observation_time,
@@ -427,6 +428,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
 			type: 'Class Observation Request',
 			table:'class_requests',
 			id: item.request_id,
+      created: item.created,
       requester_id: item?.requester_id,
 			name: item.name,
 			date: item.timeslot + ' ' + item.observe_date,
