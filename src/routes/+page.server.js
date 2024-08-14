@@ -7,7 +7,7 @@ export const actions = {
 		// TODO log the user in
 		const formData = await request.formData();
 
-		const email = formData.get("email");
+		let email = formData.get("email");
 		const password = formData.get("password");
 
 		if (!email.endsWith('@up.edu.ph')) {

@@ -1,4 +1,6 @@
 <script>
+    import { InfoCircleOutline } from 'flowbite-svelte-icons';
+
     export let data;
     export let form;
 </script>
@@ -14,8 +16,10 @@
                     placeholder="Comments for requester and approvers."
                     class="overflow-y-auto min-h-24 mt-1.5 w-80 bg-white rounded border border-gray-300 focus:border-green-600 focus:ring-2 focus:ring-green-600 text-base outline-none text-gray-700 leading-6 transition-colors duration-200 ease-in-out"/>
             </div>
-            <p class="text-gray-600 text-sm mb-1 font-small w-80">You can modify everything in this page as long as the next approver has not responded yet and the request is open.</p>
-
+            <div class="flex">
+                <InfoCircleOutline class="size-xs" /> 
+                <p class="text-gray-600 text-sm mb-1 ml-1"> You can modify your response as long as the next approver has not responded yet and the request is open.</p>
+            </div>
             <div class="flex justify-center">
                 <!-- Hidden input fields to store status, and assigned equipments -->
                 <input type="hidden" id="status" name="status" />
@@ -40,6 +44,9 @@
             </div>
         </form>
     {:else}
-        <p class="text-gray-600 text-sm mb-1 font-small w-80">You can no longer modify your response for this request.</p>
+        <div class="flex">
+            <InfoCircleOutline class="size-xs" /> 
+            <p class="text-gray-600 text-sm mb-1 ml-1"> You can no longer modify your response for this request because it is closed (declined, expired, or fully approved).</p>
+        </div>
     {/if}
 </div>   

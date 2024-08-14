@@ -1,4 +1,4 @@
-import { getApprovalsInfo, getTotalStatus, insertIntoTableDB, getFromTableDB, updateTableDB, getRequestDetailsDB, getUserFromSessionDB } from '$lib/server/db'; 
+import { getFromTableDB, updateTableDB, getRequestDetailsDB, getUserFromSessionDB } from '$lib/server/db'; 
 import { mailuser } from '$lib/server/emails.js';
 
 /** @type {import('./$types.js').LayoutServerLoad} */
@@ -6,12 +6,12 @@ export const load = async ( {cookies, params, parent} ) => {
     try {
         const parentData = await parent();
         const requestDetails = await getRequestDetailsDB(params.table, params.reqid);
-        const request = parentData.requestsInfo.find(req => req.id == params.reqid && req.table === params.table);
-        const equipmentRequestRows = request.equipmentRequestRows?.filter(row => row.request_id == params.reqid)
+        const requestInfo = parentData.requestsInfo.find(req => req.id == params.reqid && req.table === params.table);
+        const equipmentRequestRows = requestInfo.equipmentRequestRows?.filter(row => row.request_id == params.reqid)
 
-        const totalStatus = request.status;
-        const displayNames = request.approvalsInfo.displayNames;
-        const statuses = request.approvalsInfo.statuses;
+        const totalStatus = requestInfo.status;
+        const displayNames = requestInfo.approvalsInfo.displayNames;
+        const statuses = requestInfo.approvalsInfo.statuses;
         const canRespond = (totalStatus !== 'approved' && totalStatus !== 'declined') && (
             parentData.user_access_level_label === displayNames[Math.max(statuses.findLastIndex(status => status === 'approved'), 0)] || 
             parentData.user_access_level_label === displayNames[Math.max(statuses.findIndex(status => status === 'pending'), 0)]);
@@ -21,14 +21,16 @@ export const load = async ( {cookies, params, parent} ) => {
                 totalStatus: totalStatus,
                 statuses: statuses,
                 displayNames: displayNames,
-                remarks: request.approvalsInfo.remarks,
+                remarks: requestInfo.approvalsInfo.remarks,
                 canRespond: canRespond
             },
-            requestName: request.name,
             requestType: params.table,
             requestID: params.reqid,
             requestDetails: requestDetails,
-            requestedItems: request.requestedItems,
+            requestName: requestInfo.name,
+            requestedItems: requestInfo.requestedItems,
+            startDate: requestInfo.date,
+            endDate: requestInfo.actual_date_end,
             equipmentRequestRows: equipmentRequestRows,
         }
     } catch (error) {   

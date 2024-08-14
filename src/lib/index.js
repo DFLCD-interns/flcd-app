@@ -5,6 +5,6 @@ export const statusColors = { declined: 'red', pending: 'yellow', approved: 'gre
 import { format } from 'date-fns';
 const timeFormat = 'MMMM d, yyyy \'at\' hh:mm a';
 export function postgresTimeToReadable(time) {
-    if (!time) return '(unknown time)';
+    if (!time) return '';
     return format(new Date(time), timeFormat);
 }

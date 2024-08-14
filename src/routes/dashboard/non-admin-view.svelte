@@ -7,7 +7,7 @@
   let viewingPendingReqs = true;
   const pendingRequests = [], finishedRequests = [];
   data.requestsInfo.forEach(req => {
-    if (!req.actual_date_end || req.actual_date_end < new Date()) 
+    if (req.actual_date_end > new Date()) 
       pendingRequests.push(req) 
     else finishedRequests.push(req)
   });
@@ -56,9 +56,11 @@
   
     {#if (viewingPendingReqs ? pendingRequests : finishedRequests).length > 0 && data.requestsInfo != undefined}
       <div class="space-y-3">
-        {#each (viewingPendingReqs ? pendingRequests : finishedRequests) as info}
-          <RequestsCard info={info} data={data}></RequestsCard>
-        {/each}
+        {#if viewingPendingReqs} {#each pendingRequests as info}
+            <RequestsCard info={info} data={data}></RequestsCard>
+        {/each} {:else} {#each finishedRequests as info}
+            <RequestsCard info={info} data={data}></RequestsCard>
+        {/each} {/if}
       </div>
     {:else}
       <p class="text-gray-500">

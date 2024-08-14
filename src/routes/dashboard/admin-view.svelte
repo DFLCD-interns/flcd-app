@@ -20,7 +20,18 @@
     { value: 'most urgent to least urgent', name: 'needed: most urgent to least urgent' },
     { value: 'least urgent to most urgent', name: 'needed: least urgent to most urgent' }]
 
-  let allRequests=data.requestsInfo;
+  // Filter out all requests that are not for this user to see (invisible)
+  let allRequests = data.requestsInfo.filter(req => {
+    console.log(req)
+    const idIdx = req.approvalsInfo.userIDs.findIndex(id => data.current_user.access_level === 3 ? id == null : id === data.current_user.user_id );
+    const approvedIdx = req.approvalsInfo.statuses.findIndex(status => status === 'approved');
+    console.log(idIdx, approvedIdx)
+    console.log(idIdx <= (approvedIdx+1))
+    return idIdx <= (approvedIdx+1); // the only ones who can see are the pendng-approver and past-approver
+  });
+  // console.log(data.requestsInfo)
+  // console.log(allRequests)
+
   let searchQuery = '';
 
   function parseDateTime(dateTimeStr, type) {
@@ -37,7 +48,7 @@
   let pendingRequests, otherRequests;
   $: {
     // Filter and sort based on selected type and search query
-    let filteredRequests = data.requestsInfo
+    let filteredRequests = allRequests
       .filter(item => selectedType.includes(item.type)) // Filter by type
       .map(request => ({
         ...request,
@@ -105,11 +116,13 @@
     </button>
   </div>
 
-  {#if data.requestsInfo.length != 0 && data.requestsInfo != undefined}
+  {#if (viewingPendingReqs ? pendingRequests : otherRequests).length != 0 && data.requestsInfo != undefined}
     <div class="space-y-3">
-      {#each (viewingPendingReqs ? pendingRequests : otherRequests ) as info}
-        <RequestsCard info={info} data={data}></RequestsCard>
-      {/each}
+      {#if viewingPendingReqs} {#each pendingRequests as info}
+          <RequestsCard info={info} data={data}></RequestsCard>
+      {/each} {:else} {#each otherRequests as info}
+          <RequestsCard info={info} data={data}></RequestsCard>
+      {/each} {/if}
     </div>
   {:else}
     <p class="text-gray-500">No Pending Requests</p>
