@@ -1,5 +1,6 @@
 import pkg from 'pg';
 const { Pool } = pkg;
+import { format } from 'date-fns';
 
 const pool = new Pool({ //store this in an env file!
   user: 'postgres',
@@ -176,8 +177,8 @@ export async function getRequestDetailsDB(table, reqid) {
     case "venue_requests": {
       material_table_name = 'venues';
       id_col_name = 'venue';
-      start_time_col_name = 'date_needed_start';
-      end_time_col_name = 'date_needed_end';
+      start_time_col_name = 'start_time';
+      end_time_col_name = 'end_time';
       break;
     }
     case "child_requests": {
@@ -438,6 +439,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
 			name: requestName,
       created: groupedItem[0]?.created,
 			date: groupedItem[0]?.promised_start_time,
+      actual_date_end: groupedItem[0]?.actual_end_time,
 			status: null,
       approvalsInfo: null,
       requestedItems: desiredEquipments, // these are equipment types
@@ -446,6 +448,8 @@ export async function getRequestsInfo(user_id, user_access_level) {
   });
 	
 	venue_requests.forEach(function (item) {
+    const start_date = new Date(format(item.date_needed, 'yyyy-MM-dd') + 'T' + item.start_time)
+    const end_date = new Date(format(item.date_needed, 'yyyy-MM-dd') + 'T' + item.end_time)
 		allRequests.push({
 			type: 'Venue Request',
 			table:'venue_requests',
@@ -453,7 +457,8 @@ export async function getRequestsInfo(user_id, user_access_level) {
       requester_id: item?.requester_id,
 			name: item.name,
       created: item.created,
-			date: item.date_needed,
+			date: start_date,
+			actual_date_end: end_date,
 			status: null,
       approvalsInfo: null,
 		})
@@ -497,7 +502,6 @@ export async function getRequestsInfo(user_id, user_access_level) {
 		const approvalsInfo = await getApprovalsInfo(formData);
     
     let valid;
-    // console.log(forms)
     if (user_access_level < 5) // if admin
       valid = forms.some((form, i) =>	{
         // valid if this user is the approver AND the previous approver has approved

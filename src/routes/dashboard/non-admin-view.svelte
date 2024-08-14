@@ -1,24 +1,17 @@
 <script>
   export let data;
-  import { Card, Button, Drawer, CloseButton, Badge, GradientButton } from 'flowbite-svelte';
-  import { ArrowRightOutline, InfoCircleSolid } from 'flowbite-svelte-icons';
-  import { sineIn } from 'svelte/easing';
+  import { Card, GradientButton } from 'flowbite-svelte';
+  import { ArrowRightOutline, UndoOutline } from 'flowbite-svelte-icons';
   import RequestsCard from './requests-card.svelte';
-  //placeholder for now
-  // let requestInfo = data.
-  // let reduced = requestInfo.reduce((x, y) => {
-  //   (x[y.id] = x[y.id] || []).push(y);
-  //   return x;
-  // }, {});
-  // let grouped_requests = Object.keys(reduced).map((key) => reduced[key]);
-  let transitionParams = {
-    x: -320,
-    duration: 200,
-    easing: sineIn
-  };
-    function handleClick() {
-        window.location.href = "/";
-    }
+
+  let viewingPendingReqs = true;
+  const pendingRequests = [], finishedRequests = [];
+  data.requestsInfo.forEach(req => {
+    if (!req.actual_date_end || req.actual_date_end < new Date()) 
+      pendingRequests.push(req) 
+    else finishedRequests.push(req)
+  });
+
 </script>
 
 <div class="px-10 py-10">
@@ -49,18 +42,28 @@
       </div>
 
     <div class="flex items-center justify-between pb-3">
-      <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">My requests</h5>
-      <a href="#" class="text-gray-500"> View Requests History</a>
+      <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{viewingPendingReqs ? 'Your Pending Requests' : 'History'}</h5>
+      <button class="text-gray-500 flex" on:click={() => viewingPendingReqs = !viewingPendingReqs}> 
+        {#if viewingPendingReqs}
+          <svg class="h-5 w-5 text-gray-500" width="24" height="24" viewBox="2 -2 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <polyline points="12 8 12 12 14 14" />  <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" /></svg>
+          View Requests History
+        {:else}
+          <UndoOutline class="h-5 w-5 text-gray-500 mr-1"/>
+          View Pending Requests
+      {/if}
+      </button>
     </div>
   
-    {#if data.requestsInfo?.length != 0 && data.requestsInfo != undefined}
+    {#if (viewingPendingReqs ? pendingRequests : finishedRequests).length > 0 && data.requestsInfo != undefined}
       <div class="space-y-3">
-        {#each data.requestsInfo as info}
+        {#each (viewingPendingReqs ? pendingRequests : finishedRequests) as info}
           <RequestsCard info={info} data={data}></RequestsCard>
         {/each}
       </div>
     {:else}
-      <p class="text-gray-500">No Pending Requests</p>
+      <p class="text-gray-500">
+        { viewingPendingReqs ? 'No pending requests' : 'No finished requests'}
+      </p>
     {/if}
 </div>
 

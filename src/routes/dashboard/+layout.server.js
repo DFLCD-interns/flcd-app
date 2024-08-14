@@ -9,11 +9,9 @@ export async function load({ cookies }) {
 	const searchFormData = new FormData();
 	searchFormData.append('access_level', await db.getUserPriv(session));
 	const user_access_level_label = await db.getFromTableDB('user_types', searchFormData);
-
-	let requestsInfo = await db.getRequestsInfo(user?.user_id, user?.access_level);
-	
+		
 	return {
-		requestsInfo: requestsInfo,
+		requestsInfo: await db.getRequestsInfo(user?.user_id, user?.access_level),
 		equipments: await db.getEquipmentDB(),
 		equipmentTypes: await db.getEquipmentTypesDB(),
 		venue: await db.getVenueDB(),

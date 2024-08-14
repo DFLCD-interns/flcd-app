@@ -1,30 +1,26 @@
 <script>
   /** @type {import('./$types').PageData} */
 	export let data;
-	export let form;
   import { Search, MultiSelect, Select} from 'flowbite-svelte';
-  import { FilterSolid } from 'flowbite-svelte-icons';
+  import { FilterSolid, UndoOutline } from 'flowbite-svelte-icons';
   import RequestsCard from './requests-card.svelte';
-  import { sineIn } from 'svelte/easing';
-  import { page } from '$app/stores';
-  import { parse, format } from 'date-fns';
+  import { parse } from 'date-fns';
   // import { isTemplateSpan } from 'typescript';
 
   let selectedType = ['Equipment Request', 'Venue Request'];
   let type = [
-  { value: 'Equipment Request', name: 'equipment' },
-  { value: 'Venue Request', name: 'venue' },
-  { value: 'observation', name: 'observation' }]
+    { value: 'Equipment Request', name: 'equipment' },
+    { value: 'Venue Request', name: 'venue' },
+    { value: 'observation', name: 'observation' }]
 
   let selectedSort = '';
   let sort=[
-  { value: 'newest to oldest', name: 'created: newest to oldest' },
-  { value: 'oldest to newest', name: 'created: oldest to newest' },
-  { value: 'most urgent to least urgent', name: 'needed: most urgent to least urgent' },
-  { value: 'least urgent to most urgent', name: 'needed: least urgent to most urgent' }
-  ]
+    { value: 'newest to oldest', name: 'created: newest to oldest' },
+    { value: 'oldest to newest', name: 'created: oldest to newest' },
+    { value: 'most urgent to least urgent', name: 'needed: most urgent to least urgent' },
+    { value: 'least urgent to most urgent', name: 'needed: least urgent to most urgent' }]
 
-  let allRequests=data.requestsInfo; 
+  let allRequests = data.requestsInfo;
   let searchQuery = '';
 
   function parseDateTime(dateTimeStr) {
@@ -35,7 +31,8 @@
     return parsedDate
   }
 
-
+  let viewingPendingReqs = true;
+  let pendingRequests, otherRequests;
   $: {
     // Filter and sort based on selected type and search query
     let filteredRequests = data.requestsInfo
@@ -66,6 +63,14 @@
         return 0; // Default case
       }
     });
+    
+    pendingRequests = [];
+    otherRequests = [];
+    allRequests.forEach(req => {
+    if (req.status.includes(data.user_access_level_label)) 
+      pendingRequests.push(req)
+    else otherRequests.push(req);
+  });
   }
 
 </script>
@@ -85,18 +90,22 @@
     <hr>
   </form>
 
-
   <div class="flex items-center justify-between pb-0">
-    <h1 class="font-semibold text-xl text-gray-700">Pending Requests</h1>
-    <a href="/dashboard/requests-history" class="flex text-gray-500">
-      <svg class="h-5 w-5 text-gray-500"  width="24" height="24" viewBox="2 -2 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <polyline points="12 8 12 12 14 14" />  <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" /></svg>
-      View Requests History
-    </a>
+    <h1 class="font-semibold text-xl text-gray-700">{viewingPendingReqs ? 'Pending Requests' : 'History'}</h1>
+    <button class="flex text-gray-500" on:click={()=> viewingPendingReqs = !viewingPendingReqs}>
+      {#if viewingPendingReqs}
+        <svg class="h-5 w-5 text-gray-500" width="24" height="24" viewBox="2 -2 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <polyline points="12 8 12 12 14 14" />  <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5" /></svg>
+        View Requests History
+      {:else}
+        <UndoOutline class="h-5 w-5 text-gray-500 mr-1"/>
+        View Pending Requests
+      {/if}
+    </button>
   </div>
 
   {#if data.requestsInfo.length != 0 && data.requestsInfo != undefined}
     <div class="space-y-3">
-      {#each allRequests as info}
+      {#each (viewingPendingReqs ? pendingRequests : otherRequests ) as info}
         <RequestsCard info={info} data={data}></RequestsCard>
       {/each}
     </div>
