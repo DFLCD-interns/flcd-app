@@ -44,19 +44,19 @@ export const actions = {
             const user = await getUserFromSessionDB(session);
             
             const inputFormData = await request.formData(); // the user input (remarks, approve/decline)
-            inputFormData.append('request_id', params.reqid);
 
             const updateFormData = new FormData();
             updateFormData.append('status', inputFormData.get('status'));
             if (inputFormData.get('remarks')) updateFormData.append('remarks', inputFormData.get('remarks'));
             
             const searchFormData = new FormData();
-            searchFormData.append('request_id', inputFormData.get('request_id')); 
+            searchFormData.append('request_id', params.reqid); 
             searchFormData.append('approver_id', user?.user_id);
             
-            if (user.access_level === 3) {
-                updateFormData.append('approver_id', user?.user_id); // save this user as the approver
+            // check if this form is for admin staff AND no admin staff has yet to respond
+            if (user?.access_level === 3 && !(await getFromTableDB('approvals', searchFormData)).body.result.rows[0]) {
                 searchFormData.set('approver_id', null); // look for the no-approver approval form
+                updateFormData.append('approver_id', user?.user_id); // save this user as the approver
             }
 
             const response = await updateTableDB("approvals", searchFormData, updateFormData);
@@ -68,7 +68,6 @@ export const actions = {
             const approverID = searchFormData.get('approver_id')
             inputFormData.delete('remarks');
             inputFormData.delete('status');
-            inputFormData.delete('request_id');
             const assignedEquipIDs = [...inputFormData.values()]
             const equipReqsIDs = [...inputFormData.keys()].map(key => key.split('_')[2])
             

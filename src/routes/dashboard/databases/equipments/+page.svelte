@@ -69,10 +69,10 @@
         let aValue = a[column];
         let bValue = b[column];
 
-        console.log(aValue, bValue)
+        // console.log(aValue, bValue)
 
         if (typeof aValue === 'string' && typeof bValue === 'string') {
-          console.log('str')
+          // console.log('str')
           // Sort strings alphabetically
           if (sortDirection === 'asc') {
             return aValue.localeCompare(bValue);
@@ -80,7 +80,7 @@
             return bValue.localeCompare(aValue);
           }
         } else {
-          console.log('num')
+          // console.log('num')
         // Sort numbers numerically
           if (sortDirection === 'asc') {
             return aValue - bValue;

@@ -15,7 +15,7 @@
     function handleClick() {
         window.location.href = "/";
     }
-    let isAdmin = (data.current_user.access_level < 5);
+    let isAdmin = (data?.current_user?.access_level < 5);
 </script>
 <aside class="hidden lg:block fixed z-10 top-0 pb-3 px-6 w-full justify-between h-screen border-r bg-white transition duration-300 md:w-4/12 lg:ml-0 lg:w-[25%] xl:w-[20%] 2xl:w-[15%]">
     {#if isAdmin}

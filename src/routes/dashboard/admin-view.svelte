@@ -1,6 +1,7 @@
 <script>
   /** @type {import('./$types').PageData} */
 	export let data;
+	export let form;
   import { Search, MultiSelect, Select} from 'flowbite-svelte';
   import { FilterSolid } from 'flowbite-svelte-icons';
   import RequestsCard from './requests-card.svelte';
@@ -9,11 +10,11 @@
   import { parse, format } from 'date-fns';
   // import { isTemplateSpan } from 'typescript';
 
-  let selectedType = ['Equipment Request', 'Venue Request'];
+  let selectedType = ['Equipment Request', 'Venue Request', 'Class Observation Request'];
   let type = [
   { value: 'Equipment Request', name: 'equipment' },
   { value: 'Venue Request', name: 'venue' },
-  { value: 'observation', name: 'observation' }]
+  { value: 'Class Observation Request', name: 'observation' }]
 
   let selectedSort = '';
   let sort=[
@@ -24,13 +25,16 @@
   ]
 
   let allRequests=data.requestsInfo; 
+  console.log(allRequests)
   let searchQuery = '';
 
-  function parseDateTime(dateTimeStr) {
+  function parseDateTime(dateTimeStr, type) {
     // Remove 'at' and extra spaces from the string
-    const cleanedStr = dateTimeStr.toString().replace(/\sat\s/, ' ').replace(/\s+/g, ' ').trim();
     // Parse date-time string
-    const parsedDate = parse(cleanedStr, 'MMMM d, yyyy hh:mm a', new Date());
+    console.log(dateTimeStr)
+    let parsedDate = ""
+    if (type == 'Class Observation Request'){return dateTimeStr}
+    else { parsedDate = parse(dateTimeStr.toString().replace(/\sat\s/, ' ').replace(/\s+/g, ' ').trim(), 'MMMM d, yyyy hh:mm a', new Date()); }
     return parsedDate
   }
 
@@ -41,7 +45,7 @@
       .filter(item => selectedType.includes(item.type)) // Filter by type
       .map(request => ({
         ...request,
-        parsedDate: parseDateTime(request.date), // Parse date_needed
+        parsedDate: parseDateTime(request.date, request.type), // Parse date_needed
         createdDate: new Date(request.created) // Parse created date
       }))
       .filter(item =>
@@ -96,7 +100,7 @@
   {#if data.requestsInfo.length != 0 && data.requestsInfo != undefined}
     <div class="space-y-3">
       {#each allRequests as info}
-        <RequestsCard info={info}></RequestsCard>
+        <RequestsCard info={info} data={data}></RequestsCard>
       {/each}
     </div>
   {:else}

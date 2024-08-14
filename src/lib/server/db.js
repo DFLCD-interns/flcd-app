@@ -73,7 +73,7 @@ export async function createUserDB(uuid, first_name, last_name, email, pw_hash, 
 
 export async function getUserPriv(sessionID) { // returns the admin type of the user associated with this session.
 const res = await query('SELECT users.access_level FROM sessions JOIN users ON sessions.user_id = users.id WHERE sessions.session_id = $1', [sessionID]);
-return res.body.result.rows[0].access_level;
+return res.body.result.rows[0]?.access_level;
 }
 
 export async function authUserDB(email) {
@@ -163,6 +163,7 @@ export async function getClassRequestsDB() {
 
 
 // missing fields: class, requests, staff, course, purpose
+// TODO make compatible for class requests!!
 export async function getRequestDetailsDB(table, reqid) {
   let material_table_name, id_col_name, start_time_col_name, end_time_col_name;
   switch(table) {
@@ -180,23 +181,68 @@ export async function getRequestDetailsDB(table, reqid) {
       end_time_col_name = 'date_needed_end';
       break;
     }
-    case "child_requests": {
-      material_table_name = 'childs';
-      id_col_name = 'child';
-      start_time_col_name = 'observation_time'; //TODO what
-      end_time_col_name = 'observation_time'; //TODO what
-      break;
-    }
-    case "class_requests": {
-      material_table_name = 'classes';
-      id_col_name = 'class';
-      start_time_col_name = 'timeslot' + 'observe_date'; //TODO what
-      end_time_col_name = 'timeslot' + 'observe_date'; //TODO what
-      break;
-    }
-  }
 
-  const res = await query(`SELECT 
+    //TODO make timeslots available ALSO NO MORE CHILD REQUESTS!!!!
+    // case "child_requests": {
+    //   material_table_name = 'childs';
+    //   id_col_name = 'child';
+    //   start_time_col_name = 'observation_time'; //TODO what
+    //   end_time_col_name = 'observation_time'; //TODO what
+    //   break;
+    // }
+    // case "class_requests": {
+    //   material_table_name = 'classes';
+    //   id_col_name = 'class';
+    //   start_time_col_name = 'timeslot' + 'observe_date'; //TODO what
+    //   end_time_col_name = 'timeslot' + 'observe_date'; //TODO what
+    //   break;
+    // }
+  }
+  var type = table == "equipment_requests" ? 'equipments' : (table == "venue_requests" ? 'venues' : '');
+  var idtype = table == "equipment_requests" ? 'equipment' : (table == "venue_requests" ? 'venue' : '');
+  let res;
+  console.log(`SELECT 
+    br.id AS reqid,
+    requester.first_name AS requester_firstname,
+    requester.last_name AS requester_lastname,
+    requester.email,
+    requester.student_number AS studentno,
+    requester.phone AS contactno,
+    TO_CHAR(t.promised_start_time, '${timeFormat}') AS dateneeded,
+    faculty.first_name AS admin_firstname,
+    faculty.last_name AS admin_lastname,
+    requester.department AS dept,
+    e.name AS material,
+    t.location AS room,
+    faculty.email AS adminemail,
+    TO_CHAR(t.promised_end_time, '${timeFormat}') AS returndate
+    FROM base_requests br 
+    LEFT JOIN ${table} t ON br.id = t.request_id
+	  LEFT JOIN ${type} e ON t.${idtype}_id = e.id 
+    LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
+    LEFT JOIN users AS requester ON br.requester_id = requester.id
+    WHERE br.id = ${reqid}`)
+
+  if (table == "class_requests"){
+    res = await query(`SELECT 
+      br.id AS reqid,
+      requester.first_name AS requester_firstname,
+      requester.last_name AS requester_lastname,
+      requester.email,
+      requester.student_number AS studentno,
+      requester.phone AS contactno,
+      faculty.first_name AS admin_firstname,
+      faculty.last_name AS admin_lastname,
+      requester.department AS dept,
+      faculty.email AS adminemail
+      FROM base_requests br 
+      LEFT JOIN ${table} t ON br.id = t.request_id
+      LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
+      LEFT JOIN users AS requester ON br.requester_id = requester.id
+      WHERE br.id = ${reqid}`);
+  }
+  else{
+  res = await query(`SELECT 
     br.id AS reqid,
     requester.first_name AS requester_firstname,
     requester.last_name AS requester_lastname,
@@ -216,13 +262,19 @@ export async function getRequestDetailsDB(table, reqid) {
 	  LEFT JOIN ${material_table_name} mat ON t.${id_col_name}_id = mat.id 
     LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
     LEFT JOIN users AS requester ON br.requester_id = requester.id
-    WHERE br.id = ${reqid}`);
+    WHERE br.id = ${reqid}`);}
+    console.log(res.body.result.rows[0])
   return res.body.result.rows;
 }
 
 
 export async function createBaseRequestDB(staff_assistant_id, purpose, requester_id) {
   const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, requester_id) VALUES ($1, $2, $3)', [staff_assistant_id, purpose, requester_id]);
+  return res;
+}
+
+export async function createBaseRequestDB2(staff_assistant_id, purpose, requester_id, instructor_id) {
+  const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, requester_id, instructor_id) VALUES ($1, $2, $3, $4)', [staff_assistant_id, purpose, requester_id, instructor_id]);
   return res;
 }
 
@@ -239,7 +291,7 @@ export async function getNewestBaseRequest(){
 
 export async function getLatestBaseRequestID(user_id) {
   const result = await query('SELECT id FROM base_requests WHERE requester_id = $1 ORDER BY created DESC LIMIT 1;', [user_id]);
-  return result.body.result.rows[0].id;
+  return result.body.result.rows[0]?.id;
 }
 
 export async function insertIntoTableDB(table_name, formData) {
@@ -266,9 +318,11 @@ export async function getFromTableDB(table_name, searchFormData, limit = 100) {
   else if (limit < 0 || !Number.isInteger(limit)) {
     throw new Error('Trying to get negative or non-Integer number of rows (possibly mistyped/malicious injection)', limit);
   }
+
   let qText = ""
   const attributes = [...searchFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection
   const values = [...searchFormData.values()].map((val) => val); // will be for parametrization
+  values.forEach((val, i) => !val || val == 'undefined' || val == 'null' ? values[i] = 0 : ''); // sanitize
 
   const whereText = attributes.map((attributeName, index) => `(${attributeName} = \$${index+1})`).join(' AND ')
   if (table_name == 'user_types'){
@@ -305,9 +359,47 @@ export async function updateTableDB(table_name, searchFormData, updateFormData) 
     SET ${setText}
     WHERE ${whereText}`
 
-  console.log(qText, updateValues.concat(searchValues));
+  // console.log(qText, updateValues.concat(searchValues));
   const res = await query(qText, updateValues.concat(searchValues));    
   return res;
+}
+
+// Provide searchFormData for to specify which row/s you want deleting
+export async function deleteFromTableDB(table_name, searchFormData) { 
+  if (!table_names.includes(table_name)) {
+    throw new Error('Trying to update non-existent table (possibly misidentified/mispelled/malicious injection):', table_name);
+  }
+
+  const searchAttributes = [...searchFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection
+  let searchValues = [...searchFormData.values()].map((val) => val === 'null' ? null : val); // will be for parametrization
+
+  const whereText = searchAttributes.map((attributeName, index) => `(${attributeName} ${searchValues[index] ? `= \$${index+1}` : 'IS NULL'})`).join(' AND ')
+  searchValues = searchValues.filter(val => val != null)
+
+  const qText = 
+    `DELETE FROM ${table_name}
+    WHERE ${whereText}`
+
+  const res = await query(qText, searchValues);    
+  return res;
+}
+
+export async function deleteRequest(request_table_name, request_id) {
+  const searchFormData = new FormData();
+  searchFormData.append('request_id', request_id)
+  
+  // delete approval forms
+  const result = await deleteFromTableDB("approvals", searchFormData);
+  
+  // delete particular request entries
+  const result2 = await deleteFromTableDB(request_table_name, searchFormData);
+  
+  // delete base request
+  searchFormData.delete('request_id')
+  searchFormData.append('id', request_id)
+  const result3 = await deleteFromTableDB("base_requests", searchFormData);
+
+  return result?.success && result2?.success && result3?.success;
 }
 
 // Formdata should contain approver_id to search
@@ -326,9 +418,7 @@ export async function getApprovalsInfo(searchFormData) {
 
   const displayNames = [];
   searchFormData.delete('request_id');
-  searchFormData.append('id', 0);
   const searchFormData2 = new FormData();
-  searchFormData2.append('access_level', 5);
   for (const row of formsQuery.body.result.rows) {
     let access_level = undefined;
     if (row.approver_id) {
@@ -443,7 +533,8 @@ export async function getRequestsInfo(user_id, user_access_level) {
       created: item.created,
       requester_id: item?.requester_id,
 			name: item.name,
-			date: item.timeslot + ' ' + item.observe_date,
+      created: item.created,
+			date: item.observe_date,
 			status: null,
       approvalsInfo: null,
 		})
@@ -459,7 +550,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
 		const approvalsInfo = await getApprovalsInfo(formData);
     
     let valid;
-    console.log(forms)
+    // console.log(forms)
     if (user_access_level < 5) // if admin
       valid = forms.some((form, i) =>	{
         // valid if this user is the approver AND the previous approver has approved

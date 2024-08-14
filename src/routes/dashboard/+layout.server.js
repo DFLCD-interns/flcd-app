@@ -10,7 +10,7 @@ export async function load({ cookies }) {
 	searchFormData.append('access_level', await db.getUserPriv(session));
 	const user_access_level_label = await db.getFromTableDB('user_types', searchFormData);
 
-	let requestsInfo = await db.getRequestsInfo(user.user_id, user.access_level);
+	let requestsInfo = await db.getRequestsInfo(user?.user_id, user?.access_level);
 	
 	return {
 		requestsInfo: requestsInfo,
@@ -18,6 +18,6 @@ export async function load({ cookies }) {
 		equipmentTypes: await db.getEquipmentTypesDB(),
 		venue: await db.getVenueDB(),
 		current_user: user, 
-		user_access_level_label: user_access_level_label.body.result.rows[0]?.description
+		user_access_level_label: user_access_level_label?.body.result.rows[0]?.description
 	};
 }

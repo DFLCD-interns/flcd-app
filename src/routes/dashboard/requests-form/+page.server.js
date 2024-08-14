@@ -3,14 +3,14 @@ import { mailuser } from '$lib/server/emails.js'
 
 async function insertBaseRequest(user, data, isFLCD, instructor = null) {
     const base_fd = new FormData();
-    base_fd.append('requester_id', user.user_id);
+    base_fd.append('requester_id', user?.user_id);
     if (isFLCD && instructor) base_fd.append('instructor_id', instructor.id);
     base_fd.append('purpose', data.get('purpose'));
     if (!isFLCD) base_fd.append('affiliation', data.get('affiliation'));
 
     try {
         await insertIntoTableDB('base_requests', base_fd);
-        const request_id = await getLatestBaseRequestID(user.user_id);
+        const request_id = await getLatestBaseRequestID(user?.user_id);
         return request_id;
     } catch (error) {
         throw new Error('Error writing to database');
@@ -47,7 +47,7 @@ export const actions = {
         const user = await getUserFromSessionDB(session);
         const data = await request.formData();
         const staff = await getUsersWithAccessLevel(3);
-        const isFLCD = user.access_level === 5;
+        const isFLCD = user?.access_level === 5;
 
         let instructor;
         let instructorEmail;
@@ -58,7 +58,7 @@ export const actions = {
             }
             instructor = await getUserWithMatchingEmail(instructorEmail);
 
-            if (instructor.length < 1 || instructor[0].access_level !== 4) {
+            if (instructor.length < 1 || instructor[0]?.access_level !== 4) {
                 return {
                     status: 409,
                     body: {
@@ -116,7 +116,9 @@ export const actions = {
                     error: error.message
                 }
             };
-        } finally {
+        } 
+        //comment out if testing
+        finally {
             await mailuser(`[FLCD APP] New pending request!`, 
                 `Hello, new pending request by ${user.first_name + user.last_name}. Please proceed to the web app to issue a response.`,
                 `${instructorEmail}`); 
@@ -128,7 +130,7 @@ export const actions = {
         const user = await getUserFromSessionDB(session);
         const data = await request.formData();
         const staff = await getUsersWithAccessLevel(3);
-        const isFLCD = user.access_level === 5;
+        const isFLCD = user?.access_level === 5;
 
         let instructor;
         if (isFLCD) {
@@ -138,7 +140,7 @@ export const actions = {
             }
             instructor = await getUserWithMatchingEmail(instructorEmail);
 
-            if (instructor.length < 1 || instructor[0].access_level !== 4) {
+            if (instructor.length < 1 || instructor[0]?.access_level !== 4) {
                 return {
                     status: 409,
                     body: {
