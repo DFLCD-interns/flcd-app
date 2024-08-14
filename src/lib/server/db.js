@@ -181,20 +181,22 @@ export async function getRequestDetailsDB(table, reqid) {
       end_time_col_name = 'date_needed_end';
       break;
     }
-    case "child_requests": {
-      material_table_name = 'childs';
-      id_col_name = 'child';
-      start_time_col_name = 'observation_time'; //TODO what
-      end_time_col_name = 'observation_time'; //TODO what
-      break;
-    }
-    case "class_requests": {
-      material_table_name = 'classes';
-      id_col_name = 'class';
-      start_time_col_name = 'timeslot' + 'observe_date'; //TODO what
-      end_time_col_name = 'timeslot' + 'observe_date'; //TODO what
-      break;
-    }
+
+    //TODO make timeslots available ALSO NO MORE CHILD REQUESTS!!!!
+    // case "child_requests": {
+    //   material_table_name = 'childs';
+    //   id_col_name = 'child';
+    //   start_time_col_name = 'observation_time'; //TODO what
+    //   end_time_col_name = 'observation_time'; //TODO what
+    //   break;
+    // }
+    // case "class_requests": {
+    //   material_table_name = 'classes';
+    //   id_col_name = 'class';
+    //   start_time_col_name = 'timeslot' + 'observe_date'; //TODO what
+    //   end_time_col_name = 'timeslot' + 'observe_date'; //TODO what
+    //   break;
+    // }
   }
   var type = table == "equipment_requests" ? 'equipments' : (table == "venue_requests" ? 'venues' : '');
   var idtype = table == "equipment_requests" ? 'equipment' : (table == "venue_requests" ? 'venue' : '');
