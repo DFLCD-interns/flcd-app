@@ -31,24 +31,26 @@
 
 
 <div class = "min-h-screen p-10">
-    <div class="w-full items-center justify-between flex">
-        <div>
-            <a href="/dashboard"><Button class="bg-white text-gray-500 hover:bg-white drop-shadow-md"><ArrowLeftOutline/></Button></a>
-            <h2 class="pt-3 text-2xl font-semibold text-gray-600">{request_type}: {data.requestName}</h2>
-            <Badge class="mt-2" large border color='{totalStatus === 'approved' ? statusColors.approved : totalStatus === 'declined' ? statusColors.declined : statusColors.pending}'>{totalStatus.charAt(0).toUpperCase() + totalStatus.slice(1)}</Badge>
+    <div class="w-full items-center justify-between">
+        <a href="/dashboard"><Button class="bg-white text-gray-500 hover:bg-white drop-shadow-md"><ArrowLeftOutline/></Button></a>
+        <div class="w-full items-center justify-between flex">
+            <div>    
+                <h2 class="pt-3 text-2xl font-semibold text-gray-600">{request_type}: {data.requestName}</h2>
+                <Badge class="mt-2" large border color='{totalStatus === 'approved' ? statusColors.approved : totalStatus === 'declined' ? statusColors.declined : statusColors.pending}'>{totalStatus.charAt(0).toUpperCase() + totalStatus.slice(1)}</Badge>
+            </div>
+            {#if !isAdmin}
+                <form bind:this={form} action="..?/deleteRequest" method="POST">
+                    <input hidden="true" id="request_table_name" name="request_table_name" />
+                    <input hidden="true" id="request_id" name="request_id" />
+                    <GradientButton color="red" type="submit" on:click={() => {
+                        form.querySelector(`input[id="request_table_name"]`).value = data.requestType;
+                        form.querySelector(`input[id="request_id"]`).value = requestDetails.reqid;
+                        }} >
+                        <TrashBinSolid/>
+                    </GradientButton>
+                </form>
+            {/if}
         </div>
-        {#if !isAdmin}
-            <form bind:this={form} action="..?/deleteRequest" method="POST">
-                <input hidden="true" id="request_table_name" name="request_table_name" />
-                <input hidden="true" id="request_id" name="request_id" />
-                <GradientButton color="red" type="submit" on:click={() => {
-                    form.querySelector(`input[id="request_table_name"]`).value = data.requestType;
-                    form.querySelector(`input[id="request_id"]`).value = requestDetails.reqid;
-                    }} >
-                    <TrashBinSolid/>
-                </GradientButton>
-            </form>
-        {/if}
     </div>
     <div class="min-w-full md:flex pt-5 gap-10 justify-center">
         <div class="bg-white flex justify-center rounded-lg shadow-lg p-6">
