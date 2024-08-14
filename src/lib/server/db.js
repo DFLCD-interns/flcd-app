@@ -305,7 +305,7 @@ export async function updateTableDB(table_name, searchFormData, updateFormData) 
     SET ${setText}
     WHERE ${whereText}`
 
-  console.log(qText, updateValues.concat(searchValues));
+  // console.log(qText, updateValues.concat(searchValues));
   const res = await query(qText, updateValues.concat(searchValues));    
   return res;
 }
@@ -459,7 +459,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
 		const approvalsInfo = await getApprovalsInfo(formData);
     
     let valid;
-    console.log(forms)
+    // console.log(forms)
     if (user_access_level < 5) // if admin
       valid = forms.some((form, i) =>	{
         // valid if this user is the approver AND the previous approver has approved
