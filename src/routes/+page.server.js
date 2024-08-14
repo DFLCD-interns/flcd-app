@@ -10,6 +10,10 @@ export const actions = {
 		const email = formData.get("email");
 		const password = formData.get("password");
 
+		if (!email.endsWith('@up.edu.ph')) {
+			email = `${email}@up.edu.ph`;
+		}
+
         // console.log("signin+page.server.js -- GOT FORM DATA")
 
 		try {

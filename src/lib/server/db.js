@@ -164,6 +164,7 @@ export async function getClassRequestsDB() {
 
 
 // missing fields: class, requests, staff, course, purpose
+// TODO make compatible for class requests!!
 export async function getRequestDetailsDB(table, reqid) {
   let material_table_name, id_col_name, start_time_col_name, end_time_col_name;
   switch(table) {
@@ -181,23 +182,68 @@ export async function getRequestDetailsDB(table, reqid) {
       end_time_col_name = 'end_time';
       break;
     }
-    case "child_requests": {
-      material_table_name = 'childs';
-      id_col_name = 'child';
-      start_time_col_name = 'observation_time'; //TODO what
-      end_time_col_name = 'observation_time'; //TODO what
-      break;
-    }
-    case "class_requests": {
-      material_table_name = 'classes';
-      id_col_name = 'class';
-      start_time_col_name = 'timeslot' + 'observe_date'; //TODO what
-      end_time_col_name = 'timeslot' + 'observe_date'; //TODO what
-      break;
-    }
-  }
 
-  const res = await query(`SELECT 
+    //TODO make timeslots available ALSO NO MORE CHILD REQUESTS!!!!
+    // case "child_requests": {
+    //   material_table_name = 'childs';
+    //   id_col_name = 'child';
+    //   start_time_col_name = 'observation_time'; //TODO what
+    //   end_time_col_name = 'observation_time'; //TODO what
+    //   break;
+    // }
+    // case "class_requests": {
+    //   material_table_name = 'classes';
+    //   id_col_name = 'class';
+    //   start_time_col_name = 'timeslot' + 'observe_date'; //TODO what
+    //   end_time_col_name = 'timeslot' + 'observe_date'; //TODO what
+    //   break;
+    // }
+  }
+  var type = table == "equipment_requests" ? 'equipments' : (table == "venue_requests" ? 'venues' : '');
+  var idtype = table == "equipment_requests" ? 'equipment' : (table == "venue_requests" ? 'venue' : '');
+  let res;
+  console.log(`SELECT 
+    br.id AS reqid,
+    requester.first_name AS requester_firstname,
+    requester.last_name AS requester_lastname,
+    requester.email,
+    requester.student_number AS studentno,
+    requester.phone AS contactno,
+    TO_CHAR(t.promised_start_time, '${timeFormat}') AS dateneeded,
+    faculty.first_name AS admin_firstname,
+    faculty.last_name AS admin_lastname,
+    requester.department AS dept,
+    e.name AS material,
+    t.location AS room,
+    faculty.email AS adminemail,
+    TO_CHAR(t.promised_end_time, '${timeFormat}') AS returndate
+    FROM base_requests br 
+    LEFT JOIN ${table} t ON br.id = t.request_id
+	  LEFT JOIN ${type} e ON t.${idtype}_id = e.id 
+    LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
+    LEFT JOIN users AS requester ON br.requester_id = requester.id
+    WHERE br.id = ${reqid}`)
+
+  if (table == "class_requests"){
+    res = await query(`SELECT 
+      br.id AS reqid,
+      requester.first_name AS requester_firstname,
+      requester.last_name AS requester_lastname,
+      requester.email,
+      requester.student_number AS studentno,
+      requester.phone AS contactno,
+      faculty.first_name AS admin_firstname,
+      faculty.last_name AS admin_lastname,
+      requester.department AS dept,
+      faculty.email AS adminemail
+      FROM base_requests br 
+      LEFT JOIN ${table} t ON br.id = t.request_id
+      LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
+      LEFT JOIN users AS requester ON br.requester_id = requester.id
+      WHERE br.id = ${reqid}`);
+  }
+  else{
+  res = await query(`SELECT 
     br.id AS reqid,
     requester.first_name AS requester_firstname,
     requester.last_name AS requester_lastname,
@@ -217,13 +263,19 @@ export async function getRequestDetailsDB(table, reqid) {
 	  LEFT JOIN ${material_table_name} mat ON t.${id_col_name}_id = mat.id 
     LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
     LEFT JOIN users AS requester ON br.requester_id = requester.id
-    WHERE br.id = ${reqid}`);
+    WHERE br.id = ${reqid}`);}
+    console.log(res.body.result.rows[0])
   return res.body.result.rows;
 }
 
 
 export async function createBaseRequestDB(staff_assistant_id, purpose, requester_id) {
   const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, requester_id) VALUES ($1, $2, $3)', [staff_assistant_id, purpose, requester_id]);
+  return res;
+}
+
+export async function createBaseRequestDB2(staff_assistant_id, purpose, requester_id, instructor_id) {
+  const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, requester_id, instructor_id) VALUES ($1, $2, $3, $4)', [staff_assistant_id, purpose, requester_id, instructor_id]);
   return res;
 }
 
@@ -486,7 +538,8 @@ export async function getRequestsInfo(user_id, user_access_level) {
       created: item.created,
       requester_id: item?.requester_id,
 			name: item.name,
-			date: item.timeslot + ' ' + item.observe_date,
+      created: item.created,
+			date: item.observe_date,
 			status: null,
       approvalsInfo: null,
 		})
