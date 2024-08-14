@@ -73,7 +73,7 @@ export async function createUserDB(uuid, first_name, last_name, email, pw_hash, 
 
 export async function getUserPriv(sessionID) { // returns the admin type of the user associated with this session.
 const res = await query('SELECT users.access_level FROM sessions JOIN users ON sessions.user_id = users.id WHERE sessions.session_id = $1', [sessionID]);
-return res.body.result.rows[0].access_level;
+return res.body.result.rows[0]?.access_level;
 }
 
 export async function authUserDB(email) {
@@ -239,7 +239,7 @@ export async function getNewestBaseRequest(){
 
 export async function getLatestBaseRequestID(user_id) {
   const result = await query('SELECT id FROM base_requests WHERE requester_id = $1 ORDER BY created DESC LIMIT 1;', [user_id]);
-  return result.body.result.rows[0].id;
+  return result.body.result.rows[0]?.id;
 }
 
 export async function insertIntoTableDB(table_name, formData) {
@@ -266,9 +266,11 @@ export async function getFromTableDB(table_name, searchFormData, limit = 100) {
   else if (limit < 0 || !Number.isInteger(limit)) {
     throw new Error('Trying to get negative or non-Integer number of rows (possibly mistyped/malicious injection)', limit);
   }
+
   let qText = ""
   const attributes = [...searchFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection
   const values = [...searchFormData.values()].map((val) => val); // will be for parametrization
+  values.forEach((val, i) => !val || val == 'undefined' || val == 'null' ? values[i] = 0 : ''); // sanitize
 
   const whereText = attributes.map((attributeName, index) => `(${attributeName} = \$${index+1})`).join(' AND ')
   if (table_name == 'user_types'){

@@ -30,7 +30,7 @@
     $: totalStatus = data?.approvalForms.totalStatus;
     $: approvalStatuses = data?.approvalForms.statuses;
     $: approverNames = data?.approvalForms.displayNames;
-    const isAdmin = data?.current_user.access_level < 5;
+    const isAdmin = data?.current_user?.access_level < 5;
     
 </script>
 

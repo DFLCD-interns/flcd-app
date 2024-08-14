@@ -54,7 +54,7 @@ export const actions = {
             searchFormData.append('approver_id', user?.user_id);
             
             // check if this form is for admin staff AND no admin staff has yet to respond
-            if (user.access_level === 3 && !(await getFromTableDB('approvals', searchFormData)).body.result.rows[0]) {
+            if (user?.access_level === 3 && !(await getFromTableDB('approvals', searchFormData)).body.result.rows[0]) {
                 searchFormData.set('approver_id', null); // look for the no-approver approval form
                 updateFormData.append('approver_id', user?.user_id); // save this user as the approver
             }

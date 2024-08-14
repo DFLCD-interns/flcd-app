@@ -54,7 +54,7 @@
         <TableBodyCell>{user.student_number}</TableBodyCell>
         <TableBodyCell>{user.course}</TableBodyCell>
         <TableBodyCell>{user.department}</TableBodyCell>
-        <TableBodyCell><Input type="number" min=1 max=5 value={user.access_level}></Input></TableBodyCell>
+        <TableBodyCell><Input type="number" min=1 max=5 value={user?.access_level}></Input></TableBodyCell>
         <TableBodyCell>{user.created}</TableBodyCell>
       </TableBodyRow>
       {/each}

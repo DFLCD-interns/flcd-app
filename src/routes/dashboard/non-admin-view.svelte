@@ -22,7 +22,7 @@
 </script>
 
 <div class="px-10 py-10">
-  <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Welcome, {data.current_user.first_name}!</h5>
+  <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Welcome, {data.current_user?.first_name}!</h5>
     <div class="flex flex-wrap w-full mb-6  align-center justify-center">
       <div class="sm:w-1/2 sm:mb-0 mb-2 w-full">
         <Card class="w-full max-w-full sm:mr-1.5">
