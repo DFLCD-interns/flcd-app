@@ -28,7 +28,7 @@
 
   function parseDateTime(dateTimeStr) {
     // Remove 'at' and extra spaces from the string
-    const cleanedStr = dateTimeStr.replace(/\sat\s/, ' ').replace(/\s+/g, ' ').trim();
+    const cleanedStr = dateTimeStr.toString().replace(/\sat\s/, ' ').replace(/\s+/g, ' ').trim();
     // Parse date-time string
     const parsedDate = parse(cleanedStr, 'MMMM d, yyyy hh:mm a', new Date());
     return parsedDate

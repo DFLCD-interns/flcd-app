@@ -107,6 +107,8 @@ export const actions = {
                 }
             };
         } catch (error) {
+            console.error('meow')
+            console.error(error.message)
             return {
                 status: 500,
                 body: {
@@ -120,11 +122,7 @@ export const actions = {
                 `${instructorEmail}`); 
         }
     },
-
-
-
-
-
+    
     submitVenueRequest: async ({ request, cookies }) => {
         const session = cookies.get("session_id");
         const user = await getUserFromSessionDB(session);

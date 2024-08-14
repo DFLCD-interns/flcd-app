@@ -7,6 +7,7 @@
     import Assignment from './Assignment.svelte';
     import ApprovalStatus from './ApprovalStatus.svelte';
     import ResponseForm from './ResponseForm.svelte';
+    import { postgresTimeToReadable } from '$lib';
 
     /** @type {import('./$types').PageData} */
     export let data;
@@ -67,11 +68,11 @@
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Promised Start Date</td>
-                    <td class="py-3 px-4">{requestDetails.dateneeded}</td>
+                    <td class="py-3 px-4">{postgresTimeToReadable(requestDetails.dateneeded)}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Promised End/Return Date</td>
-                    <td class="py-3 px-4">{requestDetails.returndate}</td>
+                    <td class="py-3 px-4">{postgresTimeToReadable(requestDetails.returndate)}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
                     <td class="py-3 px-4 font-semibold">Location of Use/Activity</td>
