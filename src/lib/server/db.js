@@ -164,30 +164,37 @@ export async function getClassRequestsDB() {
 
 // missing fields: class, requests, staff, course, purpose
 export async function getRequestDetailsDB(table, reqid) {
-  var type = table == "equipment_requests" ? 'equipments' : (table == "venue_requests" ? 'venues' : '');
-  var idtype = table == "equipment_requests" ? 'equipment' : (table == "venue_requests" ? 'venue' : '');
-
-  console.log(`SELECT 
-    br.id AS reqid,
-    requester.first_name AS requester_firstname,
-    requester.last_name AS requester_lastname,
-    requester.email,
-    requester.student_number AS studentno,
-    requester.phone AS contactno,
-    t.promised_start_time AS dateneeded,
-    faculty.first_name AS admin_firstname,
-    faculty.last_name AS admin_lastname,
-    requester.department AS dept,
-    e.name AS material,
-    t.location AS room,
-    faculty.email AS adminemail,
-    t.promised_end_time AS returndate
-    FROM base_requests br 
-    LEFT JOIN ${table} t ON br.id = t.request_id
-	  LEFT JOIN ${type} e ON t.${idtype}_id = e.id 
-    LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
-    LEFT JOIN users AS requester ON br.requester_id = requester.id
-    WHERE br.id = ${reqid}`)
+  let material_table_name, id_col_name, start_time_col_name, end_time_col_name;
+  switch(table) {
+    case "equipment_requests": {
+      material_table_name = 'equipments';
+      id_col_name = 'equipment';
+      start_time_col_name = 'promised_start_time';
+      end_time_col_name = 'promised_end_time';
+      break;
+    }
+    case "venue_requests": {
+      material_table_name = 'venues';
+      id_col_name = 'venue';
+      start_time_col_name = 'date_needed_start';
+      end_time_col_name = 'date_needed_end';
+      break;
+    }
+    case "child_requests": {
+      material_table_name = 'childs';
+      id_col_name = 'child';
+      start_time_col_name = 'observation_time'; //TODO what
+      end_time_col_name = 'observation_time'; //TODO what
+      break;
+    }
+    case "class_requests": {
+      material_table_name = 'classes';
+      id_col_name = 'class';
+      start_time_col_name = 'timeslot' + 'observe_date'; //TODO what
+      end_time_col_name = 'timeslot' + 'observe_date'; //TODO what
+      break;
+    }
+  }
 
   const res = await query(`SELECT 
     br.id AS reqid,
@@ -196,17 +203,17 @@ export async function getRequestDetailsDB(table, reqid) {
     requester.email,
     requester.student_number AS studentno,
     requester.phone AS contactno,
-    t.promised_start_time AS dateneeded,
+    requester.department AS dept,
     faculty.first_name AS admin_firstname,
     faculty.last_name AS admin_lastname,
-    requester.department AS dept,
-    e.name AS material,
-    t.location AS room,
     faculty.email AS adminemail,
-    t.promised_end_time AS returndate
+    mat.name AS material,
+    ${material_table_name === 'equipments' ? 't.location AS room,': ''}
+    t.${start_time_col_name} AS dateneeded,
+    t.${end_time_col_name} AS returndate
     FROM base_requests br 
     LEFT JOIN ${table} t ON br.id = t.request_id
-	  LEFT JOIN ${type} e ON t.${idtype}_id = e.id 
+	  LEFT JOIN ${material_table_name} mat ON t.${id_col_name}_id = mat.id 
     LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
     LEFT JOIN users AS requester ON br.requester_id = requester.id
     WHERE br.id = ${reqid}`);
@@ -286,18 +293,19 @@ export async function updateTableDB(table_name, searchFormData, updateFormData) 
 
   const searchAttributes = [...searchFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection
   const updateAttributes = [...updateFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection
-  const searchValues = [...searchFormData.values()].map((val) => val === 'null' ? null : val); // will be for parametrization
+  let searchValues = [...searchFormData.values()].map((val) => val === 'null' ? null : val); // will be for parametrization
   const updateValues = [...updateFormData.values()].map((val) => val === 'null' ? null : val); // will be for parametrization
 
   const setText = updateAttributes.map((attributeName, index) => `${attributeName} = \$${index+1}`).join(', ')
-  const whereText = searchAttributes.map((attributeName, index) => `(${attributeName} = \$${updateAttributes.length + index+1})`).join(' AND ')
+  const whereText = searchAttributes.map((attributeName, index) => `(${attributeName} ${searchValues[index] ? `= \$${updateAttributes.length + index+1}` : 'IS NULL'})`).join(' AND ')
+  searchValues = searchValues.filter(val => val != null)
 
   const qText = 
     `UPDATE ${table_name}
     SET ${setText}
     WHERE ${whereText}`
 
-  // console.log(qText, updateValues.concat(searchValues));
+  console.log(qText, updateValues.concat(searchValues));
   const res = await query(qText, updateValues.concat(searchValues));    
   return res;
 }
@@ -322,22 +330,26 @@ export async function getApprovalsInfo(searchFormData) {
   const searchFormData2 = new FormData();
   searchFormData2.append('access_level', 5);
   for (const row of formsQuery.body.result.rows) {
+    let access_level = undefined;
+    if (row.approver_id) {
       searchFormData.set('id', row.approver_id);
       const approverQuery = await getFromTableDB("users", searchFormData);
       if (!approverQuery?.body) throw new Error(`no appover matching the id ${searchFormData.get('id')}`);  
-      const access_level = approverQuery?.body.result.rows[0]?.access_level;
+      access_level = approverQuery?.body.result.rows[0]?.access_level;
+    }
+    else access_level = 3; // if null, this must be for all the possbile Admin Staffs, which is user level 3
 
-      searchFormData2.set('access_level', access_level);
-      const access_levelQuery = await getFromTableDB("user_types", searchFormData2);
-      const displayName = access_levelQuery.body.result.rows[0]?.description;
+    searchFormData2.set('access_level', access_level);
+    const access_levelQuery = await getFromTableDB("user_types", searchFormData2);
+    const displayName = access_levelQuery.body.result.rows[0]?.description;
 
-      displayNames.push(displayName);
+    displayNames.push(displayName);
   }
   
   return { 
-      statuses: statuses, 
-      remarks: remarks,
-      displayNames: displayNames
+    statuses: statuses, 
+    remarks: remarks,
+    displayNames: displayNames
   };
 }
 
@@ -447,10 +459,15 @@ export async function getRequestsInfo(user_id, user_access_level) {
 		const approvalsInfo = await getApprovalsInfo(formData);
     
     let valid;
+    console.log(forms)
     if (user_access_level < 5) // if admin
-      valid = forms.find((form, i) =>	form.approver_id === user_id && 
-                                            //form.status !== 'declined' && // TODO make this transfer forms to requestHistory instead of disappearing here. this disappearance causes sudden errors upon declining btw
-                                            (i == 0 ? true : forms[i-1].status === 'approved'));
+      valid = forms.some((form, i) =>	{
+        // valid if this user is the approver AND the previous approver has approved
+        const validA = form.approver_id === user_id && (i == 0 ? true : forms[i-1].status === 'approved');
+        // also valid if the approver is null AND the access level of this user is ADMIN STAFF (level 3) 
+        const validB = (!form.approver_id) && user_access_level === 3;
+        return validA || validB; // TODO moving of requests to requestsHistory when necessary
+      });
     else 
       valid = req.requester_id === user_id;
     

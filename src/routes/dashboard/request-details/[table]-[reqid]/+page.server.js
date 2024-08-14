@@ -43,18 +43,21 @@ export const actions = {
             const session = cookies.get('session_id');
             const user = await getUserFromSessionDB(session);
             
-            const inputFormData = await request.formData(); // the user input
-            inputFormData.append('approver_id', user?.user_id);
+            const inputFormData = await request.formData(); // the user input (remarks, approve/decline)
             inputFormData.append('request_id', params.reqid);
 
             const updateFormData = new FormData();
             updateFormData.append('status', inputFormData.get('status'));
-            if (inputFormData.get('remarks'))
-                updateFormData.append('remarks', inputFormData.get('remarks'));
-
+            if (inputFormData.get('remarks')) updateFormData.append('remarks', inputFormData.get('remarks'));
+            
             const searchFormData = new FormData();
             searchFormData.append('request_id', inputFormData.get('request_id')); 
-            searchFormData.append('approver_id', inputFormData.get('approver_id')); 
+            searchFormData.append('approver_id', user?.user_id);
+            
+            if (user.access_level === 3) {
+                updateFormData.append('approver_id', user?.user_id); // save this user as the approver
+                searchFormData.set('approver_id', null); // look for the no-approver approval form
+            }
 
             const response = await updateTableDB("approvals", searchFormData, updateFormData);
 
@@ -62,11 +65,10 @@ export const actions = {
             
             const status = inputFormData.get('status')
             const remarks = inputFormData.get('remarks')
-            const approverID = inputFormData.get('approver_id')
+            const approverID = searchFormData.get('approver_id')
             inputFormData.delete('remarks');
             inputFormData.delete('status');
             inputFormData.delete('request_id');
-            inputFormData.delete('approver_id');
             const assignedEquipIDs = [...inputFormData.values()]
             const equipReqsIDs = [...inputFormData.keys()].map(key => key.split('_')[2])
             
@@ -87,7 +89,7 @@ export const actions = {
 
             await mailuser(
                 `[FLCD APP] New response to your request`,
-                `Hi, your request (ID #${params.reqid}) has a new response. '${remarks}' - by [user with ID ${approverID}]. Kindly check the web app for the exact status of your request.`,
+                `Hi, your request (ID #${params.reqid}) has a new response - ${status}. '${remarks}' - by [user with ID ${approverID}]. Kindly check the web app for the exact status of your request.`,
                 `legara.cedric@gmail.com`) //TODO placeholder, change to student id
 
             return {success: response?.success && response2?.success}; 
