@@ -5,7 +5,7 @@
     //import amclassesdata from "../../../lib/amclassesdata.json";
     //import pmclassesdata from "../../../lib/pmclassesdata.json";
     import { browser } from "$app/environment";
-    import { Button, Card, GradientButton, Input, Label, MultiSelect, Select, Textarea, Tabs, TabItem, Radio, Alert } from "flowbite-svelte";
+    import { Button, ButtonGroup, Card, GradientButton, Input, Label, MultiSelect, Select, Textarea, Tabs, TabItem, Radio, Alert, InputAddon } from "flowbite-svelte";
     import { AddressBookOutline, AddressBookSolid, ArrowLeftOutline, BuildingSolid, CheckCircleSolid, ChevronLeftOutline, ComputerSpeakerSolid, MoonSolid, SunSolid, TrashBinSolid, UserAddSolid, } from "flowbite-svelte-icons";
     
     function navBack() {
@@ -130,7 +130,19 @@
                         Observation Request
                     </h3>
                     <hr />
-                    <div class="grid gap-6 mb-6 md:grid-cols-3">
+                    <div class="grid gap-6 mb-6 md:grid-cols-2">
+                        <Label class="space-y-2">
+                            <span>Email of Coordinating FLCD Teacher</span>
+                            <div class="input-container">
+                                <Input 
+                                    disabled={false}
+                                    type="text" 
+                                    name="instructor_email" 
+                                    required
+                                />
+                                <span class="input-desc">@up.edu.ph</span>
+                            </div>
+                        </Label>
                         <Label class="space-y-2">
                             <span>Your section</span>
                             <Select class="mt-2" name="requesterSection" items={sections} bind:value={requesterSection} required/>
@@ -233,3 +245,21 @@
         </TabItem>
     </Tabs>
 </div>
+
+<style>
+    .input-container {
+      position: relative;
+      width: 100%;
+    }
+  
+    .input-desc {
+      position: absolute;
+      right: 26px;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 0 5px;
+      font-size: 0.9em;
+      color: grey;
+      pointer-events: none;
+    }
+  </style>

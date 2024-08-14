@@ -167,7 +167,7 @@ export async function getClassRequestsDB() {
 export async function getRequestDetailsDB(table, reqid) {
   var type = table == "equipment_requests" ? 'equipments' : (table == "venue_requests" ? 'venues' : '');
   var idtype = table == "equipment_requests" ? 'equipment' : (table == "venue_requests" ? 'venue' : '');
-
+  let res;
   console.log(`SELECT 
     br.id AS reqid,
     requester.first_name AS requester_firstname,
@@ -191,7 +191,7 @@ export async function getRequestDetailsDB(table, reqid) {
     WHERE br.id = ${reqid}`)
 
   if (table == "class_requests"){
-    const res = await query(`SELECT 
+    res = await query(`SELECT 
       br.id AS reqid,
       requester.first_name AS requester_firstname,
       requester.last_name AS requester_lastname,
@@ -201,9 +201,7 @@ export async function getRequestDetailsDB(table, reqid) {
       faculty.first_name AS admin_firstname,
       faculty.last_name AS admin_lastname,
       requester.department AS dept,
-      t.location AS room,
-      faculty.email AS adminemail,
-      TO_CHAR(t.promised_end_time, '${timeFormat}') AS returndate
+      faculty.email AS adminemail
       FROM base_requests br 
       LEFT JOIN ${table} t ON br.id = t.request_id
       LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
@@ -211,7 +209,7 @@ export async function getRequestDetailsDB(table, reqid) {
       WHERE br.id = ${reqid}`);
   }
   else{
-  const res = await query(`SELECT 
+  res = await query(`SELECT 
     br.id AS reqid,
     requester.first_name AS requester_firstname,
     requester.last_name AS requester_lastname,
@@ -232,12 +230,18 @@ export async function getRequestDetailsDB(table, reqid) {
     LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
     LEFT JOIN users AS requester ON br.requester_id = requester.id
     WHERE br.id = ${reqid}`);}
+    console.log(res.body.result.rows[0])
   return res.body.result.rows;
 }
 
 
 export async function createBaseRequestDB(staff_assistant_id, purpose, requester_id) {
   const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, requester_id) VALUES ($1, $2, $3)', [staff_assistant_id, purpose, requester_id]);
+  return res;
+}
+
+export async function createBaseRequestDB2(staff_assistant_id, purpose, requester_id, instructor_id) {
+  const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, requester_id, instructor_id) VALUES ($1, $2, $3, $4)', [staff_assistant_id, purpose, requester_id, instructor_id]);
   return res;
 }
 
@@ -451,7 +455,8 @@ export async function getRequestsInfo(user_id, user_access_level) {
 			id: item.request_id,
       requester_id: item?.requester_id,
 			name: item.name,
-			date: item.timeslot + ' ' + item.observe_date,
+      created: item.created,
+			date: item.observe_date,
 			status: null,
       approvalsInfo: null,
 		})

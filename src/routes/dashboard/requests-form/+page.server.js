@@ -113,7 +113,9 @@ export const actions = {
                     error: error.message
                 }
             };
-        } finally {
+        } 
+        //comment out if testing
+        finally {
             await mailuser(`[FLCD APP] New pending request!`, 
                 `Hello, new pending request by ${user.first_name + user.last_name}. Please proceed to the web app to issue a response.`,
                 `${instructorEmail}`); 
