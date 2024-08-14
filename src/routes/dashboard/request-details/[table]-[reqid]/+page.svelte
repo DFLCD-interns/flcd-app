@@ -53,7 +53,7 @@
         </div>
     </div>
     <div class="min-w-full md:flex pt-5 gap-10 justify-center">
-        <div class="bg-white flex justify-center rounded-lg shadow-lg p-6">
+        <div class="bg-white flex justify-center rounded-lg shadow-lg p-6" style="min-width: 42em;">
             <div class="overflow-x-auto">
             <table class="table-fixed object-cover">
                 <tbody class="text-gray-600">
@@ -112,7 +112,7 @@
             </table>
         </div>
     </div>
-    <div class="space-y-10 relative">
+    <div class="space-y-10 relative" style="width: 24em;">
         <ApprovalStatus data={data}/>
         {#if isAdmin}
             <ResponseForm data={data} bind:form={form}/>

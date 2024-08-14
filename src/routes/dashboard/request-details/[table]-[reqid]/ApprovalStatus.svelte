@@ -8,7 +8,7 @@
     $: approverRemarks = data?.approvalForms.remarks;
 </script>
 
-<div class="bg-white rounded-lg p-8 shadow-md" style="min-width: 21em;">
+<div class="bg-white rounded-lg p-8 shadow-md">
     <h2 class="text-gray-600 text-lg mb-1 font-medium title-font">Approval Status & Remarks</h2>
     {#each approvalStatuses as status, index} 
         {@const invisibleColor = '#6D7E91'}
@@ -28,7 +28,7 @@
             {/if}
             <span class="text-gray-600">{approverNames[index]}</span>
         </p>
-        <p class='text-sm' style="font-style:italic">
+        <p class="text-sm" style="word-break:break-word; font-style:italic">
             {#if approverRemarks[index]}
                 <span class="pl-6" style="display: inline-block;">
                     <QuoteSolid size='sm' style="color:gray; position:absolute;"/>
