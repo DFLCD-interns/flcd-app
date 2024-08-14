@@ -8,7 +8,7 @@
     $: approverRemarks = data?.approvalForms.remarks;
 </script>
 
-<div class="bg-white rounded-lg p-8 shadow-md">
+<div class="bg-white rounded-lg p-8 shadow-md" style="min-width: 21em;">
     <h2 class="text-gray-600 text-lg mb-1 font-medium title-font">Approval Status & Remarks</h2>
     {#each approvalStatuses as status, index} 
         {@const invisibleColor = '#6D7E91'}

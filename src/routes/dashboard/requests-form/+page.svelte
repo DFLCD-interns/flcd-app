@@ -32,7 +32,7 @@
     // Function to ensure promised_end_time is always after promised_start_time
     $: promised_end_time_min = promised_start_time || currentDateTime;
 
-    $: isFLCD = data.current_user.access_level == 5;
+    $: isFLCD = data?.current_user?.access_level == 5;
 </script>
 
 <div class="px-10 py-10">

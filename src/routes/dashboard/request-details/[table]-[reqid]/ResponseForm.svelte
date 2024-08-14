@@ -1,11 +1,6 @@
 <script>
     export let data;
     export let form;
-    
-    $: totalStatus = data?.approvalForms.totalStatus;
-    $: approvalStatuses = data?.approvalForms.statuses;
-    $: approverNames = data?.approvalForms.displayNames;
-
 </script>
 
 <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
