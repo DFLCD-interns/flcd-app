@@ -9,7 +9,7 @@
   // console.log('d:', data)
   // console.log('v:', data.venues)
 
-  let venues = data.venue;
+  let venues = data.venues;
   let tableHead = []
   if (venues.length != null){
     tableHead = Object.keys(venues[0]);
