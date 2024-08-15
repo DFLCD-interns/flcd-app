@@ -1,9 +1,22 @@
 <script>
-    import { ChevronSortOutline } from "flowbite-svelte-icons";
     /** @type {import('./$types').PageData} */
 	export let data;
+
     import AdminView from "./admin-view.svelte";
     import NonAdminView from "./non-admin-view.svelte";
+    import { onMount } from 'svelte';
+    import toast from 'svelte-french-toast';
+    import { page } from '$app/stores';
+
+    onMount(() => {
+        const urlParams = new URLSearchParams($page.url.search);
+        const isRegistered = urlParams.get('registered');
+
+        if (isRegistered) {
+            toast.success('User created successfully!');
+        }
+    });
+
     let isAdmin = (data?.current_user?.access_level < 5);
     
     // console.log(`access_level: ${data.current_user.access_level}, ${isAdmin}`)

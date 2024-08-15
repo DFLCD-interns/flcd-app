@@ -12,11 +12,8 @@ export const actions = {
 			email = `${email}@up.edu.ph`;
 		}
 
-        // console.log("signin+page.server.js -- GOT FORM DATA")
-
 		try {
 			const sessionCreationResult = await createSessionByEmail(email, password);
-            // console.log("signin+page.server.js: ",sessionCreationResult);
 
 			cookies.set(SESSION_COOKIE_NAME, sessionCreationResult.id, {
 				path: "/",
@@ -24,6 +21,7 @@ export const actions = {
                 sameSite: "strict",
                 maxAge: 60 * 60 * 12,
 			});
+
 		} catch (error) {
 			console.log("Error: ", error.message);
 			return fail(500, {
@@ -34,8 +32,6 @@ export const actions = {
 		}
 		throw redirect(303, "/dashboard");
 	},
-
-
 };
 
 // import { SESSION_COOKIE_NAME } from '$lib/constants.js';

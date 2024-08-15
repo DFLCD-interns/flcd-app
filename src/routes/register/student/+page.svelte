@@ -1,71 +1,40 @@
 <script>
-    import { goto, onNavigate } from "$app/navigation";
+    import { enhance } from '$app/forms';
     import { browser } from "$app/environment";
     import { Input, Label, Button, Select, Alert } from "flowbite-svelte";
     import { ArrowLeftOutline } from "flowbite-svelte-icons";
+    import toast from 'svelte-french-toast';
+
     let selectedDept = "";
     let password, confirm_password;
-    let match = true;
 
-    let data;
-    let form; 
+    /*-- toast logic --*/
+    let loading = false
 
-    let access_level = 5;
-    let pw_hash = "hash"
+    const submitRegister = () => {
+    loading = true;
 
-    async function handleSubmit(event) {
-        event.preventDefault(); // Prevent the default form submission behavior
-
-        // Check if password and confirm password match
-        if (!password || password !== confirm_password) {
-            alert('Passwords do not match');
-            return;
+    return async ({ result, update }) => {
+        switch (result.type) {
+            case 'success':
+                await update();
+                break;
+            case 'failure':
+                const errorMessage = result.data.message || 'Failed to create user';
+                toast.error(errorMessage);
+                await update();
+                break;
+            case 'error':
+                toast.error(result.error.message);
+                break;
+            default:
+                await update();
         }
-
-        // Create FormData object from the form
-        const formData = new FormData(event.target);
-
-        // Manually append access_level to the FormData
-        formData.append('access_level', access_level);
-
-        // placeholder for password hashing logic
-        formData.append('pw_hash', pw_hash);
-
-        // console.log([...formData.values()]);
-
-        // Remove '-' from the student number in preparation for insertion in database 
-        const noDash = formData.get('student_number').split('-').join('');
-        formData.set('student_number', noDash);
-
-        // Iterate through FormData to check for empty values
-        for (let [key, value] of formData.entries()) {
-            if (!value) {
-                alert(`Please fill out the ${key} field.`);
-                return;
-            }
-        }
-
-        try {
-            const response = await fetch('?/register', {
-                method: 'POST',
-                body: formData
-            });
-
-            const body = await response.json();
-            
-            if (body) {
-                alert('User created successfully!');
-                goto(`/`);
-            } else {
-                throw new Error('Failed to create user');
-            }
-        } catch (error) {
-            console.error('Error creating user:', error);
-            alert(error);
-        }
-    }
+        loading = false;
+    };
+};
     
-    $: isOther = selectedDept == "other";
+    // $: isOther = selectedDept == "other";
     let depts = [
         { value: "DCTID", name: "Department of Clothing, Textiles, and Interior Design" },
         { value: "DFLCD", name: "Department of Family Life and Child Development" },
@@ -74,10 +43,6 @@
         { value: "DHRIM", name: "Department of Hotel, Restaurant, and Institution Management" },
         { value: "other", name: "Other..." },
     ];
-
-    function navBack() {
-        if (browser) window.history.back();
-    }
 </script>
 
 <section class="bg-gray-200 min-h-screen flex items-center justify-center p-5">
@@ -88,9 +53,8 @@
                     <Button
                         color="alternative"
                         class="!p-2 absolute top-0 left-0"
-                        on:click={() => {
-                            navBack();
-                        }}><ArrowLeftOutline class="w-6 h-6" />
+                        href="/">
+                        <ArrowLeftOutline class="w-6 h-6" />
                     </Button>
                     <img
                         class="mx-auto h-10 w-auto"
@@ -113,14 +77,7 @@
                 </div>
 
                 <div class="mt-5">
-                    {#if !match}
-                    <Alert border color="red">
-                        <span class="font-medium">Passwords don't match!</span>
-                        Please try again.
-                      </Alert>
-                    {/if}
-
-                    <form on:submit|preventDefault={handleSubmit} class="space-y-3">
+                    <form class="space-y-3" method="POST" action="?/register" use:enhance={submitRegister}>
                         <div class="flex flex-wrap align-center">
                             <div class="sm:w-1/2 w-full mt-3 space-y-4 sm:pr-1.5">
                                 <div class="flex items-center space-x-2">
@@ -166,33 +123,37 @@
                                     <Label>
                                         <span>Department</span>
                                         <Select
+                                            name="department"
+                                            id="department"
                                             class="mt-2"
                                             items={depts}
                                             bind:value={selectedDept}
+                                            required
                                         />
                                     </Label>
                                 </div>
-                                <div>
+                                <!-- <div>
                                     {#key isOther}
                                         <Label class="space-y-2">
                                             <span>(Non-CHE) Department</span>
                                             <Input
                                                 disabled={!isOther}
                                                 type="text"
-                                                name="department"
+                                                name="other_department"
+                                                required
                                             />
                                         </Label>
                                     {/key}
-                                </div>
+                                </div> -->
                                 <div>
-                                    <Label>
+                                    <Label class="mb-2">
                                         Course
-                                        <Input
-                                            type="text"
-                                            name="course"
-                                            required
-                                        />
                                     </Label>
+                                    <Input
+                                        type="text"
+                                        name="course"
+                                        required
+                                    />
                                 </div>
                             </div>
 
@@ -238,11 +199,17 @@
                                 </div>
                                 <div>
                                     <Label for="confirm_password" class="mb-2">Confirm password</Label>
-                                    <Input bind:value={confirm_password} type="password" id="confirm_password" placeholder="•••••••••" required />
+                                    <Input
+                                        name="confirm_password" 
+                                        bind:value={confirm_password} 
+                                        type="password" 
+                                        id="confirm_password" 
+                                        placeholder="•••••••••" 
+                                        required />
                                   </div>
                             </div>
                         </div>
-                            <Button on:click={() =>{handleSubmit()}} type="submit" class="w-full">Sign Up</Button>
+                        <Button type="submit" class="w-full" disabled={loading}>Sign Up</Button>
                     </form>
 
                     <p class="mt-5 text-center text-sm text-gray-500">

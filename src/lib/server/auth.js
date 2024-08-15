@@ -3,10 +3,10 @@
 import { writable, get } from "svelte/store";
 import { v4 as uuid } from "uuid";
 import { PEPPA_PIG, SESSION_COOKIE_NAME } from "$lib/server/constants.js";
-import { getUserFromSessionDB, getUsersDB, createSessionDB, getUserByIDDB, getSessionByIDDB, createUserDB, authUserDB } from "$lib/server/db.js";
+import { getUserFromSessionDB, createSessionDB, getUserByIDDB, getSessionByIDDB, createUserDB, authUserDB } from "$lib/server/db.js";
 import { json } from "@sveltejs/kit";
 import { scryptSync, randomBytes} from "crypto"; 
-import { getUserWithMatchingEmail } from "./db";
+import { getUserWithMatchingEmail, getUserWithMatchingSN } from "./db";
 
 // these seem to be treated as a temp database replacement
 // const usersStore = writable([]); 
@@ -77,9 +77,17 @@ export function validatePassword(password) {
 
 export async function createUser(first_name, last_name, email, password, phone, student_number, course, department, access_level) {
     
-    const matches = await getUserWithMatchingEmail(email);
-    if (matches.length > 1) {
+    const email_matches = await getUserWithMatchingEmail(email);
+    if (email_matches.length > 0) {
         throw new Error("Email already in use.");
+    }
+    const sn_matches = await getUserWithMatchingSN(student_number);
+    if (sn_matches.length > 0) {
+        throw new Error("Student number already in use.");
+    }
+    const password_strong = await validatePassword(password);
+    if (password_strong.error) {
+        throw new Error(password_strong.message);
     }
 
     const new_uuid = uuid();
@@ -91,7 +99,7 @@ export async function createUser(first_name, last_name, email, password, phone, 
         throw new Error("Error occured when creating a new user.");
     }
     return { success: true,
-        message: "User created.",
+        message: "User successfully created.",
     }
 }
 
@@ -146,6 +154,12 @@ export async function createSessionByEmail(email, password) {
     // });
 
     // console.log("before userFound");
+    
+    const user = await authUserDB(email);
+    if (user.length < 1) {
+        throw new Error("Email not found. Please sign up.");
+    }
+    
     const password_resolution = await resolvePW(password, email);
 
     // console.log("auth.js - password resolution: ", password_resolution);
@@ -260,54 +274,43 @@ export async function isCorrect(hash, salt, toverify) {
     return false;
 }
 
-async function resolvePW(password, email, force = false) { //TODO change this to reflect using isCorrect and hashItem fucntions
+async function resolvePW(password, email, force = false) { 
     let salt;
     let pw_hash;
-    let user = await authUserDB(email);
-    if (user.length < 1) {
-        throw new Error("Email not found. Please sign up.");
-    }
-    user = user[0];
-    
-    if (!email || force) {
+
+    // Fetch the user from the database
+    const users = await authUserDB(email);
+    const user = users.length > 0 ? users[0] : null;
+
+    // If the email is not provided or force is true, generate a new salt
+    if (!user || force) {
         salt = randomBytes(64).toString('hex');
     } else {
         pw_hash = user.pw_hash; 
         salt = pw_hash.slice(128, 256);
     }
-    
-    let finalkey = scryptSync(password, salt, 64).toString("hex"); // salting first
+
+    let finalkey = scryptSync(password, salt, 64).toString("hex"); // Salting first
     finalkey = scryptSync(finalkey, PEPPA_PIG, 64).toString("hex");
-    if (email && !force) {
+
+    // If user exists and force is not true, validate the password
+    if (user && !force) {
         if (finalkey !== pw_hash.slice(0,128)) {
             throw new Error("Incorrect password");
         }
     }
 
     if (user) {
-        if (!force) {
-            return {
-                success: true,
-                message: "Successfully authenticated.",
-                body: {
-                    userid: user.id,
-                    useruuid: user.uuid,
-                    finalHash: finalkey,
-                    salt: salt,
-                }
+        return {
+            success: true,
+            message: force ? "Password changed." : "Successfully authenticated.",
+            body: {
+                userid: user.id,
+                useruuid: user.uuid,
+                finalHash: finalkey,
+                salt: salt,
             }
-        } else {
-            return {
-                success: true,
-                message: "Password changed.",
-                body: {
-                    userid: user.id,
-                    useruuid: user.uuid,
-                    finalHash: finalkey,
-                    salt: salt,
-                }
-            }
-        }
+        };
     } else {
         return {
             success: true,
@@ -318,6 +321,7 @@ async function resolvePW(password, email, force = false) { //TODO change this to
                 finalHash: finalkey,
                 salt: salt,
             }
-        }
+        };
     }
 }
+

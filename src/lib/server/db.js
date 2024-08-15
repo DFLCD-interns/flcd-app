@@ -98,6 +98,11 @@ export async function getUserWithMatchingEmail(email) {
   return res.body.result.rows;
 }
 
+export async function getUserWithMatchingSN(sn) {
+  const res = await query('SELECT * FROM users WHERE student_number = $1', [sn]);
+  return res.body.result.rows;
+}
+
 export async function getUsersWithAccessLevel(access_level) {
   const res = await query('SELECT * FROM users WHERE access_level = $1', [access_level]);
   return res.body.result.rows;
