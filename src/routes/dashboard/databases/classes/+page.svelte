@@ -3,12 +3,14 @@
       export let data;
   
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton, Dropdown, DropdownItem } from 'flowbite-svelte';
-    import { EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid, AngleDownOutline, TrashBinSolid } from 'flowbite-svelte-icons';
+    import { DownloadSolid, EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid, AngleDownOutline, TrashBinSolid } from 'flowbite-svelte-icons';
+    import { downloadCSV } from '../downloadcsv';
 
     // console.log("v:", data.classes_only_table)
   
     let batches = data.batches;
     let tableHead = []
+    console.log(data)
     if (batches[0] != null){
       tableHead = Object.keys(batches[0]);
     }
@@ -36,6 +38,7 @@
     <div class="flex items-center justify-between pb-5">
       <p  class="font-semibold text-xl text-gray-700">Classes Database</p>
       <div class = "flex gap-2">
+        <GradientButton on:click={() => {downloadCSV(batches, 'all_classes')}} color="green" class="inline-flex text-center gap-2"><DownloadSolid/>Download Table</GradientButton>
         <GradientButton id="batchActionsID" data-dropdown-toggle="batchActions" color="green" class="inline-flex text-center gap-2">Batch Actions<AngleDownOutline/></GradientButton>
         <Dropdown>
             <DropdownItem on:click={() => {AddBatchModal=true}}>Add Batch</DropdownItem>

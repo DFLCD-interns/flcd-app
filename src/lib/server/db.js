@@ -527,11 +527,11 @@ export async function getAllClassesDB() {
     batches.name AS batch_name,
     batches.description AS batch_description,
     batches.created AS batch_created,
-    classes."name" AS class_name,
+    classes.name AS class_name,
     users.first_name AS handler_firstname,
     users.last_name AS handler_lastname,
     classes.description AS class_description,
-    classes."schedule",
+    classes.schedule,
     classes.created AS classes_created,
     childs.name AS child_name,
     childs.birthdate AS child_birthdate,
@@ -540,7 +540,7 @@ export async function getAllClassesDB() {
     FROM batches JOIN classes ON batches.id = classes.batch_id 
     JOIN childs ON classes.id = childs.class_id 
     JOIN users ON classes.handler_id = users.id`);
-  // console.log(res);
+    //console.log(`testdb: ${res.body.result.rows}`);
   return res.body.result.rows;
 }
 
@@ -549,6 +549,8 @@ export async function getBatchesDB() {
   // console.log(res);
   return res.body.result.rows;
 }
+
+
 
 export async function getClassesDB() {
   const res = await query(`SELECT * FROM classes`);
