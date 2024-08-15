@@ -1,6 +1,6 @@
 <script>
     import {Badge, Button, GradientButton } from 'flowbite-svelte'
-    import { ArrowLeftOutline, TrashBinSolid } from 'flowbite-svelte-icons';
+    import { ArrowLeftOutline, TrashBinSolid, InfoCircleOutline } from 'flowbite-svelte-icons';
     import { statusColors, postgresTimeToReadable } from '$lib';
     import Assignment from './Assignment.svelte';
     import ApprovalStatus from './ApprovalStatus.svelte';
@@ -44,7 +44,7 @@
                     <input hidden="true" id="request_id" name="request_id" />
                     <GradientButton color="red" type="submit" on:click={() => {
                         form.querySelector(`input[id="request_table_name"]`).value = data.requestType;
-                        form.querySelector(`input[id="request_id"]`).value = requestDetails.reqid;
+                        form.querySelector(`input[id="request_id"]`).value = data.requestID;
                         }} >
                         <TrashBinSolid/>
                     </GradientButton>
@@ -53,23 +53,24 @@
         </div>
     </div>
     <div class="min-w-full md:flex pt-5 gap-10 justify-center">
-        <div class="bg-white flex justify-center rounded-lg shadow-lg p-6">
+        <div class="bg-white flex justify-center rounded-lg shadow-lg p-6" style="min-width: 42em;">
             <div class="overflow-x-auto">
             <table class="table-fixed object-cover">
                 <tbody class="text-gray-600">
-                <tr class="border-b border-blue-gray-200">
+                <tr class="border-b border-blue-gray-200"/>
+                <tr>
                     <td class="py-3 px-4 font-semibold">Name</td>
                     <td class="py-3 px-4">{requestDetails.requester_firstname} {requestDetails.requester_lastname}</td>
                 </tr>
-                <tr class="border-b border-blue-gray-200">
+                <tr>
                     <td class="py-3 px-4 font-semibold">Email</td>
                     <td class="py-3 px-4">{requestDetails.email}</td>
                 </tr>
-                <tr class="border-b border-blue-gray-200">
+                <tr>
                     <td class="py-3 px-4 font-semibold">Student Number</td>
                     <td class="py-3 px-4">{requestDetails.studentno}</td>
                 </tr>
-                <tr class="border-b border-blue-gray-200">
+                <tr>
                     <td class="py-3 px-4 font-semibold">Contact Number</td>
                     <td class="py-3 px-4">{requestDetails.contactno}</td>
                 </tr>
@@ -78,41 +79,67 @@
                     <td class="py-3 px-4">{requestDetails.dept}</td>
                 </tr>
                 <tr class="border-b border-blue-gray-200">
-                    <td class="py-3 px-4 font-semibold">Promised Start Date</td>
-                    <td class="py-3 px-4">{postgresTimeToReadable(requestDetails.dateneeded)}</td>
+                    <td class="py-3 px-4 font-semibold">Coordinating Instructor</td>
+                    <div class="py-3 px-4">
+                        <tr>{requestDetails.admin_firstname} {requestDetails.admin_lastname}</tr>
+                        <tr>{requestDetails.adminemail}</tr>
+                    </div>
                 </tr>
-                <tr class="border-b border-blue-gray-200">
-                    <td class="py-3 px-4 font-semibold">Promised End/Return Date</td>
-                    <td class="py-3 px-4">{postgresTimeToReadable(requestDetails.returndate)}</td>
-                </tr>
-                <tr class="border-b border-blue-gray-200">
-                    <td class="py-3 px-4 font-semibold">Location of Use/Activity</td>
-                    <td class="py-3 px-4">{requestDetails.room}</td>
-                </tr>
-                <tr class="border-b border-blue-gray-200">
-                    <td class="py-3 px-4 font-semibold">Name of Coordinating Instructor</td>
-                    <td class="py-3 px-4">{requestDetails.admin_firstname} {requestDetails.admin_lastname}</td>
-                </tr>
-                <tr class="border-b border-blue-gray-200">
-                    <td class="py-3 px-4 font-semibold">Email of Coordinating Instructor</td>
-                    <td class="py-3 px-4">{requestDetails.adminemail}</td>
-                </tr>
-                <tr class="border-b border-blue-gray-200">
-                    <td class="py-3 px-4 font-semibold">Requesting the following</td>
-                    <td class="py-3 px-4">
-                        {#if isAdmin && data.requestType.includes('equipment') && data?.approvalForms.canRespond}
-                            <Assignment data={data} form={form}/>     
-                        {:else}
-                            {data.requestName}
-                        {/if}
-                    </td> 
+                {#if data.requestType === 'equipment_requests'}
+                    <tr>
+                        <td class="py-3 px-4 font-semibold">Promised Date of Borrowing</td>
+                        <td class="py-3 px-4">{postgresTimeToReadable(data.startDate)}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-3 px-4 font-semibold">Promised Date of Return</td>
+                        <td class="py-3 px-4">{postgresTimeToReadable(requestDetails.promised_end_time)}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-3 px-4 font-semibold">Actual Date of Borrowing</td>
+                        <td class="py-3 px-4">{postgresTimeToReadable(requestDetails.actual_start_time)}</td>
+                    </tr>
+                    <tr class="border-b border-blue-gray-200">
+                        <td class="py-3 px-4 font-semibold">Actual Date of Return</td>
+                        <td class="py-3 px-4">{postgresTimeToReadable(data.endDate)}</td>
+                    </tr>
+                    <tr class="border-b border-blue-gray-200">
+                        <td class="py-3 px-4 font-semibold">Location of Use/Activity</td>
+                        <td class="py-3 px-4">{requestDetails.location}</td>
+                    </tr>
+                {:else} 
+                    <tr>
+                        <td class="py-3 px-4 font-semibold">Start Date</td>
+                        <td class="py-3 px-4">{postgresTimeToReadable(data.startDate)}</td>
+                    </tr>
+                    <tr class="border-b border-blue-gray-200">
+                        <td class="py-3 px-4 font-semibold">End Date</td>
+                        <td class="py-3 px-4">{postgresTimeToReadable(data.endDate)}</td>
+                    </tr>
+                {/if}
+                <td class="py-3 px-4">
+                    <p class="font-semibold"> Requesting the following </p>
+                    {#if isAdmin && data?.approvalForms.canRespond && data.requestType.includes('equipment')}
+                        <div class="mt-2 flex">
+                            <InfoCircleOutline class="size-xs" /> 
+                            <p class="text-sm max-w-52 ml-1"> Be sure to submit the Response Form on the right to save your assignments here.</p>
+                        </div>
+                    {/if}
+                </td>
 
-                </tr>
+                <td class="py-3 px-4">
+                    {#if isAdmin && data?.approvalForms.canRespond && data.requestType.includes('equipment')}
+                        <Assignment data={data} form={form}/>     
+                    {:else}
+                        {#each data.requestName?.split(', ') as item}
+                            <p>• {item}</p>
+                        {/each}
+                    {/if}
+                </td> 
                 </tbody>
             </table>
         </div>
     </div>
-    <div class="space-y-10 relative">
+    <div class="space-y-10 relative" style="width: 24em;">
         <ApprovalStatus data={data}/>
         {#if isAdmin}
             <ResponseForm data={data} bind:form={form}/>

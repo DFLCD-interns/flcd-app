@@ -1,5 +1,6 @@
 import pkg from 'pg';
 const { Pool } = pkg;
+import { format } from 'date-fns';
 
 const pool = new Pool({ //store this in an env file!
   user: 'postgres',
@@ -139,111 +140,11 @@ export async function getUserEquipmentRequests(user){
   return res.body.result.rows
 }
 
-// Equipment yet to be assigned
-export async function getEquipmentRequestsDB() {
-  const res = await query(`SELECT * FROM base_requests JOIN equipment_requests ON equipment_requests.request_id = base_requests.id ORDER BY equipment_requests.id ASC`);
-  return res.body.result.rows;
-}
-
-export async function getVenueRequestsDB() {
-  const res = await query(`SELECT * FROM base_requests JOIN venue_requests ON venue_requests.request_id = base_requests.id JOIN venues ON venue_requests.venue_id = venues.id ORDER BY venue_requests.id ASC`);
-  // console.log(res.body.result.rows);
-  return res.body.result.rows;
-}
-
-export async function getChildRequestsDB() {
-  const res = await query(`SELECT * FROM base_requests JOIN child_requests ON child_requests.request_id = base_requests.id JOIN childs ON child_requests.child_id = childs.id ORDER BY child_requests.id ASC`);
-  return res.body.result.rows;
-}
-
-export async function getClassRequestsDB() {
-  const res = await query(`SELECT * FROM base_requests JOIN class_requests ON class_requests.request_id = base_requests.id JOIN classes ON class_requests.class_id = classes.id ORDER BY class_requests.id ASC`);
-  return res.body.result.rows;
-}
-
-
 // missing fields: class, requests, staff, course, purpose
 // TODO make compatible for class requests!!
+// This is for a specific request; supposed to get extra details
 export async function getRequestDetailsDB(table, reqid) {
-  let material_table_name, id_col_name, start_time_col_name, end_time_col_name;
-  switch(table) {
-    case "equipment_requests": {
-      material_table_name = 'equipments';
-      id_col_name = 'equipment';
-      start_time_col_name = 'promised_start_time';
-      end_time_col_name = 'promised_end_time';
-      break;
-    }
-    case "venue_requests": {
-      material_table_name = 'venues';
-      id_col_name = 'venue';
-      start_time_col_name = 'date_needed_start';
-      end_time_col_name = 'date_needed_end';
-      break;
-    }
-
-    //TODO make timeslots available ALSO NO MORE CHILD REQUESTS!!!!
-    // case "child_requests": {
-    //   material_table_name = 'childs';
-    //   id_col_name = 'child';
-    //   start_time_col_name = 'observation_time'; //TODO what
-    //   end_time_col_name = 'observation_time'; //TODO what
-    //   break;
-    // }
-    // case "class_requests": {
-    //   material_table_name = 'classes';
-    //   id_col_name = 'class';
-    //   start_time_col_name = 'timeslot' + 'observe_date'; //TODO what
-    //   end_time_col_name = 'timeslot' + 'observe_date'; //TODO what
-    //   break;
-    // }
-  }
-  var type = table == "equipment_requests" ? 'equipments' : (table == "venue_requests" ? 'venues' : '');
-  var idtype = table == "equipment_requests" ? 'equipment' : (table == "venue_requests" ? 'venue' : '');
-  let res;
-  console.log(`SELECT 
-    br.id AS reqid,
-    requester.first_name AS requester_firstname,
-    requester.last_name AS requester_lastname,
-    requester.email,
-    requester.student_number AS studentno,
-    requester.phone AS contactno,
-    TO_CHAR(t.promised_start_time, '${timeFormat}') AS dateneeded,
-    faculty.first_name AS admin_firstname,
-    faculty.last_name AS admin_lastname,
-    requester.department AS dept,
-    e.name AS material,
-    t.location AS room,
-    faculty.email AS adminemail,
-    TO_CHAR(t.promised_end_time, '${timeFormat}') AS returndate
-    FROM base_requests br 
-    LEFT JOIN ${table} t ON br.id = t.request_id
-	  LEFT JOIN ${type} e ON t.${idtype}_id = e.id 
-    LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
-    LEFT JOIN users AS requester ON br.requester_id = requester.id
-    WHERE br.id = ${reqid}`)
-
-  if (table == "class_requests"){
-    res = await query(`SELECT 
-      br.id AS reqid,
-      requester.first_name AS requester_firstname,
-      requester.last_name AS requester_lastname,
-      requester.email,
-      requester.student_number AS studentno,
-      requester.phone AS contactno,
-      faculty.first_name AS admin_firstname,
-      faculty.last_name AS admin_lastname,
-      requester.department AS dept,
-      faculty.email AS adminemail
-      FROM base_requests br 
-      LEFT JOIN ${table} t ON br.id = t.request_id
-      LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
-      LEFT JOIN users AS requester ON br.requester_id = requester.id
-      WHERE br.id = ${reqid}`);
-  }
-  else{
-  res = await query(`SELECT 
-    br.id AS reqid,
+  const qText = `SELECT 
     requester.first_name AS requester_firstname,
     requester.last_name AS requester_lastname,
     requester.email,
@@ -252,18 +153,18 @@ export async function getRequestDetailsDB(table, reqid) {
     requester.department AS dept,
     faculty.first_name AS admin_firstname,
     faculty.last_name AS admin_lastname,
-    faculty.email AS adminemail,
-    mat.name AS material,
-    ${material_table_name === 'equipments' ? 't.location AS room,': ''}
-    t.${start_time_col_name} AS dateneeded,
-    t.${end_time_col_name} AS returndate
+    faculty.email AS adminemail
+    ${table === 'equipment_requests' ? 
+      `, t.location AS location, 
+         t.actual_start_time AS actual_start_time,
+         t.promised_end_time AS promised_end_time`: ''}
     FROM base_requests br 
     LEFT JOIN ${table} t ON br.id = t.request_id
-	  LEFT JOIN ${material_table_name} mat ON t.${id_col_name}_id = mat.id 
     LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
     LEFT JOIN users AS requester ON br.requester_id = requester.id
-    WHERE br.id = ${reqid}`);}
-    console.log(res.body.result.rows[0])
+    WHERE br.id = ${reqid}`
+  const res = await query(qText);
+  // console.log(res.body.result.rows)
   return res.body.result.rows;
 }
 
@@ -406,14 +307,11 @@ export async function deleteRequest(request_table_name, request_id) {
 export async function getApprovalsInfo(searchFormData) { 
   const formsQuery = await getFromTableDB("approvals", searchFormData); 
 
-  const statuses = [];
+  const statuses = [], remarks = [], userIDs = [];
   formsQuery.body.result.rows.map(async row => {
-      statuses.push(row?.status);
-  })
-
-  const remarks = [];
-  formsQuery.body.result.rows.map(async row => {
+    statuses.push(row?.status);
     remarks.push(row?.remarks);
+    userIDs.push(row?.approver_id);
   })
 
   const displayNames = [];
@@ -439,12 +337,13 @@ export async function getApprovalsInfo(searchFormData) {
   return { 
     statuses: statuses, 
     remarks: remarks,
-    displayNames: displayNames
+    displayNames: displayNames,
+    userIDs: userIDs
   };
 }
 
 // For requests
-export function getTotalStatus(names, statuses) {
+function getTotalStatus(names, statuses) {
   if (statuses.includes("declined"))
       return "declined";
   else if (statuses.includes("pending"))
@@ -457,12 +356,33 @@ export function getTotalStatus(names, statuses) {
   } 
 }
 
-// For dashboard
+async function getEquipmentRequestsDB() {
+  const res = await query(`SELECT * FROM base_requests JOIN equipment_requests ON equipment_requests.request_id = base_requests.id ORDER BY equipment_requests.id ASC`);
+  return res.body.result.rows;
+}
+
+async function getVenueRequestsDB() {
+  const res = await query(`SELECT * FROM base_requests JOIN venue_requests ON venue_requests.request_id = base_requests.id JOIN venues ON venue_requests.venue_id = venues.id ORDER BY venue_requests.id ASC`);
+  return res.body.result.rows;
+}
+
+async function getChildRequestsDB() {
+  const res = await query(`SELECT * FROM base_requests JOIN child_requests ON child_requests.request_id = base_requests.id JOIN childs ON child_requests.child_id = childs.id ORDER BY child_requests.id ASC`);
+  return res.body.result.rows;
+}
+
+async function getClassRequestsDB() {
+  const res = await query(`SELECT * FROM base_requests JOIN class_requests ON class_requests.request_id = base_requests.id JOIN classes ON class_requests.class_id = classes.id ORDER BY class_requests.id ASC`);
+  return res.body.result.rows;
+}
+
+// For dashboard, only supposed to get brief details
 export async function getRequestsInfo(user_id, user_access_level) {
 	
+  // Get all requests
 	const equipment_requests = await getEquipmentRequestsDB();
 	const venue_requests = await getVenueRequestsDB();
-	const child_requests = await getChildRequestsDB();
+	// const child_requests = await getChildRequestsDB();
 	const class_requests = await getClassRequestsDB();
 
 	const equipReqsGroupedDict = {};
@@ -490,6 +410,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
 			name: requestName,
       created: groupedItem[0]?.created,
 			date: groupedItem[0]?.promised_start_time,
+      actual_date_end: groupedItem[0]?.actual_end_time,
 			status: null,
       approvalsInfo: null,
       requestedItems: desiredEquipments, // these are equipment types
@@ -497,33 +418,45 @@ export async function getRequestsInfo(user_id, user_access_level) {
 		})
   });
 	
-	venue_requests.forEach(function (item) {
+	const venueReqsGroupedDict = {};
+	venue_requests.forEach(row => {
+		if (Object.keys(venueReqsGroupedDict).includes(row.request_id.toString())) 
+			venueReqsGroupedDict[row.request_id].push(row); // add to existing key-value pair
+		else venueReqsGroupedDict[row.request_id] = [row]; // new key-value pair
+	});
+
+  Object.values(venueReqsGroupedDict).forEach(function (groupedItem) {
+    const requestName = groupedItem.map(item => item.name).join(', ');
+    // console.log(requestName);
+    const start_date = new Date(format(groupedItem[0].date_needed, 'yyyy-MM-dd') + 'T' + groupedItem[0].start_time)
+    const end_date = new Date(format(groupedItem[0].date_needed, 'yyyy-MM-dd') + 'T' + groupedItem[0].end_time)
 		allRequests.push({
 			type: 'Venue Request',
 			table:'venue_requests',
-			id: item.request_id,
-      requester_id: item?.requester_id,
-			name: item.name,
-      created: item.created,
-			date: item.date_needed,
+			id: groupedItem[0].request_id,
+      requester_id: groupedItem[0]?.requester_id,
+			name: requestName,
+      created: groupedItem[0].created,
+			date: start_date,
+			actual_date_end: end_date,
 			status: null,
       approvalsInfo: null,
 		})
 	});
 	
-	child_requests.forEach(function (item) {
-		allRequests.push({
-			type: 'Child Observation Request',
-			table:'child_requests',
-			id: item.request_id,
-      created: item.created,
-      requester_id: item?.requester_id,
-			name: item.name,
-			date: item.observation_time,
-			status: null,
-      approvalsInfo: null,
-		})
-	});
+	// child_requests.forEach(function (item) {
+	// 	allRequests.push({
+	// 		type: 'Child Observation Request',
+	// 		table:'child_requests',
+	// 		id: item.request_id,
+  //     created: item.created,
+  //     requester_id: item?.requester_id,
+	// 		name: item.name,
+	// 		date: item.observation_time,
+	// 		status: null,
+  //     approvalsInfo: null,
+	// 	})
+	// });
   
 	class_requests.forEach(function (item) {
 		allRequests.push({
@@ -550,17 +483,15 @@ export async function getRequestsInfo(user_id, user_access_level) {
 		const approvalsInfo = await getApprovalsInfo(formData);
     
     let valid;
-    // console.log(forms)
     if (user_access_level < 5) // if admin
       valid = forms.some((form, i) =>	{
         // valid if this user is the approver AND the previous approver has approved
-        const validA = form.approver_id === user_id && (i == 0 ? true : forms[i-1].status === 'approved');
+        const validIfApprover = form.approver_id === user_id && (i == 0 ? true : forms[i-1].status === 'approved');
         // also valid if the approver is null AND the access level of this user is ADMIN STAFF (level 3) 
-        const validB = (!form.approver_id) && user_access_level === 3;
-        return validA || validB; // TODO moving of requests to requestsHistory when necessary
+        const validIfAdminStaff = (!form.approver_id) && user_access_level === 3;
+        return validIfApprover || validIfAdminStaff; 
       });
-    else 
-      valid = req.requester_id === user_id;
+    else valid = req.requester_id === user_id;
     
     if (valid) {
       req.status = getTotalStatus(approvalsInfo.displayNames, approvalsInfo.statuses);

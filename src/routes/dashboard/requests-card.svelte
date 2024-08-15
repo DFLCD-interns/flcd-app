@@ -7,8 +7,9 @@
   export let data;
   export let form;
   const isAdmin = data?.current_user?.access_level < 5; 
+  
 
-</script>
+</script> 
 
 <Card class="w-full max-w-full">
   <div class="flex items-center justify-between">
