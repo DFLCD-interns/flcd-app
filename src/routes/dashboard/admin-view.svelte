@@ -123,6 +123,8 @@
       {/each} {/if}
     </div>
   {:else}
-    <p class="text-gray-500">No Pending Requests</p>
+    <p class="text-gray-500 text-center mt-5">
+      { viewingPendingReqs ? 'No Pending Requests' : 'No Finished Requests'}
+    </p>
   {/if}
 </div>
