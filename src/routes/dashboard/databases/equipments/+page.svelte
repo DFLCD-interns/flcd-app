@@ -3,8 +3,8 @@
 	export let data;
 
   import { MultiSelect, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton } from 'flowbite-svelte';
-  import { FilterSolid, EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid, ChevronSortOutline } from 'flowbite-svelte-icons';
-
+  import { DownloadSolid, FilterSolid, EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid, ChevronSortOutline } from 'flowbite-svelte-icons';
+  import { downloadCSV } from '../downloadcsv';
   let equipments = data.equipments;
   let tableHead = []
   if (equipments != null){
@@ -116,7 +116,10 @@
   </div>
   <div class="flex items-center justify-between pb-5">
     <p  class="font-semibold text-xl text-gray-700">Equipments Database</p>
+    <div class = "flex gap-2">
+    <GradientButton on:click={downloadCSV(equipments, 'equipment')} color="green" class="inline-flex text-center gap-2"><DownloadSolid/>Download Table</GradientButton>
     <GradientButton on:click={() => {AddModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Equipment</GradientButton>
+  </div>
   </div>
   <div class="pb-5">
   {#if equipments != null}
