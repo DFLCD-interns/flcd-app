@@ -48,7 +48,7 @@
 <section class="bg-gray-200 min-h-screen flex items-center justify-center p-5">
     <div class="bg-gray-100 w-full flex rounded-xl max-w-4xl drop-shadow-xl">
         <div class="w-full ps-3 pe-3 pb-6">
-            <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8 w-full" >
+            <div class="flex min-h-full flex-col justify-center px-6 pt-12 pb-7 lg:px-8 w-full" >
                 <div class="sm:w-full sm:mx-auto w-full relative">
                     <Button
                         color="alternative"
