@@ -1,22 +1,19 @@
 <script>
     export let data;
-    import { Card, Button, Drawer, CloseButton } from 'flowbite-svelte';
-    import { ArrowRightOutline, InfoCircleSolid, HomeSolid } from 'flowbite-svelte-icons';
+    import { Drawer } from 'flowbite-svelte';
     import { sineIn } from 'svelte/easing';
-    // import admminSidebar from './admin-sidebar.svelte';
     import AdminSidebar from './admin-sidebar.svelte';
     import NonAdminSidebar from './non-admin-sidebar.svelte';
+
     let hidden1 = true;
     let transitionParams = {
         x: -320,
         duration: 200,
         easing: sineIn
     };
-    function handleClick() {
-        window.location.href = "/";
-    }
     let isAdmin = (data?.current_user?.access_level < 5);
 </script>
+
 <aside class="hidden lg:block fixed z-10 top-0 pb-3 px-6 w-full justify-between h-screen border-r bg-white transition duration-300 md:w-4/12 lg:ml-0 lg:w-[25%] xl:w-[20%] 2xl:w-[15%]">
     {#if isAdmin}
         <AdminSidebar {data}></AdminSidebar>
@@ -63,5 +60,4 @@
 
   <!--actual dashboard-->
   <slot></slot>
-
 </div>
