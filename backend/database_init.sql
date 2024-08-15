@@ -88,8 +88,8 @@ CREATE TABLE classes (
     created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
-INSERT INTO classes (name, description, handler_id, batch_id)
-VALUES ('Section A', 'Section A', 5, 1);
+INSERT INTO classes (name, description, schedule, handler_id, batch_id)
+VALUES ('Section A', 'Section A', 'AM', 5, 1);
 
 CREATE TABLE venues (
     id SERIAL PRIMARY KEY,
@@ -103,12 +103,14 @@ INSERT INTO venues (name) VALUES ('Room 302'), ('Room 303'), ('Room 304');
 CREATE TABLE childs (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
-    birthdate TIMESTAMP,
+    birthdate DATE,
     tracking_id VARCHAR(128),
     class_id INT,
     FOREIGN KEY (class_id) REFERENCES classes(id),
     created TIMESTAMP DEFAULT NOW() NOT NULL
 );
+INSERT INTO childs (name, birthdate, tracking_id, class_id)
+VALUES ('Anya Forger', '2019-03-03', 1, 1);
 
 CREATE TABLE base_requests (
     id SERIAL PRIMARY KEY,
@@ -150,14 +152,6 @@ VALUES
 ('RODE Lapel', 'Lapel Microphone', 'Room XXX', 'available'),
 (NULL, 'For Printing Only', NULL, 'available');
 
-CREATE TABLE child_requests (
-    id SERIAL PRIMARY KEY,
-    observation_time VARCHAR(128),
-    child_id INT,
-    FOREIGN KEY (child_id) REFERENCES childs(id),
-    request_id INT,
-    FOREIGN KEY (request_id) REFERENCES base_requests(id)
-);
 
 CREATE TABLE class_requests (
     id SERIAL PRIMARY KEY,
@@ -166,7 +160,9 @@ CREATE TABLE class_requests (
     class_id INT,
     FOREIGN KEY (class_id) REFERENCES classes(id),
     request_id INT, -- the base request id so this can be associated with a base request
-    FOREIGN KEY (request_id) REFERENCES base_requests(id)
+    FOREIGN KEY (request_id) REFERENCES base_requests(id),
+    assigned_child_id INT,
+    FOREIGN KEY (assigned_child_id) REFERENCES childs(id) -- assigned child for observation
 );
 
 CREATE TABLE venue_requests (
@@ -206,21 +202,6 @@ CREATE TABLE equipment_requests ( -- one entry for each equipment in a request
     FOREIGN KEY (request_id) REFERENCES base_requests(id)
 );
 
-CREATE TABLE preferred_times_child (
-    id SERIAL PRIMARY KEY,
-    start_time TIMESTAMP,
-    end_time TIMESTAMP,
-    request_id INT,
-    FOREIGN KEY (request_id) REFERENCES child_requests(id)
-);
-
-CREATE TABLE preferred_times_class (
-    id SERIAL PRIMARY KEY,
-    start_time TIMESTAMP,
-    end_time TIMESTAMP,
-    request_id INT,
-    FOREIGN KEY (request_id) REFERENCES class_requests(id)
-);
 
 CREATE TABLE approvals (
     id SERIAL PRIMARY KEY,
