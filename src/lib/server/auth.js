@@ -8,7 +8,7 @@ import { json } from "@sveltejs/kit";
 import { scryptSync, randomBytes} from "crypto"; 
 import { getUserWithMatchingEmail } from "./db";
 
-//these seem to be treated as a temp database replacement
+// these seem to be treated as a temp database replacement
 // const usersStore = writable([]); 
 // const sessionsStore = writable([]);
 
@@ -49,7 +49,6 @@ export async function authenticateUser(event) {
 
 export async function validateEmail(email) { // checking of inputs is done here
     const emailRegex = /[-A-Za-z0-9_.%]+@[-A-Za-z0-9_.%]+\.[A-Za-z]+/gm;
-
     const emailRegexExec = emailRegex.exec(email);
 
     if (emailRegexExec && emailRegexExec[0] === email) {
@@ -57,13 +56,9 @@ export async function validateEmail(email) { // checking of inputs is done here
             success: true,
         };
     }
-
-    
-    
-
     return {
         error: true,
-        message: "Email is invalid",
+        message: "Email is invalid.",
     };
 }
 
@@ -73,7 +68,7 @@ export function validatePassword(password) {
     if (!requiredLength) {
         return {
             error: true,
-            message: "Password must be at least 8 characters in length",
+            message: "Password must be at least\n8 characters in length.",
         };
     }
 
@@ -81,61 +76,20 @@ export function validatePassword(password) {
 }
 
 export async function createUser(first_name, last_name, email, password, phone, student_number, course, department, access_level) {
-    // console.log("auth.js - createUser start.");
-
-    // const emailValidationResult = validateEmail(email);
-
-    // if (emailValidationResult.error) {
-    //     throw new Error(emailValidationResult.message);
-    // }
-
-    // const passwordValidationResult = validatePassword(password);
-
-    // if (passwordValidationResult.error) {
-    //     throw new Error(passwordValidationResult.message);
-    // }
-
-    // const currentUsers = get(usersStore);
-
-    // const newUser = {
-    //     email,
-    //     password,
-    //     id: uuid(),
-    // };
-
-    // check if email exists
+    
     const matches = await getUserWithMatchingEmail(email);
     if (matches.length > 1) {
         throw new Error("Email already in use.");
-        // return {
-        //     error: true,
-        //     message: "Email already in use.",
-        // }
     }
 
     const new_uuid = uuid();
-
-
-    // console.log("newuuid", new_uuid);
-
     const pw_hash_response = await resolvePW(password, null);
-    
-    // console.log("hashresponse", pw_hash_response);
-    
     const pw_hash = pw_hash_response.body.finalHash.concat(pw_hash_response.body.salt);
-    
-    // console.log("auth.js - createUser before newuser.");
-    
     const newUser = await createUserDB(new_uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level);
 
     if (!newUser) {
         throw new Error("Error occured when creating a new user.");
     }
-    // usersStore.update((previousUsers) => {
-    //     return [...previousUsers, newUser];
-    // });
-
-    // return createSessionById(newUser.id);
     return { success: true,
         message: "User created.",
     }
@@ -307,49 +261,32 @@ export async function isCorrect(hash, salt, toverify) {
 }
 
 async function resolvePW(password, email, force = false) { //TODO change this to reflect using isCorrect and hashItem fucntions
-    // console.log("auth.js - password and email", password, email);
     let salt;
     let pw_hash;
-    const user = await authUserDB(email);
-    // console.log("authUser - ", user)
+    let user = await authUserDB(email);
+    if (user.length < 1) {
+        throw new Error("Email not found. Please sign up.");
+    }
+    user = user[0];
+    
     if (!email || force) {
         salt = randomBytes(64).toString('hex');
-        // console.log("auth.js - salt inside if", salt);
     } else {
-        pw_hash = user.pw_hash; //await authUserDB(email);
-        // console.log("auth.js - pw_hash in resolvePW", pw_hash);
+        pw_hash = user.pw_hash; 
         salt = pw_hash.slice(128, 256);
     }
     
-    // console.log("auth.js -- salt", salt);
     let finalkey = scryptSync(password, salt, 64).toString("hex"); // salting first
-    // console.log("auth.js -- prefinal key",finalkey);
-    // console.log("auth.js -- peppa", PEPPA_PIG);
     finalkey = scryptSync(finalkey, PEPPA_PIG, 64).toString("hex");
-    // console.log("auth.js -- final key",finalkey);
-    // console.log("correct hash", correctHash);
     if (email && !force) {
         if (finalkey !== pw_hash.slice(0,128)) {
-            // console.log("resolve fail");
-            throw new Error("Authentication Failed!, incorrect password!");
-            // return {
-            //     success: false,
-            //     message: "Authentication failed, incorrect password?",
-            //     body: {
-            //         userid: null,
-            //         useruuid: null,
-            //         finalHash: finalkey,
-            //         salt: salt,
-            //         // correctHash: correctHash
-            //     }
-            // }
+            throw new Error("Incorrect password");
         }
     }
-    // console.log("resolve success");
+
     if (user) {
         if (!force) {
             return {
-
                 success: true,
                 message: "Successfully authenticated.",
                 body: {
