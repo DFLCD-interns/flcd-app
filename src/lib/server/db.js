@@ -110,7 +110,24 @@ export async function getEquipmentDB() {
 }
 
 export async function getUsersListDB() {
-  const result = await query("SELECT * FROM users");
+  const result = await query(`SELECT 
+    id,
+    first_name,
+    last_name,
+    email,
+    phone,
+    student_number,
+    course,
+    department,
+    users.access_level,
+    user_types.description,
+    created
+    FROM users JOIN user_types on users.access_level = user_types.access_level`);
+  return result.body.result.rows;
+}
+
+export async function getUserTypesDB() {
+  const result = await query("SELECT * FROM user_types");
   return result.body.result.rows;
 }
 
