@@ -53,7 +53,7 @@
                     <div class="mb-5">
                         <Label for="email" class="mb-1">Email address</Label>
                         <div class="input-container">
-                            <Input name="email" type="email" id="email" autocomplete="email" required />
+                            <Input name="email" type="text" id="email" required />
                             <span class="input-desc">@up.edu.ph</span>
                         </div>
                     </div>
