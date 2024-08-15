@@ -529,9 +529,11 @@ export async function getRequestsInfo(user_id, user_access_level) {
 
 export async function getAllClassesDB() {
   const res = await query(`SELECT 
+    batches.id AS batch_id,
     batches.name AS batch_name,
     batches.description AS batch_description,
     batches.created AS batch_created,
+    classes.id AS class_id,
     classes.name AS class_name,
     users.first_name AS handler_firstname,
     users.last_name AS handler_lastname,
@@ -559,6 +561,27 @@ export async function getBatchesDB() {
 
 export async function getClassesDB() {
   const res = await query(`SELECT * FROM classes`);
+  // console.log(res);
+  return res.body.result.rows;
+}
+
+export async function getBatchesAndClassesDB() {
+  const res = await query(`SELECT 
+    classes.id AS class_id,
+    classes.name AS class_name,
+    classes.batch_id,
+    batches.name AS batch,
+    classes.handler_id AS handler_id,
+    users.first_name as handler_firstname,
+    users.last_name as handler_lastname,
+    classes.description,
+    classes.schedule,
+    classes.created
+    FROM classes 
+    JOIN batches 
+    ON classes.batch_id = batches.id
+    JOIN users
+    ON classes.handler_id = users.id`);
   // console.log(res);
   return res.body.result.rows;
 }

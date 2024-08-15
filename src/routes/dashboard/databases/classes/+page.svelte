@@ -2,15 +2,16 @@
     /** @type {import('./$types').PageData} */
       export let data;
   
-    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton, Dropdown, DropdownItem } from 'flowbite-svelte';
-    import { DownloadSolid, EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid, AngleDownOutline, TrashBinSolid } from 'flowbite-svelte-icons';
+    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton, Dropdown, DropdownItem, MultiSelect } from 'flowbite-svelte';
+    import { DownloadSolid, EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid, AngleDownOutline, ChevronSortOutline, FilterSolid, UndoOutline } from 'flowbite-svelte-icons';
     import { downloadCSV } from '../downloadcsv';
+    import BatchTable from './batchTable.svelte';
+    import ClassTable from './classTable.svelte';
 
     // console.log("v:", data.classes_only_table)
   
     let batches = data.batches;
     let tableHead = []
-    console.log(data)
     if (batches[0] != null){
       tableHead = Object.keys(batches[0]);
     }
@@ -26,40 +27,163 @@
     let editBatch = data.batches_only_table[0];
     let editClass = data.classes_only_table[0];
     let editChild = batches[0];
+
+    let searchQuery='';
+    let selectedBatch = [];
+    let sBatch = data.batches_only_table.map(item => ({
+        value: item.id,
+        name: item.name
+    }));
+
+    let selectedClass = [];
+    let sClass=[];
+
+    let showBatchOnly = false;
+    let showClassOnly = false;
+
+    
+
+    $: {
+        
+        sClass = data.classes_only_table.filter(classItem => {
+            return selectedBatch.some(batch => batch === classItem.batch_id);
+        });
+
+        sClass = sClass.map(item => ({
+            value: item.id,
+            name: item.name
+        }));
+
+        if (showBatchOnly) {
+            batches = data.batches_only_table;
+        } else if (showClassOnly){
+            batches = data.classes_batch_table
+            .filter(item => 
+            selectedBatch.length === 0 || selectedBatch.includes(item.batch_id)
+            )
+            
+            if (selectedBatch.length === 0) {
+                batches =  data.classes_batch_table;
+            }
+
+        } else {
+            batches = data.batches
+            .filter(item => 
+            selectedBatch.length === 0 || selectedBatch.includes(item.batch_id)
+            )
+            .filter(item => 
+            selectedClass.length === 0 || selectedClass.includes(item.class_id)
+            )
+            
+            if (selectedBatch.length === 0) {
+                batches = data.batches;
+            }
+
+            if (selectedClass.length === 0) {
+                batches = data.batches
+                .filter(item => 
+                selectedBatch.length === 0 || selectedBatch.includes(item.batch_id)
+            )
+        }}
+        
+        batches = batches.filter(item =>
+        searchQuery === '' || Object.values(item).some(value =>
+            // Search all string fields
+            typeof value === 'string' && value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        );}
+
+    
+
+        let sortDirection = 'asc'; // Default sort direction
+        let column='id';
+        function handleSort(column) {
+            batches = batches.sort((a, b) => {
+            let aValue = a[column];
+            let bValue = b[column];
+
+            if (typeof aValue === 'string' && typeof bValue === 'string') {
+            // Sort strings alphabetically
+            if (sortDirection === 'asc') {
+                return aValue.localeCompare(bValue);
+            } else {
+                return bValue.localeCompare(aValue);
+            }
+            } else if (column === 'dateString'){
+            if (sortDirection === 'asc') {
+                return a[date_created] - b[date_created];
+            } else {
+                return b[date_created] - a[date_created];
+            }
+            } else {
+            // Sort numbers numerically
+            if (sortDirection === 'asc') {
+                return aValue - bValue;
+            } else {
+                return bValue - aValue;
+            }}
+        });
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        }
+
+    
+
   </script>
     
   <div class="p-10">
-    <form class="flex gap-2 pb-5">
-      <Search size="md" />
-      <GradientButton color="green" class="!p-2.5">
-        <SearchOutline class="w-6 h-6" />
-      </GradientButton>
-    </form>
+    <div class="gap-2 w-full pb-5">
+        <div class="flex gap-2 w-full items-start pb-2">
+          <Search size="md" bind:value={searchQuery}/>
+        </div>
+    
+        <div class="flex gap-2 pb-2  w-full">
+            {#if showBatchOnly == true}
+            <div class="w-full"></div>
+            <Button class='w-[30%] flex gap-1 ' on:click={() => {showBatchOnly=false}}><UndoOutline/>Show batches, classes and children</Button>
+            {:else if showClassOnly == true}
+            <span class="flex text-gray-700 gap-1 pr-1 items-center"><FilterSolid/>Filter:</span>
+            <MultiSelect class="w-full bg-white text-gray-400 text-sm" placeholder="select batch" items={sBatch} bind:value={selectedBatch} />
+            <Button class='w-[30%] flex gap-1' on:click={() => {showClassOnly=false}}><UndoOutline/>Show batches, classes and children</Button>
+            {:else}
+            <span class="flex text-gray-700 gap-1 pr-1 items-center"><FilterSolid/>Filter:</span>
+            <MultiSelect class="w-full bg-white text-gray-400 text-sm" placeholder="select batch" items={sBatch} bind:value={selectedBatch} />
+            <MultiSelect class="w-full bg-white text-gray-400 text-sm" placeholder="select class" items={sClass} bind:value={selectedClass} />          
+            {/if}
+        </div>
+        <hr>
+      </div>
     <div class="flex items-center justify-between pb-5">
       <p  class="font-semibold text-xl text-gray-700">Classes Database</p>
       <div class = "flex gap-2">
         <GradientButton on:click={() => {downloadCSV(batches, 'all_classes')}} color="green" class="inline-flex text-center gap-2"><DownloadSolid/>Download Table</GradientButton>
         <GradientButton id="batchActionsID" data-dropdown-toggle="batchActions" color="green" class="inline-flex text-center gap-2">Batch Actions<AngleDownOutline/></GradientButton>
         <Dropdown>
+            <DropdownItem on:click={() => {showBatchOnly=true; showClassOnly=false;}}>Show Batches Only</DropdownItem>
             <DropdownItem on:click={() => {AddBatchModal=true}}>Add Batch</DropdownItem>
-            <DropdownItem on:click={() => {EditBatchModal=true}}>Edit/Delete Batch</DropdownItem>
+            <!-- <DropdownItem on:click={() => {EditBatchModal=true}}>Edit/Delete Batch</DropdownItem> -->
         </Dropdown>
         <GradientButton  color="green" class="inline-flex text-center gap-2">Class Actions<AngleDownOutline/></GradientButton>
         <Dropdown>
+            <DropdownItem on:click={() => {showClassOnly=true; showBatchOnly=false; selectedBatch=[]}}>Show Classes Only</DropdownItem>
             <DropdownItem on:click={() => {AddClassModal=true}}>Add Class</DropdownItem>
-            <DropdownItem on:click={() => {EditClassModal=true}}>Edit/Delete Class</DropdownItem>
+            <!-- <DropdownItem on:click={() => {EditClassModal=true}}>Edit/Delete Class</DropdownItem> -->
         </Dropdown>
         <GradientButton on:click={() => {AddChildModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Child</GradientButton>
         </div>
     </div>
     <div class="pb-5">
-    {#if batches != null }
+    {#if batches != null && (showBatchOnly == false && showClassOnly == false)}
     <Table shadow>
       <TableHead>
         <TableHeadCell></TableHeadCell>
         <TableHeadCell></TableHeadCell>
         {#each tableHead as head}
-        <TableHeadCell>{head}</TableHeadCell>
+        <TableHeadCell>
+            <button type='button' class="flex cursor-pointer" on:click={() => handleSort(head)}>
+              {head}
+              <ChevronSortOutline size='sm'/>
+            </button>
+          </TableHeadCell>
         {/each}
       </TableHead>
       <TableBody tableBodyClass="divide-y">
@@ -71,9 +195,11 @@
           <TableBodyCell>
             <button on:click={() => {DeleteModal = true}}><TrashBinOutline class="text-green-600"/></button>
           </TableBodyCell>
+          <TableBodyCell>{batch.batch_id}</TableBodyCell>
           <TableBodyCell>{batch.batch_name}</TableBodyCell>
           <TableBodyCell>{batch.batch_description}</TableBodyCell>
           <TableBodyCell>{batch.batch_created}</TableBodyCell>
+          <TableBodyCell>{batch.class_id}</TableBodyCell>
           <TableBodyCell>{batch.class_name}</TableBodyCell>
           <TableBodyCell>{batch.handler_firstname}</TableBodyCell>
           <TableBodyCell>{batch.handler_lastname}</TableBodyCell>
@@ -88,6 +214,10 @@
         {/each}
       </TableBody>
     </Table>
+    {:else if showBatchOnly==true}
+    <BatchTable batches={batches}/>
+    {:else if showClassOnly==true}
+    <ClassTable classes={batches}/>
     {:else}
     <p  class="content-center text-gray-500">No classes in database</p>
     {/if}
