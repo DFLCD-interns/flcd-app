@@ -179,6 +179,8 @@ export async function getRequestDetailsDB(table, reqid) {
       `, t.location AS location, 
          t.actual_start_time AS actual_start_time,
          t.promised_end_time AS promised_end_time`: ''}
+    ${table === 'class_requests' ?
+      ', t.timeslot AS timeslot' : ''} 
     FROM base_requests br 
     LEFT JOIN ${table} t ON br.id = t.request_id
     LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
@@ -489,6 +491,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
 			name: item.name,
       created: item.created,
 			date: item.observe_date,
+      timeslot: item.timeslot,
 			status: null,
       approvalsInfo: null,
 		})
