@@ -1,4 +1,4 @@
-import { getFromTableDB, updateTableDB, getRequestDetailsDB, getUserFromSessionDB } from '$lib/server/db'; 
+import { getFromTableDB, updateTableDB, deleteRequest, deleteFromTableDB, getRequestDetailsDB, getUserFromSessionDB } from '$lib/server/db'; 
 import { mailuser } from '$lib/server/emails.js';
 
 /** @type {import('./$types.js').LayoutServerLoad} */
@@ -7,31 +7,31 @@ export const load = async ( {cookies, params, parent} ) => {
         const parentData = await parent();
         const requestDetails = await getRequestDetailsDB(params.table, params.reqid);
         const requestInfo = parentData.requestsInfo.find(req => req.id == params.reqid && req.table === params.table);
-        const equipmentRequestRows = requestInfo.equipmentRequestRows?.filter(row => row.request_id == params.reqid)
+        const requestRows = requestInfo?.requestRows?.filter(row => row.request_id == params.reqid)
 
-        const totalStatus = requestInfo.status;
-        const displayNames = requestInfo.approvalsInfo.displayNames;
-        const statuses = requestInfo.approvalsInfo.statuses;
-        const canRespond = (totalStatus !== 'approved' && totalStatus !== 'declined') && (
-            parentData.user_access_level_label === displayNames[Math.max(statuses.findLastIndex(status => status === 'approved'), 0)] || 
-            parentData.user_access_level_label === displayNames[Math.max(statuses.findIndex(status => status === 'pending'), 0)]);
+        const totalStatus = requestInfo?.status;
+        const displayNames = requestInfo?.approvalsInfo?.displayNames;
+        const statuses = requestInfo?.approvalsInfo?.statuses;
+        const canRespond = totalStatus && displayNames && statuses ? (totalStatus !== 'approved' && totalStatus !== 'declined') && (
+            parentData.user_access_level_label === displayNames[Math.max(statuses?.findLastIndex(status => status === 'approved') || 0, 0)] || 
+            parentData.user_access_level_label === displayNames[Math.max(statuses?.findIndex(status => status === 'pending')  || 0, 0)]) : false;
 
         return {
             approvalForms: {
                 totalStatus: totalStatus,
                 statuses: statuses,
                 displayNames: displayNames,
-                remarks: requestInfo.approvalsInfo.remarks,
+                remarks: requestInfo?.approvalsInfo?.remarks,
                 canRespond: canRespond
             },
-            requestType: params.table,
+            requestType: params.table?.split('_')[0],
             requestID: params.reqid,
             requestDetails: requestDetails,
-            requestName: requestInfo.name,
-            requestedItems: requestInfo.requestedItems,
-            startDate: requestInfo.date,
-            endDate: requestInfo.actual_date_end,
-            equipmentRequestRows: equipmentRequestRows,
+            requestName: requestInfo?.name,
+            requestedItems: requestInfo?.requestedItems,
+            startDate: requestInfo?.date,
+            endDate: requestInfo?.actual_date_end,
+            requestRows: requestRows,
         }
     } catch (error) {   
         console.error("Load failed:", error.message);
@@ -63,31 +63,34 @@ export const actions = {
 
             const response = await updateTableDB("approvals", searchFormData, updateFormData);
 
-            // Updating assigned equipment ids
+            // Updating assigned ids
             
             const status = inputFormData.get('status')
             const remarks = inputFormData.get('remarks')
             const approverID = searchFormData.get('approver_id')
             inputFormData.delete('remarks');
             inputFormData.delete('status');
-            const assignedEquipIDs = [...inputFormData.values()]
-            const equipReqsIDs = [...inputFormData.keys()].map(key => key.split('_')[2])
+            const assignedItemIDs = [...inputFormData.values()];
+            const itemReqIDs = [...inputFormData.keys()].map(key => key.split('_')[2]);
+            const type = [...inputFormData.keys()][0]?.split('_')[0];
             
+            console.log(itemReqIDs, assignedItemIDs, [...inputFormData.keys()][0], inputFormData)
+
             let response2 = {success: true}; 
-            for (let i = 0; i < assignedEquipIDs.length; i++) {
-                if (!assignedEquipIDs[i]) continue;
+            for (let i = 0; i < assignedItemIDs.length; i++) {
+                if (!assignedItemIDs[i]) continue;
+
+                const _searchFormData = new FormData();
+                _searchFormData.append('id', itemReqIDs[i])
 
                 const _updateFormData = new FormData();
-                _updateFormData.append('equipment_id', assignedEquipIDs[i] == -1 ? null : assignedEquipIDs[i])
-                
-                const _searchFormData = new FormData();
-                _searchFormData.append('id', equipReqsIDs[i])
-                
-                response2 = await updateTableDB("equipment_requests", _searchFormData, _updateFormData);
+                _updateFormData.append(`${type}_id`, assignedItemIDs[i] == -1 ? null : assignedItemIDs[i])
+                response2.success &&= (await updateTableDB(`${type}_requests`, _searchFormData, _updateFormData)).success;
             }
            
-            // emailing
+            console.log(response2)
 
+            // emailing
             await mailuser(
                 `[FLCD APP] New response to your request`,
                 `Hi, your request (ID #${params.reqid}) has a new response - ${status}. '${remarks}' - by [user with ID ${approverID}]. Kindly check the web app for the exact status of your request.`,

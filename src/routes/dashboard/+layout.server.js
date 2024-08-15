@@ -14,7 +14,7 @@ export async function load({ cookies }) {
 		requestsInfo: await db.getRequestsInfo(user?.user_id, user?.access_level),
 		equipments: await db.getEquipmentDB(),
 		equipmentTypes: await db.getEquipmentTypesDB(),
-		venue: await db.getVenueDB(),
+		venues: await db.getVenueDB(),
 		current_user: user, 
 		user_access_level_label: user_access_level_label?.body.result.rows[0]?.description
 	};
