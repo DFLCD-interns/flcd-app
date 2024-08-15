@@ -79,8 +79,7 @@ return res.body.result.rows[0]?.access_level;
 
 export async function authUserDB(email) {
 const res = await query('SELECT * FROM users WHERE email = $1', [email]);
-// console.log(res, email);
-return res.body.result.rows[0];
+return res.body.result.rows;
 }
 
 export async function createSessionDB(sessionid, userid){

@@ -1,19 +1,18 @@
 <!-- current login page -->
 
 <script>
+    import { enhance } from '$app/forms';
     import { onMount } from 'svelte';
-    import { goto, onNavigate } from '$app/navigation';
-    import { Input, Label, Helper, Button, Checkbox, A } from 'flowbite-svelte';
+    import { goto } from '$app/navigation';
+    import { Input, Label, Button } from 'flowbite-svelte';
+    import toast from 'svelte-french-toast';
+
     function handleClick() {
         /*--put log in logic here--*/
         goto("/dashboard", true)
-        
-    }
-    async function handleSubmit(){
-        /*--put log in logic here--*/
-        goto(`/dashboard`)
     }
 
+    /*-- password invisibility toggle logic --*/
     let passwordVisible = false;
   
     onMount(() => {
@@ -24,6 +23,33 @@
         passwordInput.type = passwordVisible ? 'text' : 'password';
       });
     });
+
+    /*-- toast logic --*/
+    let loading = false
+
+    const submitLogin = () => {
+        loading = true;
+        return async ({ result, update }) => {
+            switch (result.type) {
+                case 'success':
+                    await update();
+                    break;
+                case 'failure':
+                    // Show the actual error message from the server
+                    const errorMessage = result.data.message || 'Invalid credentials';
+                    toast.error(errorMessage);
+                    await update();
+                    break;
+                case 'error':
+                    toast.error(result.error.message);
+                    break;
+                default:
+                    await update();
+            }
+            loading = false;
+        }
+    }
+
 </script>
 
 <section class="bg-gray-200 min-h-screen flex items-center justify-center p-5">
@@ -49,18 +75,18 @@
                 </h2>
             </div>
             <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                <form class="space-y-5" method="POST" action="?/signin">
+                <form class="space-y-5" method="POST" action="?/signin" use:enhance={submitLogin}>
                     <div class="mb-5">
                         <Label for="email" class="mb-1">Email address</Label>
                         <div class="input-container">
-                            <Input name="email" type="text" id="email" required />
+                            <Input name="email" type="text" id="email" required disabled={loading}/>
                             <span class="input-desc">@up.edu.ph</span>
                         </div>
                     </div>
                     <div class="mb-3">
                         <Label for="password" class="mb-2">Password</Label>
                         <div class="relative">
-                            <Input name="password" type="password" id="password" required />
+                            <Input name="password" type="password" id="password" required disabled={loading}/>
                     
                             <!-- Eye Icon -->
                             <span id="togglePassword" class="absolute inset-y-0 flex items-center pr-3 right-0 cursor-pointer">
@@ -85,7 +111,7 @@
                             </a>
                         </div>
                     </div>
-                    <Button type="submit" class="w-full">Login</Button>
+                    <Button type="submit" class="w-full" disabled={loading}>Login</Button>
                 </form>
                 <p class="mt-3 text-center text-sm text-gray-500 mb-3">
                     Don't have an account?

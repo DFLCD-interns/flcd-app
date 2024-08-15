@@ -1,5 +1,7 @@
 <script>
     import "../app.css";
+    import { Toaster } from 'svelte-french-toast'
+
     import { onNavigate } from '$app/navigation';
     /*
     onNavigate(() => {
@@ -11,6 +13,7 @@
     })*/
 </script>
 
+<Toaster />
 <slot />
 <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap">
