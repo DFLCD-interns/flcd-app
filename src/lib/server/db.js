@@ -15,13 +15,10 @@ const table_names = [
   'base_requests',
   'batches',
   'childs',
-  'child_requests',
   'classes',
   'class_requests',
   'equipments',
   'equipment_requests',
-  'preferred_times_child',
-  'preferred_times_class',
   'sessions',
   'transaction_log',
   'users',
@@ -398,11 +395,6 @@ async function getVenueRequestsDB() {
   return ret;
 }
 
-async function getChildRequestsDB() {
-  const res = await query(`SELECT child_requests.id AS req_id, * FROM base_requests JOIN child_requests ON child_requests.request_id = base_requests.id JOIN childs ON child_requests.child_id = childs.id ORDER BY child_requests.id ASC`);
-  return res.body.result.rows;
-}
-
 async function getClassRequestsDB() {
   const res = await query(`SELECT class_requests.id AS req_id, * FROM base_requests JOIN class_requests ON class_requests.request_id = base_requests.id JOIN classes ON class_requests.class_id = classes.id ORDER BY class_requests.id ASC`);
   return res.body.result.rows;
@@ -414,7 +406,6 @@ export async function getRequestsInfo(user_id, user_access_level) {
   // Get all requests
 	const equipment_requests = await getEquipmentRequestsDB();
 	const venue_requests = await getVenueRequestsDB();
-	// const child_requests = await getChildRequestsDB();
 	const class_requests = await getClassRequestsDB();
 
 	const equipReqsGroupedDict = {};
@@ -483,20 +474,6 @@ export async function getRequestsInfo(user_id, user_access_level) {
       requestRows: venue_requests,
 		})
 	});
-	
-	// child_requests.forEach(function (item) {
-	// 	allRequests.push({
-	// 		type: 'Child Observation Request',
-	// 		table:'child_requests',
-	// 		id: item.request_id,
-  //     created: item.created,
-  //     requester_id: item?.requester_id,
-	// 		name: item.name,
-	// 		date: item.observation_time,
-	// 		status: null,
-  //     approvalsInfo: null,
-	// 	})
-	// });
   
 	class_requests.forEach(function (item) {
 		allRequests.push({

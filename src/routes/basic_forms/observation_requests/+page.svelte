@@ -1,43 +1,3 @@
-# Child Observation Request
-<form action="?/createChildRequest" method="POST">
-  <label>
-    Observation Time:
-    <input name="observation_time" type="text" placeholder="" />
-  </label>
-
-  <label>
-    Child ID:
-    <input name="child_id" type="number" />
-  </label>
-  
-  <label>
-    Base Request ID:
-    <input name="request_id" type="number" required />
-  </label>
-
-  <button type="submit" class="button-style">Create Child Observation Request</button>
-</form>
-
-# Preferred Times (in Child Observation)
-<form action="?/createPreferredTimeChild" method="POST">
-  <label>
-    Start Time:
-    <input name="start_time" type="datetime-local" required />
-  </label>
-
-  <label>
-    End Time:
-    <input name="end_time" type="datetime-local" required />
-  </label>
-
-  <label>
-    Child Request ID:
-    <input name="request_id" type="number" required />
-  </label>
-
-  <button type="submit" class="button-style">Choose this Preferred Time (Child)</button>
-</form>
-
 # Class Observation Request
 <form action="?/createClassRequest" method="POST">
   <label>
@@ -60,28 +20,12 @@
     <input name="request_id" type="number" required />
   </label>
   
+  <label>
+    Assigned Child ID:
+    <input name="assigned_child_id" type="number" required />
+  </label>
 
   <button type="submit" class="button-style">Create Class Observation Request</button>
-</form>
-
-# Preferred Times (in Class Observation)
-<form action="?/createPreferredTimeClass" method="POST">
-  <label>
-    Start Time:
-    <input name="start_time" type="datetime-local" required />
-  </label>
-
-  <label>
-    End Time:
-    <input name="end_time" type="datetime-local" required />
-  </label>
-
-  <label>
-    Class Request ID:
-    <input name="request_id" type="number" required />
-  </label>
-
-  <button type="submit" class="button-style">Choose this Preferred Time (Class)</button>
 </form>
 
 <form action="?/createObservationRequest" method="POST">

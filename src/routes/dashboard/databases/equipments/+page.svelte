@@ -204,29 +204,21 @@
 </Modal>
 
 <Modal title="Add Equipment" bind:open={AddModal} autoclose>
-  <div class="mb-6">
-      <Label class="block mb-2">Name</Label>
+  <div class="mb-5">
+      <Label class="block mb-1">Name</Label>
       <Input placeholder="Equipment name" />
   </div>
-  <div class="mb-6">
-      <Label class="block mb-2">Type</Label>
+  <div class="mb-5">
+      <Label class="block mb-1">Type</Label>
       <Input placeholder="Equipment type" />
   </div>
-  <div class="mb-6">
-    <Label class="block mb-2">Location</Label>
+  <div class="mb-5">
+    <Label class="block mb-1">Location</Label>
     <Input placeholder="Equipment location" />
   </div>
-  <div class="mb-6">
-    <Label class="block mb-2">Status</Label>
-    <Input placeholder="Equipment status" />
-  </div>
-  <div class="mb-6">
-    <Label class="block mb-2">Notes</Label>
+  <div class="mb-5">
+    <Label class="block mb-1">Notes</Label>
     <Input placeholder="Enter notes" />
-  </div>
-  <div class="mb-6">
-    <Label class="block mb-2">Date Registered</Label>
-    <Input type="datetime-local" />
   </div>
   <div class="mb-6 flex gap-5 justify-center">
       <GradientButton color="green">Confirm</GradientButton>

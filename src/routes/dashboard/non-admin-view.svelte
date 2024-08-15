@@ -27,7 +27,7 @@
           <div class="sm:absolute sm:left-[-10px] sm:bottom-[-25px] mb-[-3px] sm:mb-0">
             <img src="/1.png" alt="Description" class="object-cover" style="width: 9.5rem; height: 9.5rem;" />
           </div>
-          <GradientButton color="green" shadow href="/dashboard/observationform" class="sm:mt-16 mt-0 sm:mb-4 ml-auto w-fit align-self-end">
+          <GradientButton color="green" shadow href="/dashboard/requests-form" class="sm:mt-16 mt-0 sm:mb-4 ml-auto w-fit align-self-end">
             Borrow <ArrowRightOutline class="w-6 h-6 ms-2 text-white" />
           </GradientButton>
         </div>
@@ -43,7 +43,7 @@
           <div class="sm:absolute sm:left-[-10px] sm:bottom-[-25px] mb-[-1px] sm:mb-0">
             <img src="/2.png" alt="Description" class="object-cover" style="width: 9.5rem; height: 9.5rem;" />
           </div>
-          <GradientButton color="green" shadow href="/dashboard/observationform" class="sm:mt-16 mt-0 sm:mb-4 ml-auto w-fit align-self-end">
+          <GradientButton color="green" shadow href="/dashboard/requests-form" class="sm:mt-16 mt-0 sm:mb-4 ml-auto w-fit align-self-end">
             Reserve <ArrowRightOutline class="w-6 h-6 ms-2 text-white" />
           </GradientButton>
         </div>
@@ -90,8 +90,8 @@
         {/each} {/if}
       </div>
     {:else}
-      <p class="text-gray-500">
-        { viewingPendingReqs ? 'No pending requests' : 'No finished requests'}
+      <p class="text-gray-500 text-center mt-5">
+        { viewingPendingReqs ? 'No Pending Requests' : 'No Finished Requests'}
       </p>
     {/if}
 </div>
