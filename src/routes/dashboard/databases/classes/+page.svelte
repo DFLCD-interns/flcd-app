@@ -9,6 +9,7 @@
     import ClassTable from './classTable.svelte';
 
     // console.log("v:", data.classes_only_table)
+    let access_level=data.current_user.access_level;
   
     let batches = data.batches;
     let tableHead = []
@@ -159,24 +160,32 @@
         <GradientButton id="batchActionsID" data-dropdown-toggle="batchActions" color="green" class="inline-flex text-center gap-2">Batch Actions<AngleDownOutline/></GradientButton>
         <Dropdown>
             <DropdownItem on:click={() => {showBatchOnly=true; showClassOnly=false;}}>Show Batches Only</DropdownItem>
+            {#if access_level != 4}
             <DropdownItem on:click={() => {AddBatchModal=true}}>Add Batch</DropdownItem>
+            {/if}
             <!-- <DropdownItem on:click={() => {EditBatchModal=true}}>Edit/Delete Batch</DropdownItem> -->
         </Dropdown>
         <GradientButton  color="green" class="inline-flex text-center gap-2">Class Actions<AngleDownOutline/></GradientButton>
         <Dropdown>
             <DropdownItem on:click={() => {showClassOnly=true; showBatchOnly=false; selectedBatch=[]}}>Show Classes Only</DropdownItem>
+            {#if access_level != 4}
             <DropdownItem on:click={() => {AddClassModal=true}}>Add Class</DropdownItem>
+            {/if}
             <!-- <DropdownItem on:click={() => {EditClassModal=true}}>Edit/Delete Class</DropdownItem> -->
         </Dropdown>
+        {#if access_level != 4}
         <GradientButton on:click={() => {AddChildModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Child</GradientButton>
+        {/if}
         </div>
     </div>
     <div class="pb-5">
     {#if batches != null && (showBatchOnly == false && showClassOnly == false)}
     <Table shadow>
       <TableHead>
+        {#if access_level != 4}
         <TableHeadCell></TableHeadCell>
         <TableHeadCell></TableHeadCell>
+        {/if}
         {#each tableHead as head}
         <TableHeadCell>
             <button type='button' class="flex cursor-pointer" on:click={() => handleSort(head)}>
@@ -189,12 +198,14 @@
       <TableBody tableBodyClass="divide-y">
         {#each batches as batch}
         <TableBodyRow>
+            {#if access_level != 4}
             <TableBodyCell>
                 <button on:click={() => {EditChildModal = true; editChild = batch}}><EditOutline  class="text-green-600"/></button>
             </TableBodyCell>
           <TableBodyCell>
             <button on:click={() => {DeleteModal = true}}><TrashBinOutline class="text-green-600"/></button>
           </TableBodyCell>
+          {/if}
           <TableBodyCell>{batch.batch_id}</TableBodyCell>
           <TableBodyCell>{batch.batch_name}</TableBodyCell>
           <TableBodyCell>{batch.batch_description}</TableBodyCell>

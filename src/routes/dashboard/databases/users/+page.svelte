@@ -6,6 +6,7 @@
   import { EditOutline, TrashBinOutline, FilterSolid, ChevronSortOutline } from 'flowbite-svelte-icons';
 
   let users = data.user;
+  let access_level = data.current_user.access_level;
 
   let tableHead = []
   if (users != null){
@@ -15,6 +16,9 @@
   let userName;
 
   let DeleteModal=false;
+  let EditModal=false;
+
+  let editUser;
 
   
 
@@ -112,7 +116,10 @@
   {#if users != null }
   <Table shadow>
     <TableHead>
+      {#if access_level !=4}
       <TableHeadCell></TableHeadCell>
+      <TableHeadCell></TableHeadCell>
+      {/if}
       {#each tableHead as head}
       {#if head != 'dateString'}
       <TableHeadCell>
@@ -127,9 +134,14 @@
     <TableBody tableBodyClass="divide-y">
       {#each users as user}
       <TableBodyRow>
+        {#if access_level !=4}
+        <TableBodyCell>
+          <button on:click={() => {EditModal = true; editUser = user}}><EditOutline  class="text-green-600"/></button>
+        </TableBodyCell>
         <TableBodyCell>
           <button on:click={() => {DeleteModal = true; userName = user.first_name+" "+user.last_name}}><TrashBinOutline class="text-green-600"/></button>
         </TableBodyCell>
+        {/if}
         <TableBodyCell>{user.id}</TableBodyCell>
         <TableBodyCell>{user.first_name}</TableBodyCell>
         <TableBodyCell>{user.last_name}</TableBodyCell>
@@ -154,6 +166,54 @@
 
 <Modal title="Delete {userName} from database?" bind:open={DeleteModal} autoclose>
   <div class="flex gap-5 justify-center">
+      <GradientButton color="green">Confirm</GradientButton>
+      <GradientButton color="green">Cancel</GradientButton>
+  </div>
+</Modal>
+
+<Modal title="Edit User Details" bind:open={EditModal} autoclose>
+  {console.log(editUser)}
+  <div class="mb-6">
+      <Label class="block mb-2">First Name</Label>
+      <Input value={editUser.first_name} />
+  </div>
+  <div class="mb-6">
+    <Label class="block mb-2">Last Name</Label>
+    <Input value={editUser.last_name} />
+  </div>
+  <div class="mb-6">
+    <Label class="block mb-2">Email</Label>
+    <Input value={editUser.email} />
+  </div>
+  <div class="mb-6">
+    <Label class="block mb-2">Phone</Label>
+    <Input value={editUser.phone} />
+  </div>
+  <div class="mb-6">
+    <Label class="block mb-2">Student Number</Label>
+    <Input value={editUser.student_number} disabled=true/>
+  </div>
+  <div class="mb-6">
+    <Label class="block mb-2">Course</Label>
+    <Input value={editUser.course} />
+  </div>
+  <div class="mb-6">
+    <Label class="block mb-2">Department</Label>
+    <Input value={editUser.department} />
+  </div>
+  <div class="mb-6">
+    <Label class="block mb-2">Access Level</Label>
+    <Input value={editUser.access_level}/>
+  </div>
+  <div class="mb-6">
+    <Label class="block mb-2">Access Level Description</Label>
+    <Input value={editUser.description} />
+  </div>
+  <div class="mb-6">
+    <Label class="block mb-2">Date Created</Label>
+    <Input name="schedule" type="text" value={editUser.created} onfocus="(this.type='date')" onblur="(this.type='text')"/>
+  </div>
+  <div class="mb-6 flex gap-5 justify-center">
       <GradientButton color="green">Confirm</GradientButton>
       <GradientButton color="green">Cancel</GradientButton>
   </div>
