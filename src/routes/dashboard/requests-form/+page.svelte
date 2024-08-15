@@ -8,7 +8,7 @@
     import { enhance } from '$app/forms';
 
     let equipmentTypes = data.equipmentTypes;
-    let venues = data.venue;
+    let venues = data.venues;
     let selectedEq = [];
     let selectedVenue = [];
     let promised_start_time = "";
