@@ -5,7 +5,7 @@
     let userData = {
         firstName: data?.current_user?.first_name,
         lastName: data?.current_user?.last_name,
-        userType: data?.user_access_level_label.charAt(0).toUpperCase() + data.user_access_level_label.slice(1) // first letter capitalized
+        userType: data?.user_access_level_label.charAt(0).toUpperCase() + data.user_access_level_label.slice(1)
     }
     let dropdownVisible = false;
 
@@ -47,12 +47,12 @@
                            {currentPath === '/dashboard' ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-200 hover:text-gray-900'}"
                 >
                     <GridSolid class="text-gray-600"/>
-                    <span class="font-medium">Dashboard</span>
+                    <span class="font-medium -mr-1">Dashboard</span>
                 </a>
             </li>
             <li>
                 <button on:click={() => dropdownVisible = !dropdownVisible} class="w-full px-4 py-3 flex justify-between items-center space-x-4 rounded-xl text-gray-600 hover:bg-gray-200 hover:text-gray-900">
-                    <div class="flex items-center space-x-2">
+                    <div class="gap-2 flex items-center space-x-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path class="fill-current text-gray-600" fill-rule="evenodd" d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z" clip-rule="evenodd" />
                             <path class="fill-current text-gray-300" d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z" />
@@ -81,6 +81,7 @@
         </ul>
     </div>
 
+    <!-- Logout Section -->
     <div class="px-6 -mx-6 pt-2 pb-2 flex justify-between items-center border-t">
         <button class="px-4 py-3 flex items-center space-x-4 rounded-md text-gray-600 group">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
