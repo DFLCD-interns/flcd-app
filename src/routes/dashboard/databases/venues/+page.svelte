@@ -3,7 +3,7 @@
 	export let data;
 
   import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton } from 'flowbite-svelte';
-  import { EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid } from 'flowbite-svelte-icons';
+  import { EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid, ChevronSortOutline } from 'flowbite-svelte-icons';
 
   // console.log('d:', data)
   // console.log('v:', data.venues)
@@ -21,14 +21,68 @@
   let AddModal = false;
 
   let editVenue;
+
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const optionsDate = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    };
+    const optionsTime = {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true, // AM/PM format
+    };
+
+    const formattedDate = date.toLocaleDateString('en-US', optionsDate);
+    const formattedTime = date.toLocaleTimeString('en-US', optionsTime);
+
+    return `${formattedDate} at ${formattedTime}`;}
+
+  venues.forEach(item => {
+    item.dateString = formatDate(item.date_registered) // or use another format if preferred
+  });
+
+  let searchQuery='';
+
+  $: venues = data.venue
+    .filter(item =>
+      searchQuery === '' || Object.values(item).some(value =>
+        // Search all string fields
+        typeof value === 'string' && value.toString().toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    );
+
+      let sortDirection = 'asc'; // Default sort direction
+      let column='id';
+      function handleSort(column) {
+        venues = venues.sort((a, b) => {
+        let aValue = a[column];
+        let bValue = b[column];
+
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+          // Sort strings alphabetically
+          if (sortDirection === 'asc') {
+            return aValue.localeCompare(bValue);
+          } else {
+            return bValue.localeCompare(aValue);
+          }
+        } else {
+        // Sort numbers numerically
+          if (sortDirection === 'asc') {
+            return aValue - bValue;
+          } else {
+            return bValue - aValue;
+          }}
+      });
+      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    }
 </script>
   
 <div class="p-10">
   <form class="flex gap-2 pb-5">
-    <Search size="md" />
-    <GradientButton color="green" class="!p-2.5">
-      <SearchOutline class="w-6 h-6" />
-    </GradientButton>
+    <Search size="md" bind:value={searchQuery}/>
   </form>
   <div class="flex items-center justify-between pb-5">
     <p  class="font-semibold text-xl text-gray-700">Venues Database</p>
@@ -41,7 +95,14 @@
       <TableHeadCell></TableHeadCell>
       <TableHeadCell></TableHeadCell>
       {#each tableHead as head}
-      <TableHeadCell>{head}</TableHeadCell>
+      {#if head != 'dateString'}
+      <TableHeadCell>
+        <button type='button' class="flex cursor-pointer" on:click={() => handleSort(head)}>
+          {head}
+          <ChevronSortOutline size='sm'/>
+        </button>
+      </TableHeadCell>
+      {/if}
       {/each}
     </TableHead>
     <TableBody tableBodyClass="divide-y">
@@ -56,7 +117,7 @@
         <TableBodyCell>{venue.id}</TableBodyCell>
         <TableBodyCell>{venue.name}</TableBodyCell>
         <TableBodyCell>{venue.description}</TableBodyCell>
-        <TableBodyCell>{venue.created}</TableBodyCell>
+        <TableBodyCell>{formatDate(venue.date_registered)}</TableBodyCell>
       </TableBodyRow>
       {/each}
     </TableBody>

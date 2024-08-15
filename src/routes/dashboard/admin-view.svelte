@@ -21,7 +21,7 @@
     { value: 'least urgent to most urgent', name: 'needed: least urgent to most urgent' }]
 
   // Filter out all requests that are not for this user to see (invisible)
-  let allRequests = data.requestsInfo.filter(req => {
+  let availableRequests = data.requestsInfo.filter(req => {
     console.log(req)
     const idIdx = req.approvalsInfo.userIDs.findIndex(id => data.current_user.access_level === 3 ? id == null : id === data.current_user.user_id );
     const approvedIdx = req.approvalsInfo.statuses.findIndex(status => status === 'approved');
@@ -32,6 +32,7 @@
   // console.log(data.requestsInfo)
   // console.log(allRequests)
 
+  let displayRequests;
   let searchQuery = '';
 
   function parseDateTime(dateTimeStr, type) {
@@ -48,7 +49,7 @@
   let pendingRequests, otherRequests;
   $: {
     // Filter and sort based on selected type and search query
-    let filteredRequests = allRequests
+    let filteredRequests = availableRequests
       .filter(item => selectedType.includes(item.type)) // Filter by type
       .map(request => ({
         ...request,
@@ -63,7 +64,7 @@
       );
 
     // Sort based on selected sort option
-    allRequests = filteredRequests.sort((a, b) => {
+    displayRequests = filteredRequests.sort((a, b) => {
       if (selectedSort === 'newest to oldest') {
         return b.createdDate - a.createdDate;
       } else if (selectedSort === 'oldest to newest') {
@@ -79,7 +80,7 @@
     
     pendingRequests = [];
     otherRequests = [];
-    allRequests.forEach(req => {
+    displayRequests.forEach(req => {
     if (req.status.includes(data.user_access_level_label)) 
       pendingRequests.push(req)
     else otherRequests.push(req);
