@@ -12,35 +12,66 @@
     else finishedRequests.push(req)
   });
 
+  console.log(data.current_user.access_level)
+
 </script>
 
 <div class="px-10 py-10">
-  <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Welcome, {data?.current_user?.first_name}!</h5>
-    <div class="flex flex-wrap w-full mb-6  align-center justify-center">
-      <div class="sm:w-1/2 sm:mb-0 mb-2 w-full">
-        <Card class="w-full max-w-full sm:mr-1.5">
-            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Borrow requests</h5>
-            <p class="mb-3 font-normal text-gray-700 dark:text-gray-400 leading-tight">Borrow equipment or venues for your own use.</p>
-            <div class="flex sm:justify-normal justify-end">
-              <GradientButton color="green" shadow href="/dashboard/requests-form" class="w-fit align-self-end">
-                Request <ArrowRightOutline class="w-6 h-6 ms-2 text-white" />
-              </GradientButton>
-            </div>      
-          </Card>
-      </div>
-      <div class="sm:w-1/2 w-full">
-        <Card class="w-full max-w-full h-full sm:ml-1.5">
-          <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Book an observation</h5>
-          <p class="mb-3 font-normal text-gray-700 dark:text-gray-400 leading-tight">Book an available observation schedule.</p>
-          <div class="flex sm:justify-normal justify-end">
-            <GradientButton color="purple" shadow href="/dashboard/observationform" class="w-fit align-self-end">
-              Book <ArrowRightOutline class="w-6 h-6 ms-2 text-white" />
-            </GradientButton>
-          </div>
-        </Card>
-      </div>
-      </div>
+  <h5 class="mb-7 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Request Forms</h5>
+  <div class="flex flex-wrap w-full mb-12 align-center justify-center">
 
+    <!-- First Card -->
+    <div class="sm:w-1/3 w-full mb-2 sm:mb-0 px-3">
+      <Card class="relative w-full max-w-full">
+        <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 dark:text-white">Equipment</h5>
+        <p class="mb-3 text-sm text-gray-700 dark:text-gray-400 leading-tight">Borrow FLCD equipment. Printing available for FLCD students.</p>
+        <div class="flex sm:flex-row flex-col sm:justify-end relative">
+          <div class="sm:absolute sm:left-[-10px] sm:bottom-[-25px] mb-[-3px] sm:mb-0">
+            <img src="/1.png" alt="Description" class="object-cover" style="width: 9.5rem; height: 9.5rem;" />
+          </div>
+          <GradientButton color="green" shadow href="/dashboard/requests-form" class="sm:mt-16 mt-0 sm:mb-4 ml-auto w-fit align-self-end">
+            Borrow <ArrowRightOutline class="w-6 h-6 ms-2 text-white" />
+          </GradientButton>
+        </div>
+      </Card>
+    </div>
+
+    <!-- Second Card -->
+    <div class="sm:w-1/3 w-full mb-2 sm:mb-0 px-3">
+      <Card class="relative w-full max-w-full">
+        <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">Venues</h5>
+        <p class="mb-3 text-sm text-gray-700 dark:text-gray-400 leading-tight">Reserve rooms in the UPCDC Building for activities & events.</p>
+        <div class="flex sm:flex-row flex-col sm:justify-end relative">
+          <div class="sm:absolute sm:left-[-10px] sm:bottom-[-25px] mb-[-1px] sm:mb-0">
+            <img src="/2.png" alt="Description" class="object-cover" style="width: 9.5rem; height: 9.5rem;" />
+          </div>
+          <GradientButton color="green" shadow href="/dashboard/requests-form" class="sm:mt-16 mt-0 sm:mb-4 ml-auto w-fit align-self-end">
+            Reserve <ArrowRightOutline class="w-6 h-6 ms-2 text-white" />
+          </GradientButton>
+        </div>
+      </Card>
+    </div>
+
+    <!-- Third Card -->
+     {#if data.current_user.access_level != 7}
+    <div class="sm:w-1/3 w-full mb-2 sm:mb-0 px-3">
+      <Card class="relative w-full max-w-full">
+        <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">Observations</h5>
+        <p class="mb-3 text-sm text-gray-700 dark:text-gray-400 leading-tight">Book an available class observation schedule.</p>
+        <div class="flex sm:flex-row flex-col sm:justify-end relative">
+          <div class="sm:absolute sm:left-0 sm:bottom-[-25px] mb-[-13px] ml-2 sm:mb-0">
+            <img src="/3.png" alt="Description" class="object-cover" style="width: 9.5rem; height: 9.5rem;" />
+          </div>
+          <GradientButton color="green" shadow href="/dashboard/observationform" class="sm:mt-16 mt-0 sm:mb-4 ml-auto w-fit align-self-end">
+            Book <ArrowRightOutline class="w-6 h-6 ms-2 text-white" />
+          </GradientButton>
+        </div>
+      </Card>
+    </div>
+    {/if}
+
+  </div>  
+  {#if data.current_user.access_level != 7}
     <div class="flex items-center justify-between pb-3">
       <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{viewingPendingReqs ? 'Your Pending Requests' : 'History'}</h5>
       <button class="text-gray-500 flex" on:click={() => viewingPendingReqs = !viewingPendingReqs}> 
@@ -63,9 +94,10 @@
         {/each} {/if}
       </div>
     {:else}
-      <p class="text-gray-500">
-        { viewingPendingReqs ? 'No pending requests' : 'No finished requests'}
+      <p class="text-gray-500 text-center mt-5">
+        { viewingPendingReqs ? 'No Pending Requests' : 'No Finished Requests'}
       </p>
+    {/if}
     {/if}
 </div>
 

@@ -12,18 +12,7 @@
     console.log(data.requestDetails)
 
     let requestDetails = data?.requestDetails[0];
-    let request_type = "";
-
-    if (data.requestType == "equipment_requests"){
-        request_type = "Equipment Requests"
-    }
-    else if (data.requestType == "venue_requests"){
-        request_type = "Venue Requests"
-    }
-
-    if (requestDetails.studentno == null){
-        requestDetails.studentno = "none";
-    }
+    let requestTypeDisplay = data.requestType?.charAt(0).toUpperCase() + data.requestType.slice(1) + " Requests";
 
     $: totalStatus = data?.approvalForms.totalStatus;
     const isAdmin = data?.current_user?.access_level < 5;
@@ -37,15 +26,15 @@
         <a href="/dashboard"><Button class="bg-white text-gray-500 hover:bg-white drop-shadow-md"><ArrowLeftOutline/></Button></a>
         <div class="w-full items-center justify-between flex">
             <div>    
-                <h2 class="pt-3 text-2xl font-semibold text-gray-600">{request_type}: {data.requestName}</h2>
-                <Badge class="mt-2" large border color='{totalStatus === 'approved' ? statusColors.approved : totalStatus === 'declined' ? statusColors.declined : statusColors.pending}'>{totalStatus.charAt(0).toUpperCase() + totalStatus.slice(1)}</Badge>
+                <h2 class="pt-3 text-2xl font-semibold text-gray-600">{requestTypeDisplay}: {data.requestName} {#if data.request_type ="class_requests"}, {requestDetails.timeslot}{/if}</h2>
+                <Badge class="mt-2" large border color='{totalStatus === 'approved' ? statusColors.approved : totalStatus === 'declined' ? statusColors.declined : statusColors.pending}'>{totalStatus?.charAt(0)?.toUpperCase() + totalStatus?.slice(1)}</Badge>
             </div>
             {#if !isAdmin}
                 <form bind:this={form} action="..?/deleteRequest" method="POST">
                     <input hidden="true" id="request_table_name" name="request_table_name" />
                     <input hidden="true" id="request_id" name="request_id" />
                     <GradientButton color="red" type="submit" on:click={() => {
-                        form.querySelector(`input[id="request_table_name"]`).value = data.requestType;
+                        form.querySelector(`input[id="request_table_name"]`).value = data.requestType + '_requests';
                         form.querySelector(`input[id="request_id"]`).value = data.requestID;
                         }} >
                         <TrashBinSolid/>
@@ -70,7 +59,7 @@
                 </tr>
                 <tr>
                     <td class="py-3 px-4 font-semibold">Student Number</td>
-                    <td class="py-3 px-4">{requestDetails.studentno}</td>
+                    <td class="py-3 px-4">{requestDetails.studentno || 'none'}</td>
                 </tr>
                 <tr>
                     <td class="py-3 px-4 font-semibold">Contact Number</td>
@@ -87,7 +76,7 @@
                         <tr>{requestDetails.adminemail}</tr>
                     </div>
                 </tr>
-                {#if data.requestType === 'equipment_requests'}
+                {#if data.requestType === 'equipment'}
                     <tr>
                         <td class="py-3 px-4 font-semibold">Promised Date of Borrowing</td>
                         <td class="py-3 px-4">{postgresTimeToReadable(data.startDate)}</td>
@@ -120,16 +109,16 @@
                 {/if}
                 <td class="py-3 px-4">
                     <p class="font-semibold"> Requesting the following </p>
-                    {#if isAdmin && data?.approvalForms.canRespond && data.requestType.includes('equipment')}
+                    {#if isAdmin && data?.approvalForms.canRespond}
                         <div class="mt-2 flex">
                             <InfoCircleOutline class="size-xs" /> 
-                            <p class="text-sm max-w-52 ml-1"> Be sure to submit the Response Form on the right to save your assignments here.</p>
+                            <p class="text-sm max-w-52 ml-1"> Be sure to approve the Response Form on the right to save your assignments here.</p>
                         </div>
                     {/if}
                 </td>
 
                 <td class="py-3 px-4">
-                    {#if isAdmin && data?.approvalForms.canRespond && data.requestType.includes('equipment')}
+                    {#if isAdmin && data?.approvalForms.canRespond && data.requestType !== 'class'}
                         <Assignment data={data} form={form}/>     
                     {:else}
                         {#each data.requestName?.split(', ') as item}

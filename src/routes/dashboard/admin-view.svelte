@@ -22,11 +22,8 @@
 
   // Filter out all requests that are not for this user to see (invisible)
   let availableRequests = data.requestsInfo.filter(req => {
-    //console.log(req)
     const idIdx = req.approvalsInfo.userIDs.findIndex(id => data.current_user.access_level === 3 ? id == null : id === data.current_user.user_id );
     const approvedIdx = req.approvalsInfo.statuses.findIndex(status => status === 'approved');
-    // console.log(idIdx, approvedIdx)
-    // console.log(idIdx <= (approvedIdx+1))
     return idIdx <= (approvedIdx+1); // the only ones who can see are the pendng-approver and past-approver
   });
   // console.log(data.requestsInfo)
@@ -126,6 +123,8 @@
       {/each} {/if}
     </div>
   {:else}
-    <p class="text-gray-500">No Pending Requests</p>
+    <p class="text-gray-500 text-center mt-5">
+      { viewingPendingReqs ? 'No Pending Requests' : 'No Finished Requests'}
+    </p>
   {/if}
 </div>

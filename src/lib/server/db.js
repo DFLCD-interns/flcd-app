@@ -15,13 +15,10 @@ const table_names = [
   'base_requests',
   'batches',
   'childs',
-  'child_requests',
   'classes',
   'class_requests',
   'equipments',
   'equipment_requests',
-  'preferred_times_child',
-  'preferred_times_class',
   'sessions',
   'transaction_log',
   'users',
@@ -271,8 +268,8 @@ export async function updateTableDB(table_name, searchFormData, updateFormData) 
 
   const searchAttributes = [...searchFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection
   const updateAttributes = [...updateFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection
-  let searchValues = [...searchFormData.values()].map((val) => val === 'null' ? null : val); // will be for parametrization
-  const updateValues = [...updateFormData.values()].map((val) => val === 'null' ? null : val); // will be for parametrization
+  let searchValues = [...searchFormData.values()].map((val) => val === 'null' || val === 'undefined' ? null : val); // will be for parametrization
+  const updateValues = [...updateFormData.values()].map((val) => val === 'null' || val === 'undefined' ? null : val); // will be for parametrization
 
   const setText = updateAttributes.map((attributeName, index) => `${attributeName} = \$${index+1}`).join(', ')
   const whereText = searchAttributes.map((attributeName, index) => `(${attributeName} ${searchValues[index] ? `= \$${updateAttributes.length + index+1}` : 'IS NULL'})`).join(' AND ')
@@ -340,7 +337,7 @@ export async function getApprovalsInfo(searchFormData) {
   const displayNames = [];
   searchFormData.delete('request_id');
   const searchFormData2 = new FormData();
-  for (const row of formsQuery.body.result.rows) {
+  for (const row of formsQuery?.body.result.rows) {
     let access_level = undefined;
     if (row.approver_id) {
       searchFormData.set('id', row.approver_id);
@@ -380,22 +377,26 @@ function getTotalStatus(names, statuses) {
 }
 
 async function getEquipmentRequestsDB() {
-  const res = await query(`SELECT * FROM base_requests JOIN equipment_requests ON equipment_requests.request_id = base_requests.id ORDER BY equipment_requests.id ASC`);
+  const res = await query(`SELECT equipment_requests.id AS req_id, * FROM base_requests JOIN equipment_requests ON equipment_requests.request_id = base_requests.id ORDER BY equipment_requests.id ASC`);
   return res.body.result.rows;
 }
 
 async function getVenueRequestsDB() {
-  const res = await query(`SELECT * FROM base_requests JOIN venue_requests ON venue_requests.request_id = base_requests.id JOIN venues ON venue_requests.venue_id = venues.id ORDER BY venue_requests.id ASC`);
-  return res.body.result.rows;
-}
-
-async function getChildRequestsDB() {
-  const res = await query(`SELECT * FROM base_requests JOIN child_requests ON child_requests.request_id = base_requests.id JOIN childs ON child_requests.child_id = childs.id ORDER BY child_requests.id ASC`);
-  return res.body.result.rows;
+  const res = await query(`SELECT venue_requests.id AS req_id, * FROM base_requests JOIN venue_requests ON venue_requests.request_id = base_requests.id JOIN venues ON venue_requests.venue_id = venues.id ORDER BY venue_requests.id ASC`);
+  // for those without venue_id:
+  const res2 = await query(`SELECT venue_requests.id AS req_id, * FROM base_requests JOIN venue_requests ON venue_requests.request_id = base_requests.id ORDER BY venue_requests.id ASC`);
+  const ret = res.body.result.rows?.concat(
+    res2.body.result.rows?.filter(
+      reqNoAssignedVenue => {
+        if (reqNoAssignedVenue.venue_id) return false;
+        if (res.body.result.rows?.length === 0) return true;
+        return res.body.result.rows.some(reqWithAssignedVenue => reqWithAssignedVenue.request_id === reqNoAssignedVenue.request_id && reqWithAssignedVenue.req_id !== reqNoAssignedVenue.req_id)
+      }))
+  return ret;
 }
 
 async function getClassRequestsDB() {
-  const res = await query(`SELECT * FROM base_requests JOIN class_requests ON class_requests.request_id = base_requests.id JOIN classes ON class_requests.class_id = classes.id ORDER BY class_requests.id ASC`);
+  const res = await query(`SELECT class_requests.id AS req_id, * FROM base_requests JOIN class_requests ON class_requests.request_id = base_requests.id JOIN classes ON class_requests.class_id = classes.id ORDER BY class_requests.id ASC`);
   return res.body.result.rows;
 }
 
@@ -405,7 +406,6 @@ export async function getRequestsInfo(user_id, user_access_level) {
   // Get all requests
 	const equipment_requests = await getEquipmentRequestsDB();
 	const venue_requests = await getVenueRequestsDB();
-	// const child_requests = await getChildRequestsDB();
 	const class_requests = await getClassRequestsDB();
 
 	const equipReqsGroupedDict = {};
@@ -418,7 +418,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
 	const allRequests = [];
 	Object.values(equipReqsGroupedDict).forEach(function (groupedItem) {
     const desiredEquipments = groupedItem.reduce((equipTypeDict, item) => {
-      if (Object.keys(equipTypeDict).includes(item?.equipment_type))  
+      if (Object.keys(equipTypeDict).includes(item?.equipment_type)) 
         equipTypeDict[item?.equipment_type]++; // increment total
       else equipTypeDict[item?.equipment_type] = 1; // else add to dict
       return equipTypeDict;
@@ -437,11 +437,11 @@ export async function getRequestsInfo(user_id, user_access_level) {
 			status: null,
       approvalsInfo: null,
       requestedItems: desiredEquipments, // these are equipment types
-      equipmentRequestRows: equipment_requests,
+      requestRows: equipment_requests,
 		})
   });
 	
-	const venueReqsGroupedDict = {};
+  const venueReqsGroupedDict = {};
 	venue_requests.forEach(row => {
 		if (Object.keys(venueReqsGroupedDict).includes(row.request_id.toString())) 
 			venueReqsGroupedDict[row.request_id].push(row); // add to existing key-value pair
@@ -449,10 +449,16 @@ export async function getRequestsInfo(user_id, user_access_level) {
 	});
 
   Object.values(venueReqsGroupedDict).forEach(function (groupedItem) {
-    const requestName = groupedItem.map(item => item.name).join(', ');
-    // console.log(requestName);
+    const noAssignedCount = groupedItem.reduce((_noAssignedCount, item) => item.name ? _noAssignedCount : (++_noAssignedCount), 0);
+    const requestName = groupedItem.map(item => item.name).join(', ') + noAssignedCount !== 0 ? `(${noAssignedCount} unavailable venues)` : '';
+
     const start_date = new Date(format(groupedItem[0].date_needed, 'yyyy-MM-dd') + 'T' + groupedItem[0].start_time)
     const end_date = new Date(format(groupedItem[0].date_needed, 'yyyy-MM-dd') + 'T' + groupedItem[0].end_time)
+    const desiredVenues = groupedItem.reduce((venueDict, item) => {
+      if (!Object.keys(venueDict).includes(item?.venue_id)) 
+        venueDict[item?.venue_id] = item?.name; 
+      return venueDict;
+    }, {}) // key-value pair of each venue name as key and the id as value
 		allRequests.push({
 			type: 'Venue Request',
 			table:'venue_requests',
@@ -464,22 +470,10 @@ export async function getRequestsInfo(user_id, user_access_level) {
 			actual_date_end: end_date,
 			status: null,
       approvalsInfo: null,
+      requestedItems: desiredVenues, // these are the venues
+      requestRows: venue_requests,
 		})
 	});
-	
-	// child_requests.forEach(function (item) {
-	// 	allRequests.push({
-	// 		type: 'Child Observation Request',
-	// 		table:'child_requests',
-	// 		id: item.request_id,
-  //     created: item.created,
-  //     requester_id: item?.requester_id,
-	// 		name: item.name,
-	// 		date: item.observation_time,
-	// 		status: null,
-  //     approvalsInfo: null,
-	// 	})
-	// });
   
 	class_requests.forEach(function (item) {
 		allRequests.push({

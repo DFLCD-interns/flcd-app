@@ -1,5 +1,7 @@
 <script>
     import { InfoCircleOutline } from 'flowbite-svelte-icons';
+    import { enhance } from '$app/forms';
+    import { goto } from '$app/navigation';
 
     export let data;
     export let form;
@@ -8,7 +10,7 @@
 <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
     <h1 class="text-gray-600 text-lg mb-1 font-medium title-font">Response Form</h1>                    
     {#if data?.approvalForms.canRespond }
-        <form bind:this={form} action="?/approve" method="POST">
+        <form bind:this={form} action="?/approve" method="POST" use:enhance={() => goto('/dashboard')}>
             <div class="relative mb-4">
                 <textarea 
                     id="remarks" 
@@ -21,13 +23,18 @@
                 <p class="text-gray-600 text-sm mb-1 ml-1"> You can modify your response as long as the next approver has not responded yet and the request is open.</p>
             </div>
             <div class="flex justify-center">
-                <!-- Hidden input fields to store status, and assigned equipments -->
+                <!-- Hidden input fields to store status and assigned items -->
                 <input type="hidden" id="status" name="status" />
-                {#if data.requestType.includes('equipment')}
-                     {#each Object.entries(data.requestedItems) as item}
-                         {#each data.equipmentRequestRows.filter(row => row.equipment_type == item[0]) as requestRow}
-                             <input type="hidden" name="equipment_id_{requestRow.id}" />
-                     {/each} {/each}
+                {#if data.requestType == 'equipment'}
+                    {#each Object.entries(data.requestedItems) as item}
+                        {#each data.requestRows?.filter(row => row.equipment_type == item[0]) as requestRow}
+                            <input type="hidden" name="{data.requestType}_id_{requestRow?.req_id}" />
+                        {/each} 
+                    {/each}
+                {:else if data.requestType == 'venue'}
+                    {#each data.requestRows as requestRow}            
+                        <input type="hidden" name="{data.requestType}_id_{requestRow?.req_id}" />
+                    {/each} 
                 {/if}
                 <button 
                     on:click={() => form.querySelector('input[name="status"]').value = "approved"}
