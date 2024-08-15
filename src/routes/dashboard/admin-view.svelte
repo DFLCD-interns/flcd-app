@@ -35,7 +35,7 @@
   function parseDateTime(dateTimeStr, type) {
     // Remove 'at' and extra spaces from the string
     // Parse date-time string
-    console.log(dateTimeStr)
+    //console.log(dateTimeStr)
     let parsedDate = ""
     if (type == 'Class Observation Request'){return dateTimeStr}
     else { parsedDate = parse(dateTimeStr.toString().replace(/\sat\s/, ' ').replace(/\s+/g, ' ').trim(), 'MMMM d, yyyy hh:mm a', new Date()); }

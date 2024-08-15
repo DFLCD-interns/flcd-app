@@ -1,48 +1,70 @@
 import { SESSION_COOKIE_NAME } from '$lib/server/constants.js';
-import { createUser } from '$lib/server/auth.js';
+import { createUser, createSessionByEmail } from '$lib/server/auth.js';
 import { fail, redirect } from "@sveltejs/kit";
 
 export const actions = {
-	register: async ({request, cookies}) => {
-		// TODO log the user in
-		const formData = await request.formData();
+    register: async ({ request, cookies }) => {
+        const formData = await request.formData();
 
-		const email = formData.get("email");
-		const password = formData.get("password");
-		const first_name = formData.get("first_name");
-		const last_name = formData.get("last_name");
-		const phone = formData.get("phone");
-		const student_number = formData.get("student_number");
-		const course = formData.get("course");
-		const department = formData.get("department");
+        const email = formData.get("email");
+        const password = formData.get("password");
+        const confirm_password = formData.get("confirm_password");
+        const first_name = formData.get("first_name");
+        const last_name = formData.get("last_name");
+        const phone = formData.get("phone");
+        const student_number = formData.get("student_number").split('-').join('');
+        const course = formData.get("course");
+        let department = formData.get("department");
 
-        // console.log("signin+page.server.js -- GOT FORM DATA")
+        if (!email.endsWith('@up.edu.ph')) {
+            return fail(500, {
+                email,
+                password,
+                message: "Please use your UP mail.",
+            });
+        }
 
-		try {
-            // console.log("signup+page.server.js - before sessionresult");
-			// console.log('creating user...')
-			const createUserResult = await createUser(first_name, last_name, email, password, phone, student_number, course, department, 5);
-			
-            // console.log("register+page.server.js", createUserResult);
-		} catch (error) {
-			if (error instanceof Error) {
-				return fail(500, {
-					email,
-					password,
-					message: error.message,
-				});
-			} else {
-				return fail(500, {
-					email,
-					password,
-					message: "Unknown error occured in server",
-				  });
-			}
-		}
+        if (!password || password !== confirm_password) {
+            return fail(500, {
+                email,
+                password,
+                message: "Passwords don't match!",
+            });
+        }
 
-		throw redirect(303, "/");
-	},
+        let access_level;
+        if (department == "DFLCD") {
+            access_level = 5;
+        } else {
+            access_level = 6;
+        }
+
+        try {
+            const createUserResult = await createUser(first_name, last_name, email, password, phone, student_number, course, department, access_level);
+
+			// Automatically log the user in
+            const sessionCreationResult = await createSessionByEmail(email, password);
+
+            cookies.set(SESSION_COOKIE_NAME, sessionCreationResult.id, {
+                path: "/",
+                httpOnly: true,
+                sameSite: "strict",
+                maxAge: 60 * 60 * 12,
+            });
+
+        } catch (error) {
+            console.log("Error: ", error.message);
+            return fail(500, {
+                email,
+                password,
+                message: error.message,
+            });
+        }
+		// Redirect to dashboard after successful registration
+		throw redirect(303, "/dashboard?registered=true");
+    },
 };
+
 
 // import { SESSION_COOKIE_NAME } from '$lib/constants.js';
 

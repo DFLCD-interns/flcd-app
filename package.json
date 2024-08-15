@@ -9,7 +9,7 @@
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^3.0.0",
-		"@sveltejs/kit": "^2.0.0",
+		"@sveltejs/kit": "^2.5.22",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@tailwindcss/forms": "^0.5.7",
 		"@types/date-fns": "^2.6.0",
@@ -26,6 +26,7 @@
 	"dependencies": {
 		"date-fns": "^3.6.0",
 		"pg": "^8.12.0",
+		"svelte-french-toast": "^1.2.0",
 		"uuid": "^10.0.0"
 	}
 }

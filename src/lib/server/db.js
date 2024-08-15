@@ -79,8 +79,7 @@ return res.body.result.rows[0]?.access_level;
 
 export async function authUserDB(email) {
 const res = await query('SELECT * FROM users WHERE email = $1', [email]);
-// console.log(res, email);
-return res.body.result.rows[0];
+return res.body.result.rows;
 }
 
 export async function createSessionDB(sessionid, userid){
@@ -99,6 +98,11 @@ export async function getUserWithMatchingEmail(email) {
   return res.body.result.rows;
 }
 
+export async function getUserWithMatchingSN(sn) {
+  const res = await query('SELECT * FROM users WHERE student_number = $1', [sn]);
+  return res.body.result.rows;
+}
+
 export async function getUsersWithAccessLevel(access_level) {
   const res = await query('SELECT * FROM users WHERE access_level = $1', [access_level]);
   return res.body.result.rows;
@@ -110,7 +114,24 @@ export async function getEquipmentDB() {
 }
 
 export async function getUsersListDB() {
-  const result = await query("SELECT * FROM users");
+  const result = await query(`SELECT 
+    id,
+    first_name,
+    last_name,
+    email,
+    phone,
+    student_number,
+    course,
+    department,
+    users.access_level,
+    user_types.description,
+    created
+    FROM users JOIN user_types on users.access_level = user_types.access_level`);
+  return result.body.result.rows;
+}
+
+export async function getUserTypesDB() {
+  const result = await query("SELECT * FROM user_types");
   return result.body.result.rows;
 }
 
@@ -158,6 +179,8 @@ export async function getRequestDetailsDB(table, reqid) {
       `, t.location AS location, 
          t.actual_start_time AS actual_start_time,
          t.promised_end_time AS promised_end_time`: ''}
+    ${table === 'class_requests' ?
+      ', t.timeslot AS timeslot' : ''} 
     FROM base_requests br 
     LEFT JOIN ${table} t ON br.id = t.request_id
     LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
@@ -485,6 +508,7 @@ export async function getRequestsInfo(user_id, user_access_level) {
 			name: item.name,
       created: item.created,
 			date: item.observe_date,
+      timeslot: item.timeslot,
 			status: null,
       approvalsInfo: null,
 		})
@@ -525,11 +549,11 @@ export async function getAllClassesDB() {
     batches.name AS batch_name,
     batches.description AS batch_description,
     batches.created AS batch_created,
-    classes."name" AS class_name,
+    classes.name AS class_name,
     users.first_name AS handler_firstname,
     users.last_name AS handler_lastname,
     classes.description AS class_description,
-    classes."schedule",
+    classes.schedule,
     classes.created AS classes_created,
     childs.name AS child_name,
     childs.birthdate AS child_birthdate,
@@ -538,7 +562,7 @@ export async function getAllClassesDB() {
     FROM batches JOIN classes ON batches.id = classes.batch_id 
     JOIN childs ON classes.id = childs.class_id 
     JOIN users ON classes.handler_id = users.id`);
-  // console.log(res);
+    //console.log(`testdb: ${res.body.result.rows}`);
   return res.body.result.rows;
 }
 
@@ -547,6 +571,8 @@ export async function getBatchesDB() {
   // console.log(res);
   return res.body.result.rows;
 }
+
+
 
 export async function getClassesDB() {
   const res = await query(`SELECT * FROM classes`);

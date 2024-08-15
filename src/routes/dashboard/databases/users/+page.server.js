@@ -4,5 +4,6 @@ import * as db from '$lib/server/db.js';
 export async function load() {
 	return {
 		user: await db.getUsersListDB(),
+		userTypes: await db.getUserTypesDB(),
 	};
 }

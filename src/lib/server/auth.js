@@ -3,12 +3,12 @@
 import { writable, get } from "svelte/store";
 import { v4 as uuid } from "uuid";
 import { PEPPA_PIG, SESSION_COOKIE_NAME } from "$lib/server/constants.js";
-import { getUserFromSessionDB, getUsersDB, createSessionDB, getUserByIDDB, getSessionByIDDB, createUserDB, authUserDB } from "$lib/server/db.js";
+import { getUserFromSessionDB, createSessionDB, getUserByIDDB, getSessionByIDDB, createUserDB, authUserDB } from "$lib/server/db.js";
 import { json } from "@sveltejs/kit";
 import { scryptSync, randomBytes} from "crypto"; 
-import { getUserWithMatchingEmail } from "./db";
+import { getUserWithMatchingEmail, getUserWithMatchingSN } from "./db";
 
-//these seem to be treated as a temp database replacement
+// these seem to be treated as a temp database replacement
 // const usersStore = writable([]); 
 // const sessionsStore = writable([]);
 
@@ -49,7 +49,6 @@ export async function authenticateUser(event) {
 
 export async function validateEmail(email) { // checking of inputs is done here
     const emailRegex = /[-A-Za-z0-9_.%]+@[-A-Za-z0-9_.%]+\.[A-Za-z]+/gm;
-
     const emailRegexExec = emailRegex.exec(email);
 
     if (emailRegexExec && emailRegexExec[0] === email) {
@@ -57,13 +56,9 @@ export async function validateEmail(email) { // checking of inputs is done here
             success: true,
         };
     }
-
-    
-    
-
     return {
         error: true,
-        message: "Email is invalid",
+        message: "Email is invalid.",
     };
 }
 
@@ -73,7 +68,7 @@ export function validatePassword(password) {
     if (!requiredLength) {
         return {
             error: true,
-            message: "Password must be at least 8 characters in length",
+            message: "Password must be at least\n8 characters in length.",
         };
     }
 
@@ -81,63 +76,30 @@ export function validatePassword(password) {
 }
 
 export async function createUser(first_name, last_name, email, password, phone, student_number, course, department, access_level) {
-    // console.log("auth.js - createUser start.");
-
-    // const emailValidationResult = validateEmail(email);
-
-    // if (emailValidationResult.error) {
-    //     throw new Error(emailValidationResult.message);
-    // }
-
-    // const passwordValidationResult = validatePassword(password);
-
-    // if (passwordValidationResult.error) {
-    //     throw new Error(passwordValidationResult.message);
-    // }
-
-    // const currentUsers = get(usersStore);
-
-    // const newUser = {
-    //     email,
-    //     password,
-    //     id: uuid(),
-    // };
-
-    // check if email exists
-    const matches = await getUserWithMatchingEmail(email);
-    if (matches.length > 1) {
+    
+    const email_matches = await getUserWithMatchingEmail(email);
+    if (email_matches.length > 0) {
         throw new Error("Email already in use.");
-        // return {
-        //     error: true,
-        //     message: "Email already in use.",
-        // }
+    }
+    const sn_matches = await getUserWithMatchingSN(student_number);
+    if (sn_matches.length > 0) {
+        throw new Error("Student number already in use.");
+    }
+    const password_strong = await validatePassword(password);
+    if (password_strong.error) {
+        throw new Error(password_strong.message);
     }
 
     const new_uuid = uuid();
-
-
-    // console.log("newuuid", new_uuid);
-
     const pw_hash_response = await resolvePW(password, null);
-    
-    // console.log("hashresponse", pw_hash_response);
-    
     const pw_hash = pw_hash_response.body.finalHash.concat(pw_hash_response.body.salt);
-    
-    // console.log("auth.js - createUser before newuser.");
-    
     const newUser = await createUserDB(new_uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level);
 
     if (!newUser) {
         throw new Error("Error occured when creating a new user.");
     }
-    // usersStore.update((previousUsers) => {
-    //     return [...previousUsers, newUser];
-    // });
-
-    // return createSessionById(newUser.id);
     return { success: true,
-        message: "User created.",
+        message: "User successfully created.",
     }
 }
 
@@ -192,6 +154,12 @@ export async function createSessionByEmail(email, password) {
     // });
 
     // console.log("before userFound");
+    
+    const user = await authUserDB(email);
+    if (user.length < 1) {
+        throw new Error("Email not found. Please sign up.");
+    }
+    
     const password_resolution = await resolvePW(password, email);
 
     // console.log("auth.js - password resolution: ", password_resolution);
@@ -306,71 +274,43 @@ export async function isCorrect(hash, salt, toverify) {
     return false;
 }
 
-async function resolvePW(password, email, force = false) { //TODO change this to reflect using isCorrect and hashItem fucntions
-    // console.log("auth.js - password and email", password, email);
+async function resolvePW(password, email, force = false) { 
     let salt;
     let pw_hash;
-    const user = await authUserDB(email);
-    // console.log("authUser - ", user)
-    if (!email || force) {
+
+    // Fetch the user from the database
+    const users = await authUserDB(email);
+    const user = users.length > 0 ? users[0] : null;
+
+    // If the email is not provided or force is true, generate a new salt
+    if (!user || force) {
         salt = randomBytes(64).toString('hex');
-        // console.log("auth.js - salt inside if", salt);
     } else {
-        pw_hash = user.pw_hash; //await authUserDB(email);
-        // console.log("auth.js - pw_hash in resolvePW", pw_hash);
+        pw_hash = user.pw_hash; 
         salt = pw_hash.slice(128, 256);
     }
-    
-    // console.log("auth.js -- salt", salt);
-    let finalkey = scryptSync(password, salt, 64).toString("hex"); // salting first
-    // console.log("auth.js -- prefinal key",finalkey);
-    // console.log("auth.js -- peppa", PEPPA_PIG);
+
+    let finalkey = scryptSync(password, salt, 64).toString("hex"); // Salting first
     finalkey = scryptSync(finalkey, PEPPA_PIG, 64).toString("hex");
-    // console.log("auth.js -- final key",finalkey);
-    // console.log("correct hash", correctHash);
-    if (email && !force) {
+
+    // If user exists and force is not true, validate the password
+    if (user && !force) {
         if (finalkey !== pw_hash.slice(0,128)) {
-            // console.log("resolve fail");
-            throw new Error("Authentication Failed!, incorrect password!");
-            // return {
-            //     success: false,
-            //     message: "Authentication failed, incorrect password?",
-            //     body: {
-            //         userid: null,
-            //         useruuid: null,
-            //         finalHash: finalkey,
-            //         salt: salt,
-            //         // correctHash: correctHash
-            //     }
-            // }
+            throw new Error("Incorrect password");
         }
     }
-    // console.log("resolve success");
-    if (user) {
-        if (!force) {
-            return {
 
-                success: true,
-                message: "Successfully authenticated.",
-                body: {
-                    userid: user.id,
-                    useruuid: user.uuid,
-                    finalHash: finalkey,
-                    salt: salt,
-                }
+    if (user) {
+        return {
+            success: true,
+            message: force ? "Password changed." : "Successfully authenticated.",
+            body: {
+                userid: user.id,
+                useruuid: user.uuid,
+                finalHash: finalkey,
+                salt: salt,
             }
-        } else {
-            return {
-                success: true,
-                message: "Password changed.",
-                body: {
-                    userid: user.id,
-                    useruuid: user.uuid,
-                    finalHash: finalkey,
-                    salt: salt,
-                }
-            }
-        }
+        };
     } else {
         return {
             success: true,
@@ -381,6 +321,7 @@ async function resolvePW(password, email, force = false) { //TODO change this to
                 finalHash: finalkey,
                 salt: salt,
             }
-        }
+        };
     }
 }
+

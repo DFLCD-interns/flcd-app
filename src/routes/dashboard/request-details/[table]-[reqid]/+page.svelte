@@ -9,12 +9,14 @@
     /** @type {import('./$types').PageData} */
     export let data;
     export let form;
+    console.log(data.requestDetails)
 
     let requestDetails = data?.requestDetails[0];
     let requestTypeDisplay = data.requestType?.charAt(0).toUpperCase() + data.requestType.slice(1) + " Requests";
 
     $: totalStatus = data?.approvalForms.totalStatus;
     const isAdmin = data?.current_user?.access_level < 5;
+    
     
 </script>
 
@@ -120,7 +122,11 @@
                         <Assignment data={data} form={form}/>     
                     {:else}
                         {#each data.requestName?.split(', ') as item}
+                        {#if data.requestType.includes('class')}
+                            <p>• {item}, {requestDetails.timeslot}</p>
+                        {:else}
                             <p>• {item}</p>
+                            {/if}
                         {/each}
                     {/if}
                 </td> 

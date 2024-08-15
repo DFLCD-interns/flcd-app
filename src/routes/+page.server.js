@@ -4,22 +4,16 @@ import { fail, redirect } from "@sveltejs/kit";
 
 export const actions = {
 	signin: async ({request, cookies}) => {
-		// TODO log the user in
+
 		const formData = await request.formData();
-
-		let email = formData.get("email");
 		const password = formData.get("password");
-
+		let email = formData.get("email");
 		if (!email.endsWith('@up.edu.ph')) {
 			email = `${email}@up.edu.ph`;
 		}
 
-        // console.log("signin+page.server.js -- GOT FORM DATA")
-
 		try {
 			const sessionCreationResult = await createSessionByEmail(email, password);
-            
-            // console.log("signin+page.server.js: ",sessionCreationResult);
 
 			cookies.set(SESSION_COOKIE_NAME, sessionCreationResult.id, {
 				path: "/",
@@ -27,25 +21,17 @@ export const actions = {
                 sameSite: "strict",
                 maxAge: 60 * 60 * 12,
 			});
+
 		} catch (error) {
-			if (error instanceof Error) {
-				return fail(500, {
-					email,
-					password,
-					message: error.message,
-				});
-			} else {
-				return fail(500, {
-					email,
-					password,
-					message: "Unknown error occured in server",
-				  });
-			}
+			console.log("Error: ", error.message);
+			return fail(500, {
+                email,
+                password,
+                message: error.message,
+            });
 		}
 		throw redirect(303, "/dashboard");
 	},
-
-
 };
 
 // import { SESSION_COOKIE_NAME } from '$lib/constants.js';
