@@ -31,7 +31,7 @@ export const load = async ( {cookies, params, parent} ) => {
             requestedItems: requestInfo.requestedItems,
             startDate: requestInfo.date,
             endDate: requestInfo.actual_date_end,
-            equipmentRequestRows: equipmentRequestRows,
+            equipmentRequestRows: equipmentRequestRows
         }
     } catch (error) {   
         console.error("Load failed:", error.message);

@@ -22,11 +22,11 @@
 
   // Filter out all requests that are not for this user to see (invisible)
   let availableRequests = data.requestsInfo.filter(req => {
-    console.log(req)
+    //console.log(req)
     const idIdx = req.approvalsInfo.userIDs.findIndex(id => data.current_user.access_level === 3 ? id == null : id === data.current_user.user_id );
     const approvedIdx = req.approvalsInfo.statuses.findIndex(status => status === 'approved');
-    console.log(idIdx, approvedIdx)
-    console.log(idIdx <= (approvedIdx+1))
+    // console.log(idIdx, approvedIdx)
+    // console.log(idIdx <= (approvedIdx+1))
     return idIdx <= (approvedIdx+1); // the only ones who can see are the pendng-approver and past-approver
   });
   // console.log(data.requestsInfo)
@@ -38,7 +38,7 @@
   function parseDateTime(dateTimeStr, type) {
     // Remove 'at' and extra spaces from the string
     // Parse date-time string
-    console.log(dateTimeStr)
+    //console.log(dateTimeStr)
     let parsedDate = ""
     if (type == 'Class Observation Request'){return dateTimeStr}
     else { parsedDate = parse(dateTimeStr.toString().replace(/\sat\s/, ' ').replace(/\s+/g, ' ').trim(), 'MMMM d, yyyy hh:mm a', new Date()); }
