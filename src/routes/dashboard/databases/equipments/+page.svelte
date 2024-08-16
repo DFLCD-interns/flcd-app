@@ -13,12 +13,9 @@
   if (equipments != null){
     tableHead = Object.keys(equipments[0]);
   }
-<<<<<<< HEAD
-=======
   
   let access_level=data.current_user.access_level;
   
->>>>>>> 05cae6200097582585f9f63c12849cea4745a977
 
   let equipmentName="equipment"
   let EditModal = false;
@@ -145,25 +142,54 @@
     </div>
     <hr>
   </div>
-<<<<<<< HEAD
   
   <div class="flex flex-col md:flex-row items-center justify-between pb-5">
     <p class="font-semibold text-xl text-gray-700">Equipments Database</p>
     <div class="flex flex-row md:flex-row gap-2 mt-2 md:mt-0">
       <GradientButton on:click={downloadCSV(equipments, 'equipment')} color="green" class="inline-flex text-center gap-2"><DownloadSolid/>Download Table</GradientButton>
-      <GradientButton on:click={() => {AddModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Equipment</GradientButton>
-    </div>
-=======
-  <div class="flex items-center justify-between pb-5">
-    <p  class="font-semibold text-xl text-gray-700">Equipments Database</p>
-    <div class = "flex gap-2">
-    <GradientButton on:click={downloadCSV(equipments, 'equipment')} color="green" class="inline-flex text-center gap-2"><DownloadSolid/>Download Table</GradientButton>
     {#if access_level !=4}
-    <GradientButton on:click={() => {AddModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Equipment</GradientButton>
+      <GradientButton on:click={() => {AddModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Equipment</GradientButton>
     {/if}
+    </div>
   </div>
-  </div>
+  
   <div class="pb-5">
+    {#if equipments != null}
+    <Table shadow>
+      <TableHead>
+        {#each tableHead as head}
+        {#if head != 'dateString' && head != 'id'} <!-- Exclude id from table headers -->
+        <TableHeadCell>
+          <button type='button' class="flex cursor-pointer" on:click={() => handleSort(head)}>
+            {head}
+            <ChevronSortOutline size='sm'/>
+          </button>
+        </TableHeadCell>
+        {/if}
+        {/each}
+        <TableHeadCell></TableHeadCell>
+      </TableHead>
+      <TableBody tableBodyClass="divide-y">
+        {#each equipments as equipment}
+        <TableBodyRow>
+          <!-- Remove ID cell -->
+          <TableBodyCell>{equipment.name}</TableBodyCell>
+          <TableBodyCell>{equipment.type}</TableBodyCell>
+          <TableBodyCell>{equipment.location}</TableBodyCell>
+          <TableBodyCell>{equipment.status}</TableBodyCell>
+          <TableBodyCell>{equipment.notes}</TableBodyCell>
+          <TableBodyCell>{formatDate(equipment.date_registered).toString()}</TableBodyCell>
+          <TableBodyCell>
+            <button on:click={() => {EditModal = true; editEquipment = equipment}}><EditOutline class="text-green-700 mr-2"/></button>
+            <button on:click={() => {DeleteModal = true; equipmentName = equipment.name}}><TrashBinOutline class="text-red-700"/></button>
+          </TableBodyCell>
+        </TableBodyRow>
+        {/each}
+      </TableBody>
+    </Table>
+    {:else}
+    <p class="content-center text-gray-500">No equipments in database</p>
+    {/if}
   {#if equipments != null}
   <Table shadow>
     <TableHead>
@@ -207,46 +233,6 @@
   {:else}
   <p  class="content-center text-gray-500">No equipments in database</p>
   {/if}
->>>>>>> 05cae6200097582585f9f63c12849cea4745a977
-  </div>
-  
-  <div class="pb-5">
-    {#if equipments != null}
-    <Table shadow>
-      <TableHead>
-        {#each tableHead as head}
-        {#if head != 'dateString' && head != 'id'} <!-- Exclude id from table headers -->
-        <TableHeadCell>
-          <button type='button' class="flex cursor-pointer" on:click={() => handleSort(head)}>
-            {head}
-            <ChevronSortOutline size='sm'/>
-          </button>
-        </TableHeadCell>
-        {/if}
-        {/each}
-        <TableHeadCell></TableHeadCell>
-      </TableHead>
-      <TableBody tableBodyClass="divide-y">
-        {#each equipments as equipment}
-        <TableBodyRow>
-          <!-- Remove ID cell -->
-          <TableBodyCell>{equipment.name}</TableBodyCell>
-          <TableBodyCell>{equipment.type}</TableBodyCell>
-          <TableBodyCell>{equipment.location}</TableBodyCell>
-          <TableBodyCell>{equipment.status}</TableBodyCell>
-          <TableBodyCell>{equipment.notes}</TableBodyCell>
-          <TableBodyCell>{formatDate(equipment.date_registered).toString()}</TableBodyCell>
-          <TableBodyCell>
-            <button on:click={() => {EditModal = true; editEquipment = equipment}}><EditOutline class="text-green-700 mr-2"/></button>
-            <button on:click={() => {DeleteModal = true; equipmentName = equipment.name}}><TrashBinOutline class="text-red-700"/></button>
-          </TableBodyCell>
-        </TableBodyRow>
-        {/each}
-      </TableBody>
-    </Table>
-    {:else}
-    <p class="content-center text-gray-500">No equipments in database</p>
-    {/if}
   </div>
 </div>
 
@@ -292,11 +278,9 @@
   <form class="space-y-5 mb-2" method="POST" action="?/signin" use:enhance={submitEquipment}>
     <div class="mb-3">
         <Label class="block mb-1">Name</Label>
-        <Input placeholder="please try to include the model/brand" />
     </div>
     <div class="mb-3">
         <Label class="block mb-1">Type</Label>
-        <Input placeholder="Equipment type" />
     </div>
     <div class="mb-3">
       <Label class="block mb-1">Location</Label>
