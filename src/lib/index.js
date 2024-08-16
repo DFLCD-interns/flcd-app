@@ -4,9 +4,9 @@ import { format } from 'date-fns';
 export const statusColors = { declined: 'red', pending: 'yellow', approved: 'green'};
 
 const timeFormat = 'MMMM d, yyyy \'at\' hh:mm a';
-export function postgresTimeToReadable(time) {
+export function postgresTimeToReadable(time, _format = timeFormat) {
     if (!time) return '';
-    return format(new Date(time), timeFormat);
+    return format(new Date(time), _format);
 }
 
 const timeslotFormatExtended = 'hh:mm a';

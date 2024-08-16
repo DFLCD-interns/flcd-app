@@ -1,7 +1,7 @@
 <script>
     import { Button, Dropdown, DropdownDivider, DropdownItem } from 'flowbite-svelte';
     import { ChevronDownOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
-    import { postgresTimeToTimeslot } from '$lib';
+    import { postgresTimeToReadable } from '$lib';
 
     export let data;
     export let form;
@@ -27,16 +27,18 @@
         dropDownDataStates = Object.entries(data.requestRows).map(item => getRequestRows(item)?.map(() => false));
     }
     else {
-        getAssignedItemID = () => data.requestRows.find(row => row.assigned_child_id != null)?.req_id;
-        getAssignedItemIdx = () => data.requestRows.findIndex(row => row.assigned_child_id != null);
-        dropdownItems = data.requestedItems;
+        getAssignedItemID = () => data.requestRows[0].assigned_child_id;
+        getDisplayName = (item) => item[1];
+        dropdownItems = data.childs;
         dropDownsStates = false;
         dropDownDataStates = false;
     }
+    console.log(data.requestDetails);
 </script>
 
 {#if data.requestType !== 'class'}
     {#each Object.entries(data.requestedItems) as item, index1}
+    {@debug item}
         <p class="mb-0.5"> • {getDisplayName(item) || `(declined ${data.requestType}s)`}</p>
         {#each getRequestRows(item) as requestRow, index2}
             {#if requestRow?.equipment_type != 'For Printing Only'}
@@ -91,35 +93,43 @@
         {/each}
     {/each}
 {:else}
-    <p>{postgresTimeToTimeslot(data.requestedItems[getAssignedItemIdx()]) || 'No final timeslot assigned yet'}</p>
+    <p>{data.requestDetails[0].child_name || 'No child assigned yet'}</p>
     <Button class="ml-1 mb-0.5 w-52 text-white py-2 px-6 rounded 
         bg-gradient-to-r { dropDownDataStates ? 'from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-600' :
-        getAssignedItemIdx() != -1 ? 'from-green-400 to-green-600 hover:from-green-500 hover:to-green-600' : 'from-red-400 to-red-600 hover:from-red-500 hover:to-red-600'}">
-    { dropDownDataStates ? 'Unsaved Change' : getAssignedItemIdx() != -1 ? 'Assigned' : 'None' }
+        getAssignedItemID() ? 'from-green-400 to-green-600 hover:from-green-500 hover:to-green-600' : 'from-red-400 to-red-600 hover:from-red-500 hover:to-red-600'}">
+    { dropDownDataStates ? 'Unsaved Change' : getAssignedItemID() ? 'Assigned' : 'None' }
     <ChevronDownOutline class="w-4 h-5 ml-3"/>
     </Button>
     <Dropdown bind:open={dropDownsStates} class="max-w-80 overflow-y-auto py-1 max-h-48">
-        {#each [[undefined, undefined, -1]].concat(data.requestedItems) as dropDownItem, index}
+        {#each [{id: 'null', name:"No available child"}].concat(dropdownItems) as dropDownItem, index}
             <DropdownItem 
                 class="flex items-center" 
+                on:mouseenter={() => hoveredItem = dropDownItem.id ?? -1}
+                on:mouseleave={() => hoveredItem = null}
                 on:click={() => { 
                     dropDownsStates = false; 
-                    data.requestRows.forEach((_,_i) => form.querySelector(`input[name="${data.requestType}_id_${data.requestRows[_i].req_id}"]`).value = 'null')
-                    
-                    const req_id = index == 0 ? undefined : data.requestRows[index-1].req_id;
-                    console.log(dropDownItem)
-                    console.log(postgresTimeToTimeslot(dropDownItem))
-                    console.log(getAssignedItemIdx())
-                    console.log(data.requestedItems[getAssignedItemIdx()])
-                    if (postgresTimeToTimeslot(dropDownItem) !== (data.requestedItems[getAssignedItemIdx()])) {
+                    if ((dropDownItem.id == 'null' ? null : dropDownItem.id) !== getAssignedItemID()) {
                         dropDownDataStates = true;
-                        form.querySelector(`input[name="${data.requestType}_id_${req_id}"]`).value = 0;
+                        console.log(dropDownItem)
+                        data.requestRows.forEach((_,_i) => form.querySelector(`input[name="${data.requestType}_id_${data.requestRows[_i].req_id}"]`).value = dropDownItem.id)
                     } 
-                    else { dropDownDataStates = false; }
+                    else { 
+                        data.requestRows.forEach((_,_i) => form.querySelector(`input[name="${data.requestType}_id_${data.requestRows[_i].req_id}"]`).value = '')
+                        dropDownDataStates = false; 
+                    }
                 }}>
-                {dropDownItem.length > 2 ? 'No available preferred timeslot' : postgresTimeToTimeslot(dropDownItem)}
+                {dropDownItem.name}
+                <ChevronRightOutline class="{dropDownItem.id !== 'null' ? '' : 'hidden'}"/>
             </DropdownItem>
-            {#if dropDownItem.length > 2 }<DropdownDivider />{/if}
+            {#if dropDownItem.id !== 'null'  }<DropdownDivider />{/if}
+            {#if hoveredItem === dropDownItem.id}
+                <Dropdown placement="right-start" class="w-80" open>
+                    <DropdownItem> Birth Date: { postgresTimeToReadable(dropDownItem?.birthdate, 'MMMM d, yyyy') || '-'} </DropdownItem>
+                    <DropdownItem> Tracking ID: {dropDownItem?.tracking_id || '-'} </DropdownItem>
+                    <DropdownItem> Class ID: {dropDownItem?.class_id || '-'} </DropdownItem>
+                    <DropdownItem slot="footer"> Reserved Dates: {'-'} </DropdownItem>
+                </Dropdown>    
+            {/if}
         {/each}
     </Dropdown>
 {/if}

@@ -112,7 +112,7 @@
                         <td class="py-3 px-4"> {data.requestName}</td>
                     </tr>
                     <tr>
-                        <td class="py-3 px-4 font-semibold">Preferred Timeslots</td>
+                        <td class="py-3 px-4 font-semibold">Reserved Timeslots</td>
                         <td class="py-3 px-4"> 
                             {#each data.requestedItems as timeslot}
                                 <p>• {postgresTimeToTimeslot(timeslot)}</p>
@@ -122,13 +122,14 @@
                 {/if}
 
                 <td class="py-3 px-4">
-                    {#if data.requestType !== 'class'}
-                        <p class="font-semibold"> Requesting the following </p>
+                    {#if data.requestType === 'equipment'}
+                        <p class="font-semibold"> Requested Equipment/s </p>
+                    {:else if data.requestType === 'equipment'}
+                        <p class="font-semibold"> Requested Venue/s </p>
                     {:else}
-                        <!-- chosen if there assigned_child_id is not null (if no assigned child, -1 or 0) -->
-                        <p class="font-semibold"> Final Timeslot </p> 
+                        <p class="font-semibold"> Child Assigned </p> 
                     {/if}
-                    {#if isAdmin && data?.approvalForms.canRespond && data.requestType !== 'class'}
+                    {#if isAdmin && data?.approvalForms.canRespond}
                         <div class="mt-2 flex">
                             <InfoCircleOutline class="size-xs" /> 
                             <p class="text-sm max-w-52 ml-1"> Be sure to approve the Response Form on the right to save your assignments here.</p>
@@ -144,26 +145,22 @@
                             <p>• {item}</p>
                         {/each}
                     {:else}
-                        <p>{postgresTimeToTimeslot(data.requestedItems[data.requestRows.findIndex(row => row.assigned_child_id != null)]) || '(not yet assigned by approvers)'}</p>
+                        <p>{data.requestDetails[0].child_name || '(no child assigned yet)'}</p>
                     {/if}
                 </td> 
 
-                {#if data.requestType === 'class'}
+                {#if data.requestType === 'equipment'}
                     <tr>
-                        <td class="py-3 px-4">
-                            <p class="font-semibold">Child Assigned</p>
-                            {#if isAdmin && data?.approvalForms.canRespond}
-                                <div class="mt-2 flex">
-                                    <InfoCircleOutline class="size-xs" /> 
-                                    <p class="text-sm max-w-52 ml-1"> Be sure to approve the Response Form on the right to save your assignments here.</p>
-                                </div>
-                            {/if}
-                        </td>
-                        <td class="py-3 px-4">{data.requestRows.find(row => row.assigned_child_id != null)?.assigned_child_id || '(not yet assigned by approvers)'}</td>
+                        <td class="py-3 px-4 font-semibold"> Assigned Equipment/s </td>
+                        {#if data.requestDetails[0].equipment_name}
+                            <td class="py-3 px-4">
+                                {#each data.requestDetails as row}
+                                    <p>{row.equipment_name ? `• ${row.equipment_name} (${row.equipment_location || 'no specified location'})` : ''}</p>   
+                                {/each}
+                            </td>
+                        {/if}
                     </tr>
                 {/if}
-
-                
 
 
                 </tbody>
