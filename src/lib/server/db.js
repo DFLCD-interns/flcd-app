@@ -177,7 +177,9 @@ export async function getRequestDetailsDB(table, reqid) {
     ${table === 'equipment_requests' ? 
       `, t.location AS location, 
          t.actual_start_time AS actual_start_time,
-         t.promised_end_time AS promised_end_time`: ''}
+         t.promised_end_time AS promised_end_time,
+         e.name as equipment_name,
+         e.location as equipment_location`: ''}
     ${table === 'class_requests' ?
       `, t.timeslot AS timeslot,
          c.name as child_name` : ''} 
@@ -186,6 +188,7 @@ export async function getRequestDetailsDB(table, reqid) {
     LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
     LEFT JOIN users AS requester ON br.requester_id = requester.id
     ${table === 'class_requests' ? 'LEFT JOIN childs c ON t.assigned_child_id = c.id' : ''}
+    ${table === 'equipment_requests' ? 'LEFT JOIN equipments e ON t.equipment_id = e.id' : ''}
     WHERE br.id = ${reqid}`
   const res = await query(qText);
   // console.log(res.body.result.rows)

@@ -122,8 +122,10 @@
                 {/if}
 
                 <td class="py-3 px-4">
-                    {#if data.requestType !== 'class'}
-                        <p class="font-semibold"> Requesting the following </p>
+                    {#if data.requestType === 'equipment'}
+                        <p class="font-semibold"> Requested Equipment/s </p>
+                    {:else if data.requestType === 'equipment'}
+                        <p class="font-semibold"> Requested Venue/s </p>
                     {:else}
                         <p class="font-semibold"> Child Assigned </p> 
                     {/if}
@@ -146,6 +148,18 @@
                         <p>{data.requestDetails[0].child_name || '(no child assigned yet)'}</p>
                     {/if}
                 </td> 
+
+                <tr>
+                    <td class="py-3 px-4 font-semibold"> Assigned Equipment/s </td>
+                        {#if data.requestType === 'equipment' && data.requestDetails[0].equipment_name}
+                        <td class="py-3 px-4">
+                            {#each data.requestDetails as row}
+                                <p>{row.equipment_name ? `• ${row.equipment_name} (${row.equipment_location || 'no specified location'})` : ''}</p>   
+                            {/each}
+                        </td>
+                    {/if}
+                </tr>
+
 
                 </tbody>
             </table>
