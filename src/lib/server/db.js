@@ -112,6 +112,35 @@ export async function getEquipmentDB() {
   return result.body.result.rows;
 }
 
+export async function getEquipmentsStatusesDB() {
+  const result = await query(`
+    SELECT 
+      equipments.id AS equip_id,
+      equipment_requests.id AS subreq_id,
+      equipment_requests.request_id AS req_id,
+      equipment_requests.promised_start_time AS promised_start_time,
+      equipment_requests.promised_end_time AS promised_end_time
+    FROM equipments 
+    JOIN equipment_requests ON equipments.id = equipment_requests.equipment_id
+    GROUP BY promised_start_time, equip_id, subreq_id`);
+  return result.body.result.rows;
+}
+
+export async function getVenuesStatusesDB() {
+  const result = await query(`
+    SELECT 
+      venues.id AS venue_id,
+      venue_requests.id AS subreq_id,
+      venue_requests.request_id AS req_id,
+      venue_requests.date_needed AS date,
+      venue_requests.start_time AS start,
+      venue_requests.end_time AS end
+    FROM venues 
+    JOIN venue_requests ON venues.id = venue_requests.venue_id
+    GROUP BY date, start, venue_requests.end_time, venues.id, subreq_id`);
+  return result.body.result.rows;
+}
+
 export async function getUsersListDB() {
   const result = await query(`SELECT 
     id,

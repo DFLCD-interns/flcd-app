@@ -24,6 +24,7 @@ CREATE TABLE user_types (
     access_level INT PRIMARY KEY
 );
 
+-- MOSTLY REQUIRED; DO NOT MOVE ROWS 0 to 5
 INSERT INTO user_types (description, access_level)
 VALUES 
 ('Database Admin', 0),
@@ -51,6 +52,7 @@ CREATE TABLE users (
     created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
+-- ONLY DATABASE ADMIN IS REQUIRED HERE
 INSERT INTO users (uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level) 
 VALUES 
 ('ec9e1401-f6d8-49b0-9778-f0818f92dee2', 'Database', 'Admin', 'admin@up.edu.ph', '9ff8cf4d917ad5f8d606b5b03c5123f28c04aecc9edd4126a7403d5c4aec0b45b263e0dcf223bf49bb3a14c13aaeefa746190c798fa4e72ca42884e7fc2af62e7735f5a1105cf8af6ec8f08d67b428deacb0cc8c314cc45f0caaf8bfeb34b89539ccb9673af4f5f20e24504223fbb210c1f1ffd00fafbc01e03659d6201daf84', '09173170302', NULL, NULL, 'DFLCD', 0),
@@ -73,6 +75,7 @@ CREATE TABLE batches (
     created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
+-- OPTIONAL
 INSERT INTO batches (name, description)
 VALUES ('2023-2024 1st', '1st semester, starting July');
 
@@ -88,6 +91,7 @@ CREATE TABLE classes (
     created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
+-- OPTIONAL
 INSERT INTO classes (name, description, schedule, handler_id, batch_id)
 VALUES ('Section A', 'Section A', 'AM', 5, 1);
 
@@ -98,6 +102,7 @@ CREATE TABLE venues (
     date_registered TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
+-- OPTIONAL
 INSERT INTO venues (name) VALUES ('Room 302'), ('Room 303'), ('Room 304'); 
 
 CREATE TABLE childs (
@@ -110,6 +115,7 @@ CREATE TABLE childs (
     created TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
+-- OPTIONAL
 INSERT INTO childs (name, birthdate, tracking_id, class_id)
 VALUES ('Anya Forger', '2019-03-03', 1, 1);
 
@@ -136,6 +142,7 @@ CREATE TABLE equipments (
     date_registered TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
+-- OPTIONAL
 INSERT INTO equipments (name, type, location, status)
 VALUES 
 ('Laminating Machine 1', 'Laminating Machine', 'Room XXX', 'available'),
