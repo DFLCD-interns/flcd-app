@@ -332,7 +332,7 @@
     </form>
   </Modal>
   
-  <Modal title="Add Batch" bind:open={AddBatchModal} autoclose>
+  <Modal title="Add Batch" bind:open={AddBatchModal}>
     <form action="?/createBatch" method="POST">
         <div class="mb-6">
             <Label class="block mb-2">Batch Name</Label>
@@ -349,8 +349,8 @@
       </form>
   </Modal>
 
-  <Modal title="Add Class" bind:open={AddClassModal} autoclose>
-    <form action="?/createBatch" method="POST">
+  <Modal title="Add Class" bind:open={AddClassModal}>
+    <form action="?/createClass" method="POST">
         <div class="mb-6">
             <Label class="block mb-2">Class Name</Label>
             <Input name="name" type="text" placeholder="(eg, String Theory 101 - Section 1)" required/>
@@ -379,7 +379,7 @@
   </Modal>
 
   <Modal title="Edit Child Details" bind:open={EditChildModal} autoclose>
-    <form>
+    <form >
         <div class="mb-6">
             <Label class="block mb-2">Batch Name</Label>
             <Input disabled=true type="text" value={editChild.batch_name} required />
@@ -415,27 +415,23 @@
     </form>
   </Modal>
 
-  <Modal title="Add Child" bind:open={AddChildModal} autoclose>
-    <form>
+  <Modal title="Add Child" bind:open={AddChildModal}>
+    <form action="?/addChild" method="POST">
         <div class="mb-6">
             <Label class="block mb-2">Name</Label>
-            <Input type="text" placeholder="Child Name" required/>
+            <Input name="name" type="text" placeholder="Child Name" required/>
         </div>
         <div class="mb-6">
             <Label class="block mb-2">Birthdate</Label>
-            <Input type="datetime-local" placeholder="Child Birthdate"/>
+            <Input name="birthdate" type="date" placeholder="Child Birthdate"/>
         </div>
         <div class="mb-6">
             <Label class="block mb-2">Tracking ID</Label>
-            <Input type="number" placeholder="Child Tracking ID"/>
+            <Input name="tracking_id" type="number" placeholder="Child Tracking ID"/>
         </div>
         <div class="mb-6">
             <Label class="block mb-2">Class ID</Label>
-            <Input type="text" placeholder="Class ID"/>
-        </div>
-        <div class="mb-6">
-            <Label class="block mb-2">Created</Label>
-            <Input type="datetime-local" />
+            <Input name="class_id" type="text" placeholder="Class ID"/>
         </div>
         <div class="mb-6 flex gap-2 justify-center">
             <GradientButton type="submit" class="button-style" color="green">Confirm</GradientButton>
