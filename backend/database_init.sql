@@ -113,8 +113,6 @@ CREATE TABLE childs (
 INSERT INTO childs (name, birthdate, tracking_id, class_id)
 VALUES ('Anya Forger', '2019-03-03', 1, 1);
 
-INSERT INTO childs (id) VALUES (0); -- REQUIRED FOR OBSERVATION APPROVAL
-
 CREATE TABLE base_requests (
     id SERIAL PRIMARY KEY,
     requester_id INT,

@@ -11,11 +11,14 @@ export async function load({ cookies }) {
 	searchFormData.append('access_level', await db.getUserPriv(session));
 	const user_access_level_label = await db.getFromTableDB('user_types', searchFormData);
 		
+	const childQuery = await db.getFromTableDB('childs', new FormData());
+
 	return {
 		requestsInfo: await getRequestsInfo(user?.user_id, user?.access_level),
 		equipments: await db.getEquipmentDB(),
 		equipmentTypes: await db.getEquipmentTypesDB(),
 		venues: await db.getVenueDB(),
+		childs: childQuery?.body.result.rows,
 		current_user: user, 
 		user_access_level_label: user_access_level_label?.body.result.rows[0]?.description
 	};

@@ -33,7 +33,7 @@
                     {/each}
                 {:else if data.requestType}
                     {#each data.requestRows as requestRow}            
-                        <input type="hidden" name="{data.requestType}_id_{requestRow?.req_id}" />
+                        <input name="{data.requestType}_id_{requestRow?.req_id}" />
                     {/each} 
                 {/if}
 
