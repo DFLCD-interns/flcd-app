@@ -2,8 +2,8 @@
     /** @type {import('./$types').PageData} */
       export let data;
   
-    import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton, Dropdown, DropdownItem, MultiSelect } from 'flowbite-svelte';
-    import { DownloadSolid, EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid, AngleDownOutline, ChevronSortOutline, FilterSolid, UndoOutline } from 'flowbite-svelte-icons';
+    import { Select, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton, Dropdown, DropdownItem, MultiSelect } from 'flowbite-svelte';
+    import { DownloadSolid, EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid, AngleDownOutline, ChevronSortOutline, FilterSolid, UndoOutline, RectangleListSolid } from 'flowbite-svelte-icons';
     import { downloadCSV } from '../downloadcsv';
     import BatchTable from './batchTable.svelte';
     import ClassTable from './classTable.svelte';
@@ -29,6 +29,22 @@
     let editClass = data.classes_only_table[0];
     let editChild = batches[0];
 
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+
+        // Get individual date components
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+        const day = String(date.getDate()).padStart(2, '0');
+        const year = String(date.getFullYear()).slice(-2); // Get last two digits of the year
+
+        // Get time components
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+
+        // Format date and time according to the desired format
+        return `${month}/${day}/${year}  ${hours}:${minutes}`;
+    }
+
     let searchQuery='';
     let selectedBatch = [];
     let sBatch = data.batches_only_table.map(item => ({
@@ -39,8 +55,14 @@
     let selectedClass = [];
     let sClass=[];
 
+    let selectedView = '';
+    let sView = [{value:'batches', name:'batches'},{value:'classes', name:'classes'},{value:'children', name:'children'}]
+
     let showBatchOnly = false;
     let showClassOnly = false;
+
+    let sortedBatches = data.batches;
+
 
     
 
@@ -55,6 +77,18 @@
             name: item.name
         }));
 
+        if (selectedView === 'batches'){
+            showBatchOnly=true
+            showClassOnly=false
+        } else if (selectedView === 'classes'){
+            showClassOnly=true
+            showBatchOnly=false
+        } else {
+            showClassOnly=false
+            showBatchOnly=false
+        }
+
+        
         if (showBatchOnly) {
             batches = data.batches_only_table;
         } else if (showClassOnly){
@@ -68,7 +102,8 @@
             }
 
         } else {
-            batches = data.batches
+            console.log('in here')
+            batches = batches
             .filter(item => 
             selectedBatch.length === 0 || selectedBatch.includes(item.batch_id)
             )
@@ -76,15 +111,16 @@
             selectedClass.length === 0 || selectedClass.includes(item.class_id)
             )
             
-            if (selectedBatch.length === 0) {
-                batches = data.batches;
+            if (selectedBatch.length === 0 ) {
+                batches = sortedBatches;
             }
 
             if (selectedClass.length === 0) {
-                batches = data.batches
+                batches = sortedBatches
                 .filter(item => 
                 selectedBatch.length === 0 || selectedBatch.includes(item.batch_id)
             )
+
         }}
         
         batches = batches.filter(item =>
@@ -95,11 +131,11 @@
         );}
 
     
-
+        
         let sortDirection = 'asc'; // Default sort direction
         let column='id';
         function handleSort(column) {
-            batches = batches.sort((a, b) => {
+            sortedBatches = batches.sort((a, b) => {
             let aValue = a[column];
             let bValue = b[column];
 
@@ -125,8 +161,8 @@
             }}
         });
         sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        console.log(batches)
         }
-
     
 
   </script>
@@ -138,13 +174,16 @@
         </div>
     
         <div class="flex gap-2 pb-2  w-full">
+            <span class="flex text-gray-700 gap-1 pr-1 items-center"><RectangleListSolid/>View:</span>
+            
+            <Select class="w-full bg-white text-gray-400 text-sm" placeholder="select view option" items={sView} bind:value={selectedView} />
+        
             {#if showBatchOnly == true}
-            <div class="w-full"></div>
-            <Button class='w-[30%] flex gap-1 ' on:click={() => {showBatchOnly=false}}><UndoOutline/>Show batches, classes and children</Button>
+            <!-- <div class="w-full"></div>
+            <Button class='w-[30%] flex gap-1 ' on:click={() => {showBatchOnly=false}}><UndoOutline/>Show batches, classes and children</Button>-->
             {:else if showClassOnly == true}
             <span class="flex text-gray-700 gap-1 pr-1 items-center"><FilterSolid/>Filter:</span>
             <MultiSelect class="w-full bg-white text-gray-400 text-sm" placeholder="select batch" items={sBatch} bind:value={selectedBatch} />
-            <Button class='w-[30%] flex gap-1' on:click={() => {showClassOnly=false}}><UndoOutline/>Show batches, classes and children</Button>
             {:else}
             <span class="flex text-gray-700 gap-1 pr-1 items-center"><FilterSolid/>Filter:</span>
             <MultiSelect class="w-full bg-white text-gray-400 text-sm" placeholder="select batch" items={sBatch} bind:value={selectedBatch} />
@@ -156,79 +195,58 @@
     <div class="flex items-center justify-between pb-5">
       <p  class="font-semibold text-xl text-gray-700">Classes Database</p>
       <div class = "flex gap-2">
-        <GradientButton on:click={() => {downloadCSV(batches, 'all_classes')}} color="green" class="inline-flex text-center gap-2"><DownloadSolid/>Download Table</GradientButton>
-        <GradientButton id="batchActionsID" data-dropdown-toggle="batchActions" color="green" class="inline-flex text-center gap-2">Batch Actions<AngleDownOutline/></GradientButton>
-        <Dropdown>
-            <DropdownItem on:click={() => {showBatchOnly=true; showClassOnly=false;}}>Show Batches Only</DropdownItem>
-            {#if access_level != 4}
-            <DropdownItem on:click={() => {AddBatchModal=true}}>Add Batch</DropdownItem>
-            {/if}
-            <!-- <DropdownItem on:click={() => {EditBatchModal=true}}>Edit/Delete Batch</DropdownItem> -->
-        </Dropdown>
-        <GradientButton  color="green" class="inline-flex text-center gap-2">Class Actions<AngleDownOutline/></GradientButton>
-        <Dropdown>
-            <DropdownItem on:click={() => {showClassOnly=true; showBatchOnly=false; selectedBatch=[]}}>Show Classes Only</DropdownItem>
-            {#if access_level != 4}
-            <DropdownItem on:click={() => {AddClassModal=true}}>Add Class</DropdownItem>
-            {/if}
-            <!-- <DropdownItem on:click={() => {EditClassModal=true}}>Edit/Delete Class</DropdownItem> -->
-        </Dropdown>
         {#if access_level != 4}
+        <GradientButton on:click={() => {AddBatchModal=true}}  color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Batch</GradientButton>
+        <GradientButton on:click={() => {AddClassModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Class</GradientButton>
         <GradientButton on:click={() => {AddChildModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Child</GradientButton>
         {/if}
+        <GradientButton on:click={() => {downloadCSV(batches, 'all_classes')}} color="green" class="inline-flex text-center gap-2"><DownloadSolid/>Download Table</GradientButton>
         </div>
     </div>
     <div class="pb-5">
     {#if batches != null && (showBatchOnly == false && showClassOnly == false)}
     <Table shadow>
       <TableHead>
-        {#if access_level != 4}
-        <TableHeadCell></TableHeadCell>
-        <TableHeadCell></TableHeadCell>
-        {/if}
         {#each tableHead as head}
-        <TableHeadCell>
+        {#if head != 'batch_id' && head != 'class_id'}
+            <TableHeadCell>
             <button type='button' class="flex cursor-pointer" on:click={() => handleSort(head)}>
               {head}
               <ChevronSortOutline size='sm'/>
             </button>
           </TableHeadCell>
+          {/if}
         {/each}
+        {#if access_level != 4}
+        <TableHeadCell></TableHeadCell>
+        {/if}
       </TableHead>
       <TableBody tableBodyClass="divide-y">
         {#each batches as batch}
         <TableBodyRow>
-            {#if access_level != 4}
-            <TableBodyCell>
-                <button on:click={() => {EditChildModal = true; editChild = batch}}><EditOutline  class="text-green-600"/></button>
-            </TableBodyCell>
-          <TableBodyCell>
-            <button on:click={() => {DeleteModal = true}}><TrashBinOutline class="text-green-600"/></button>
-          </TableBodyCell>
-          {/if}
-          <TableBodyCell>{batch.batch_id}</TableBodyCell>
           <TableBodyCell>{batch.batch_name}</TableBodyCell>
-          <TableBodyCell>{batch.batch_description}</TableBodyCell>
-          <TableBodyCell>{batch.batch_created}</TableBodyCell>
-          <TableBodyCell>{batch.class_id}</TableBodyCell>
           <TableBodyCell>{batch.class_name}</TableBodyCell>
           <TableBodyCell>{batch.handler_firstname}</TableBodyCell>
           <TableBodyCell>{batch.handler_lastname}</TableBodyCell>
-          <TableBodyCell>{batch.class_description}</TableBodyCell>
           <TableBodyCell>{batch.schedule}</TableBodyCell>
-          <TableBodyCell>{batch.class_created}</TableBodyCell>
           <TableBodyCell>{batch.child_name}</TableBodyCell>
-          <TableBodyCell>{batch.child_birthdate}</TableBodyCell>
+          <TableBodyCell>{formatDate(batch.child_birthdate)}</TableBodyCell>
           <TableBodyCell>{batch.child_trackingid}</TableBodyCell>
-          <TableBodyCell>{batch.child_created}</TableBodyCell>
+          <TableBodyCell>{formatDate(batch.child_created)}</TableBodyCell>
+          {#if access_level != 4}
+          <TableBodyCell>
+            <button on:click={() => {EditChildModal = true; editChild = batch}}><EditOutline class="text-green-700 mr-2"/></button>
+            <button on:click={() => {DeleteModal = true}}><TrashBinOutline class="text-red-700"/></button>
+          </TableBodyCell>
+          {/if}
         </TableBodyRow>
         {/each}
       </TableBody>
     </Table>
     {:else if showBatchOnly==true}
-    <BatchTable batches={batches}/>
+    <BatchTable batches={batches} access_level={access_level}/>
     {:else if showClassOnly==true}
-    <ClassTable classes={batches}/>
+    <ClassTable classes={batches} access_level={access_level}/>
     {:else}
     <p  class="content-center text-gray-500">No classes in database</p>
     {/if}
@@ -380,7 +398,7 @@
         </div>
         <div class="mb-6">
             <Label class="block mb-2">Child Birthdate</Label>
-            <Input name="description" type="text" value={editChild.child_birthdate} onfocus="(this.type='date')" onblur="(this.type='text')"/>
+            <Input name="description" type="text" value={formatDate(editChild.child_birthdate)} onfocus="(this.type='date')" onblur="(this.type='text')"/>
         </div>
         <div class="mb-6">
             <Label class="block mb-2">Child Tracking ID</Label>
@@ -388,7 +406,7 @@
         </div>
         <div class="mb-6">
             <Label class="block mb-2">Date Created</Label>
-            <Input name="schedule" type="text" value={editChild.child_created} onfocus="(this.type='date')" onblur="(this.type='text')"/>
+            <Input name="schedule" type="text" value={formatDate(editChild.child_created)} onfocus="(this.type='date')" onblur="(this.type='text')"/>
         </div>
         <div class="mb-6 flex gap-2 justify-center">
             <GradientButton type="submit" class="button-style" color="green">Confirm</GradientButton>
