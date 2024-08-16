@@ -167,21 +167,19 @@
   </div>
 </Modal>
 
-<Modal title="Add Venue" bind:open={AddModal} autoclose>
+<Modal title="Add Venue" bind:open={AddModal}>
+  <form action="?/addVenue" method="POST">
   <div class="mb-6">
       <Label class="block mb-2">Name</Label>
-      <Input placeholder="Venue name" />
+      <Input name="name" placeholder="Venue name" />
   </div>
   <div class="mb-6">
       <Label class="block mb-2">Description</Label>
-      <Input placeholder="Venue type" />
-  </div>
-  <div class="mb-6">
-    <Label class="block mb-2">Date Created</Label>
-    <Input type="datetime-local"/>
+      <Input name="description" placeholder="Venue type" />
   </div>
   <div class="mb-6 flex gap-5 justify-center">
-      <GradientButton color="green">Confirm</GradientButton>
+      <GradientButton type="submit" color="green">Confirm</GradientButton>
       <GradientButton color="green">Cancel</GradientButton>
   </div>
+  </form>
 </Modal>
