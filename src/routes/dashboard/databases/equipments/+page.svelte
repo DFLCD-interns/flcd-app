@@ -277,10 +277,12 @@
 <Modal title="Add Equipment" bind:open={AddModal} autoclose>
   <form class="space-y-5 mb-2" method="POST" action="?/signin" use:enhance={submitEquipment}>
     <div class="mb-3">
-        <Label class="block mb-1">Name</Label>
+      <Label class="block mb-1">Name</Label>
+      <Input placeholder="" />
     </div>
     <div class="mb-3">
-        <Label class="block mb-1">Type</Label>
+      <Label class="block mb-1">Type</Label>
+      <Input placeholder="" />
     </div>
     <div class="mb-3">
       <Label class="block mb-1">Location</Label>
@@ -291,8 +293,8 @@
       <Input placeholder="Enter notes" />
     </div>
     <div class="flex gap-5 justify-center">
-        <Button type="submit" class="w-full" disabled={loading}>Confirm</Button>
-        <Button type="button" class="bg-red-700 hover:bg-red-800">Cancel</Button>
+      <Button type="submit" class="w-full" disabled={loading}>Confirm</Button>
+      <Button type="button" class="bg-red-700 hover:bg-red-800">Cancel</Button>
     </div>
   </form>
 </Modal>

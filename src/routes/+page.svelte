@@ -78,7 +78,7 @@
                         <Label for="email" class="mb-1">Email address</Label>
                         <div class="input-container">
                             <Input name="email" type="text" id="email" required disabled={loading}/>
-                            <!-- <span class="input-desc">@up.edu.ph</span> -->
+                            <span class="input-desc">@up.edu.ph</span>
                         </div>
                     </div>
                     <div class="mb-3">
