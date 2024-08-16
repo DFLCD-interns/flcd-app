@@ -1,7 +1,7 @@
 <script>
     import {Badge, Button, GradientButton } from 'flowbite-svelte'
     import { ArrowLeftOutline, TrashBinSolid, InfoCircleOutline } from 'flowbite-svelte-icons';
-    import { statusColors, postgresTimeToReadable } from '$lib';
+    import { statusColors, postgresTimeToReadable, postgresTimeToTimeslot } from '$lib';
     import Assignment from './Assignment.svelte';
     import ApprovalStatus from './ApprovalStatus.svelte';
     import ResponseForm from './ResponseForm.svelte';
@@ -9,14 +9,12 @@
     /** @type {import('./$types').PageData} */
     export let data;
     export let form;
-    console.log(data.requestDetails)
 
     let requestDetails = data?.requestDetails[0];
     let requestTypeDisplay = data.requestType?.charAt(0).toUpperCase() + data.requestType.slice(1) + " Requests";
 
     $: totalStatus = data?.approvalForms.totalStatus;
     const isAdmin = data?.current_user?.access_level < 5;
-    
     
 </script>
 
@@ -97,7 +95,7 @@
                         <td class="py-3 px-4 font-semibold">Location of Use/Activity</td>
                         <td class="py-3 px-4">{requestDetails.location}</td>
                     </tr>
-                {:else} 
+                {:else if data.requestType === 'venue'} 
                     <tr>
                         <td class="py-3 px-4 font-semibold">Start Date</td>
                         <td class="py-3 px-4">{postgresTimeToReadable(data.startDate)}</td>
@@ -107,9 +105,30 @@
                         <td class="py-3 px-4">{postgresTimeToReadable(data.endDate)}</td>
                     </tr>
                 {/if}
+
+                {#if data.requestType === 'class'}
+                    <tr>
+                        <td class="py-3 px-4 font-semibold">Preschool Class Assigned</td>
+                        <td class="py-3 px-4"> {data.requestName}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-3 px-4 font-semibold">Preferred Timeslots</td>
+                        <td class="py-3 px-4"> 
+                            {#each data.requestedItems as timeslot}
+                                <p>• {postgresTimeToTimeslot(timeslot)}</p>
+                            {/each}    
+                        </td>
+                    </tr>
+                {/if}
+
                 <td class="py-3 px-4">
-                    <p class="font-semibold"> Requesting the following </p>
-                    {#if isAdmin && data?.approvalForms.canRespond}
+                    {#if data.requestType !== 'class'}
+                        <p class="font-semibold"> Requesting the following </p>
+                    {:else}
+                        <!-- chosen if there assigned_child_id is not null (if no assigned child, -1 or 0) -->
+                        <p class="font-semibold"> Final Timeslot </p> 
+                    {/if}
+                    {#if isAdmin && data?.approvalForms.canRespond && data.requestType !== 'class'}
                         <div class="mt-2 flex">
                             <InfoCircleOutline class="size-xs" /> 
                             <p class="text-sm max-w-52 ml-1"> Be sure to approve the Response Form on the right to save your assignments here.</p>
@@ -118,18 +137,35 @@
                 </td>
 
                 <td class="py-3 px-4">
-                    {#if isAdmin && data?.approvalForms.canRespond && data.requestType !== 'class'}
+                    {#if isAdmin && data?.approvalForms.canRespond}
                         <Assignment data={data} form={form}/>     
-                    {:else}
+                    {:else if data.requestType !== 'class'}
                         {#each data.requestName?.split(', ') as item}
-                        {#if data.requestType.includes('class')}
-                            <p>• {item}, {requestDetails.timeslot}</p>
-                        {:else}
                             <p>• {item}</p>
-                            {/if}
                         {/each}
+                    {:else}
+                        <p>{postgresTimeToTimeslot(data.requestedItems[data.requestRows.findIndex(row => row.assigned_child_id != null)]) || '(not yet assigned by approvers)'}</p>
                     {/if}
                 </td> 
+
+                {#if data.requestType === 'class'}
+                    <tr>
+                        <td class="py-3 px-4">
+                            <p class="font-semibold">Child Assigned</p>
+                            {#if isAdmin && data?.approvalForms.canRespond}
+                                <div class="mt-2 flex">
+                                    <InfoCircleOutline class="size-xs" /> 
+                                    <p class="text-sm max-w-52 ml-1"> Be sure to approve the Response Form on the right to save your assignments here.</p>
+                                </div>
+                            {/if}
+                        </td>
+                        <td class="py-3 px-4">{data.requestRows.find(row => row.assigned_child_id != null)?.assigned_child_id || '(not yet assigned by approvers)'}</td>
+                    </tr>
+                {/if}
+
+                
+
+
                 </tbody>
             </table>
         </div>

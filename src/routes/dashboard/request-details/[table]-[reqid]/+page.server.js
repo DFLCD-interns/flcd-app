@@ -74,9 +74,8 @@ export const actions = {
             const itemReqIDs = [...inputFormData.keys()].map(key => key.split('_')[2]);
             const type = [...inputFormData.keys()][0]?.split('_')[0];
             
-            console.log(itemReqIDs, assignedItemIDs, [...inputFormData.keys()][0], inputFormData)
-
             let response2 = {success: true}; 
+            console.log('owo', assignedItemIDs)
             for (let i = 0; i < assignedItemIDs.length; i++) {
                 if (!assignedItemIDs[i]) continue;
 
@@ -84,12 +83,11 @@ export const actions = {
                 _searchFormData.append('id', itemReqIDs[i])
 
                 const _updateFormData = new FormData();
-                _updateFormData.append(`${type}_id`, assignedItemIDs[i] == -1 ? null : assignedItemIDs[i])
+                if (type == 'class') _updateFormData.append('assigned_child_id', assignedItemIDs[i]);
+                else _updateFormData.append(`${type}_id`, assignedItemIDs[i] == -1 ? null : assignedItemIDs[i]);
                 response2.success &&= (await updateTableDB(`${type}_requests`, _searchFormData, _updateFormData)).success;
             }
            
-            console.log(response2)
-
             // emailing
             await mailuser(
                 `[FLCD APP] New response to your request`,

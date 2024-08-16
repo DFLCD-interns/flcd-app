@@ -10,7 +10,7 @@
 <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
     <h1 class="text-gray-600 text-lg mb-1 font-medium title-font">Response Form</h1>                    
     {#if data?.approvalForms.canRespond }
-        <form bind:this={form} action="?/approve" method="POST" use:enhance={() => goto('/dashboard')}>
+        <form bind:this={form} action="?/approve" method="POST">
             <div class="relative mb-4">
                 <textarea 
                     id="remarks" 
@@ -31,21 +31,22 @@
                             <input type="hidden" name="{data.requestType}_id_{requestRow?.req_id}" />
                         {/each} 
                     {/each}
-                {:else if data.requestType == 'venue'}
+                {:else if data.requestType}
                     {#each data.requestRows as requestRow}            
                         <input type="hidden" name="{data.requestType}_id_{requestRow?.req_id}" />
                     {/each} 
                 {/if}
+
                 <button 
                     on:click={() => form.querySelector('input[name="status"]').value = "approved"}
                     type="submit" 
-                    class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-600 to-lime-300 hover:from-green-600 hover:to-green-600">
+                    class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-600">
                     Approve
                 </button>
                 <button
                     on:click={() => form.querySelector('input[name="status"]').value = "declined"}
                     type="submit" 
-                    class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-red-600 to-rose-300 hover:from-red-600 hover:to-red-600">
+                    class="text-white border-0 py-2 px-6 rounded text-lg m-3 bg-gradient-to-r from-red-400 to-red-600 hover:from-red-500 hover:to-red-600">
                     Decline
                 </button>
             </div>

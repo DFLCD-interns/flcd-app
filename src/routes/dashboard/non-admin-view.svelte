@@ -7,7 +7,7 @@
   let viewingPendingReqs = true;
   const pendingRequests = [], finishedRequests = [];
   data.requestsInfo.forEach(req => {
-    if (req.actual_date_end > new Date()) 
+    if ((req.table.includes('equipment') && !req.actual_date_end) || req.actual_date_end > new Date()) 
       pendingRequests.push(req) 
     else finishedRequests.push(req)
   });

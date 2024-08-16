@@ -51,7 +51,7 @@
     value: item.description,
     name: item.description
   }));
-  console.log(data)
+  // console.log(data)
 
   $: users = data.user
     .filter(item => 
