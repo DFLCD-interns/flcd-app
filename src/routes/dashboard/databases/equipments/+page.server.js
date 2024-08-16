@@ -1,4 +1,4 @@
-import { insertIntoTableDB, getEquipmentDB, getEquipmentTypesDB } from '$lib/server/db';
+import { insertIntoTableDB, getEquipmentDB, getEquipmentTypesDB, deleteFromTableDB } from '$lib/server/db';
 import { fail } from "@sveltejs/kit";
 /** @type {import('./$types').Actions} */
 
@@ -70,6 +70,25 @@ export const actions = {
 
         try {
             await insertIntoTableDB('equipments', form_data);
+        } catch (error) {   
+            console.error("Error: ", error.message);
+            return fail(500, {
+                message: error.message,
+            }); 
+        }
+    },
+
+    deleteEquipment: async ({ request, cookies }) => {
+        const formData = await request.formData();
+        const id = formData.get("id");
+        const fd = { id };
+        const form_data = new FormData();
+        for (let key in fd) {
+            form_data.append(key, fd[key]);
+        }
+        
+        try {
+            await deleteFromTableDB('equipments', form_data);
         } catch (error) {   
             console.error("Error: ", error.message);
             return fail(500, {

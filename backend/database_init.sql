@@ -27,7 +27,7 @@ CREATE TABLE user_types (
 INSERT INTO user_types (description, access_level)
 VALUES 
 ('Database Admin', 0),
-('FLCD Chair', 1),
+('Chair', 1),
 ('Faculty-in-Charge', 2),
 ('Admin Staff', 3),
 ('Course Instructor', 4),
@@ -136,21 +136,21 @@ CREATE TABLE equipments (
     date_registered TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
-INSERT INTO equipments (name, type, location, status)
+INSERT INTO equipments (name, type, location, status, notes)
 VALUES 
-('Laminating Machine 1', 'Laminating Machine', 'Room XXX', 'available'),
-('Laminating Machine 2', 'Laminating Machine', 'Room XXX', 'available'),
-('Epson LX100 Printer', 'Printer', 'Room XXX', 'available'),
-('Paper Cutter Big', 'Paper Cutter', 'Room XXX', 'available'),
-('Paper Cutter Small', 'Paper Cutter', 'Room XXX', 'available'),
-('Extension Cord 1', 'Extension Cord', 'Room XXX', 'available'),
-('Extension Cord 2', 'Extension Cord', 'Room XXX', 'available'),
-('UPCDC Movable TV', 'Movable TV', 'Room XXX', 'available'),
-('DFLCD Movable TV', 'Movable TV', 'Room XXX', 'available'),
-('Portable Speaker Bldg 1', 'Portable Speaker', 'Room XXX', 'available'),
-('Portable Speaker Bldg 2', 'Portable Speaker', 'Room XXX', 'available'),
-('Sony Camera', 'Digital Camera', 'Room XXX', 'available'),
-('RODE Lapel', 'Lapel Microphone', 'Room XXX', 'available');
+('Laminating Machine 1', 'Laminating Machine', 'Room XXX', 'available', ''),
+('Laminating Machine 2', 'Laminating Machine', 'Room XXX', 'available', ''),
+('Epson LX100 Printer', 'Printer', 'Room XXX', 'available', ''),
+('Paper Cutter Big', 'Paper Cutter', 'Room XXX', 'available', ''),
+('Paper Cutter Small', 'Paper Cutter', 'Room XXX', 'available', ''),
+('Extension Cord 1', 'Extension Cord', 'Room XXX', 'available', ''),
+('Extension Cord 2', 'Extension Cord', 'Room XXX', 'available', ''),
+('UPCDC Movable TV', 'Movable TV', 'Room XXX', 'available', ''),
+('DFLCD Movable TV', 'Movable TV', 'Room XXX', 'available', ''),
+('Portable Speaker Bldg 1', 'Portable Speaker', 'Room XXX', 'available', ''),
+('Portable Speaker Bldg 2', 'Portable Speaker', 'Room XXX', 'available', ''),
+('Sony Camera', 'Digital Camera', 'Room XXX', 'available', ''),
+('RODE Lapel', 'Lapel Microphone', 'Room XXX', 'available', '');
 
 
 CREATE TABLE class_requests (

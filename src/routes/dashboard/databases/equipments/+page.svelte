@@ -14,20 +14,19 @@
   if (equipments != null){
     tableHead = Object.keys(equipments[0]);
   }
-  // Add a 'value' & 'name' property to each object in the array (for Svelte each behavior)
+  
   equipmentTypes = equipmentTypes.map((item) => ({ ...item, value: item.type, name: item.type }));
   equipmentTypes.push({type: 'Other...', value: 'other', name: 'Other...'});
-
   let addedEquipmentType = "";
   $: isOther = addedEquipmentType == "other";
   
   let access_level=data.current_user.access_level;
-  
-  let equipmentName="equipment"
+
   let EditModal = false;
   let DeleteModal = false;
   let AddModal = false;
   let editEquipment;
+  let eq; // for deleting equipment
 
   function formatDate(dateString) {
     const date = new Date(dateString);
@@ -46,7 +45,7 @@
   }
   
   equipments.forEach(item => {
-    item.dateString = formatDate(item.date_registered) // or use another format if preferred
+    item.dateString = formatDate(item.date_registered)
   });
 
   let searchQuery='';
@@ -59,8 +58,7 @@
   let selectedStatus = [];
   let status = [
     { value: 'available', name: 'available' }, 
-    { value: 'in use', name: 'in use' },
-    { value: 'in repair', name: 'in repair' },
+    { value: 'unavailable', name: 'unavailable' },
   ]
 
   $: equipments = data.equipments
@@ -110,7 +108,6 @@
 
     /*-- toast logic --*/
     let loading = false
-
     const submitEquipment = () => {
         loading = true;
         return async ({ result, update }) => {
@@ -129,6 +126,26 @@
             loading = false;
         }
     }
+    const deleteEquipment = () => {
+        loading = true;
+        return async ({ result, update }) => {
+            switch (result.type) {
+                case 'success':
+                    DeleteModal = false;
+                    toast.success("Equipment deleted successfully!");
+                    await update();
+                    break;
+                case 'failure':
+                    const errorMessage = result.data.message || 'Failed to delete equipment.';
+                    toast.error(errorMessage);
+                    break;
+                default:
+                    await update();
+            }
+            loading = false;
+        }
+    }
+  
 </script>
   
 <div class="p-4 md:p-10">
@@ -183,7 +200,7 @@
           <TableBodyCell>{formatDate(equipment.date_registered).toString()}</TableBodyCell>
           <TableBodyCell>
             <button on:click={() => {EditModal = true; editEquipment = equipment}}><EditOutline class="text-green-700 mr-2"/></button>
-            <button on:click={() => {DeleteModal = true; equipmentName = equipment.name}}><TrashBinOutline class="text-red-700"/></button>
+            <button on:click={() => {DeleteModal = true; eq = equipment}}><TrashBinOutline class="text-red-700"/></button>
           </TableBodyCell>
         </TableBodyRow>
         {/each}
@@ -226,14 +243,25 @@
   </div>
 </Modal>
 
-<Modal title="Delete {equipmentName} from database?" bind:open={DeleteModal} autoclose>
-  <div class="flex gap-5 justify-center">
-      <GradientButton color="green">Confirm</GradientButton>
-      <GradientButton color="green">Cancel</GradientButton>
+<Modal size="xs" bind:open={DeleteModal} outsideclose>
+  <div class="text-center">
+    <h3 class="mb-1 text-lg font-bold text-gray-800 dark:text-gray-400">Delete equipment from database?</h3>
+    <p class="mb-6 text-sm">You are about to delete this entry. This cannot be undone.</p>
+    <p class="text-gray-800">Name: <span style="font-weight: 600;">{eq.name}</span></p>
+    <p class="text-gray-800">Type: <span style="font-weight: 600;">{eq.type}</span></p>
+    <p class="text-gray-800">Location: <span style="font-weight: 600;">{eq.location}</span></p>
+    <p class="mb-6 text-gray-800">Notes: <span style="font-weight: 600;">{eq.notes}</span></p>
+    <form method="POST" action="?/deleteEquipment" use:enhance={deleteEquipment}>
+      <input type="hidden" name="id" value={eq.id}/>
+      <div class="flex mb-1 gap-1 justify-center">
+        <Button type="submit" disabled={loading} color="red" class="me-2"><TrashBinOutline class="text-white mr-1"/>Delete</Button>
+        <Button color="alternative" disabled={loading} on:click={() => DeleteModal = false}>Cancel</Button>
+      </div>
+    </form>
   </div>
 </Modal>
 
-<Modal title="Add Equipment" bind:open={AddModal} >
+<Modal title="Add Equipment" bind:open={AddModal} outsideclose>
   <form class="space-y-5 mb-2" method="POST" action="?/addEquipment" use:enhance={submitEquipment}>
     <div class="mb-3">
       <Label class="block mb-1">Name</Label>
@@ -286,11 +314,12 @@
       <Label class="block mb-1">Notes</Label>
       <Input name="notes" type="text" id="notes" placeholder="Enter addtl. comments about the equipment. Can be empty." disabled={loading} />
     </div>
+    <hr>
     <div class="flex gap-5 justify-center">
       <Button type="submit" class="w-full" disabled={loading}>Confirm</Button>
       <Button 
         type="button" 
-        class="bg-red-700 hover:bg-red-800" 
+        color="alternative"
         disabled={loading} 
         on:click={() => AddModal = false}
       >
