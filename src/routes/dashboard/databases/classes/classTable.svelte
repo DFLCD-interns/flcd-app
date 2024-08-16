@@ -15,7 +15,7 @@
   
     let currClass = classes[0];
 
-    console.log(classes)
+    // console.log(classes)
 
     function formatDate(dateString) {
         const date = new Date(dateString);

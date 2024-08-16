@@ -34,7 +34,7 @@ export const actions = {
 
         let equipmentNames = await getEquipmentDB()
         equipmentNames = equipmentNames.map((item) => (item.name));
-        console.log(equipmentNames);
+        // console.log(equipmentNames);
         equipmentNames = equipmentNames.map(item => item.toLowerCase());
 
         if (equipmentNames.includes(name.toLowerCase())) {
