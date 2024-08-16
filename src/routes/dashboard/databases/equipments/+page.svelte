@@ -13,6 +13,12 @@
   if (equipments != null){
     tableHead = Object.keys(equipments[0]);
   }
+<<<<<<< HEAD
+=======
+  
+  let access_level=data.current_user.access_level;
+  
+>>>>>>> 05cae6200097582585f9f63c12849cea4745a977
 
   let equipmentName="equipment"
   let EditModal = false;
@@ -139,6 +145,7 @@
     </div>
     <hr>
   </div>
+<<<<<<< HEAD
   
   <div class="flex flex-col md:flex-row items-center justify-between pb-5">
     <p class="font-semibold text-xl text-gray-700">Equipments Database</p>
@@ -146,6 +153,61 @@
       <GradientButton on:click={downloadCSV(equipments, 'equipment')} color="green" class="inline-flex text-center gap-2"><DownloadSolid/>Download Table</GradientButton>
       <GradientButton on:click={() => {AddModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Equipment</GradientButton>
     </div>
+=======
+  <div class="flex items-center justify-between pb-5">
+    <p  class="font-semibold text-xl text-gray-700">Equipments Database</p>
+    <div class = "flex gap-2">
+    <GradientButton on:click={downloadCSV(equipments, 'equipment')} color="green" class="inline-flex text-center gap-2"><DownloadSolid/>Download Table</GradientButton>
+    {#if access_level !=4}
+    <GradientButton on:click={() => {AddModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Equipment</GradientButton>
+    {/if}
+  </div>
+  </div>
+  <div class="pb-5">
+  {#if equipments != null}
+  <Table shadow>
+    <TableHead>
+      {#if access_level != 4}
+      <TableHeadCell></TableHeadCell>
+      <TableHeadCell></TableHeadCell>
+      {/if}
+      {#each tableHead as head}
+      {#if head != 'dateString'}
+      <TableHeadCell>
+        <button type='button' class="flex cursor-pointer" on:click={() => handleSort(head)}>
+          {head}
+          <ChevronSortOutline size='sm'/>
+        </button>
+      </TableHeadCell>
+      {/if}
+      {/each}
+    </TableHead>
+    <TableBody tableBodyClass="divide-y">
+      {#each equipments as equipment}
+      <TableBodyRow>
+        {#if access_level != 4}
+        <TableBodyCell>
+          <button on:click={() => {EditModal = true; editEquipment = equipment}}><EditOutline  class="text-green-600"/></button>
+        </TableBodyCell>
+        <TableBodyCell>
+          <button on:click={() => {DeleteModal = true; equipmentName = equipment.name}}><TrashBinOutline class="text-green-600"/></button>
+        </TableBodyCell>
+        {/if}
+        <TableBodyCell>{equipment.id}</TableBodyCell>
+        <TableBodyCell>{equipment.name}</TableBodyCell>
+        <TableBodyCell>{equipment.type}</TableBodyCell>
+        <TableBodyCell>{equipment.location}</TableBodyCell>
+        <TableBodyCell>{equipment.status}</TableBodyCell>
+        <TableBodyCell>{equipment.notes}</TableBodyCell>
+        <TableBodyCell>{formatDate(equipment.date_registered).toString()}</TableBodyCell>
+      </TableBodyRow>
+      {/each}
+    </TableBody>
+  </Table>
+  {:else}
+  <p  class="content-center text-gray-500">No equipments in database</p>
+  {/if}
+>>>>>>> 05cae6200097582585f9f63c12849cea4745a977
   </div>
   
   <div class="pb-5">
