@@ -194,37 +194,37 @@ export async function createSessionByEmail(email, password) {
 }
 
 // Step 3
-export async function validateSession(id) {
-    // const sessions = get(sessionsStore);
+// export async function validateSession(id) { //sessions are now not validated
+//     // const sessions = get(sessionsStore);
 
-    // const sessionResult = sessions.find((session) => session.id === id);
-    // console.log("auth.js - validateSession")
-    const sessionResult = await getSessionByIDDB(id);
+//     // const sessionResult = sessions.find((session) => session.id === id);
+//     // console.log("auth.js - validateSession")
+//     const sessionResult = await getSessionByIDDB(id);
 
 
-    const s_session = sessionResult[0];
-    // console.log(`auth.js - validateSession session Result: ${json(s_session)}`)
+//     const s_session = sessionResult[0];
+//     // console.log(`auth.js - validateSession session Result: ${json(s_session)}`)
 
-    if (!s_session) {
-        throw new Error("Session does not exist");
-    }
+//     if (!s_session) {
+//         throw new Error("Session does not exist");
+//     }
 
-    // const users = get(usersStore);
+//     // const users = get(usersStore);
 
-    // const userResult = users.find((user) => user.id === sessionResult.userId);
+//     // const userResult = users.find((user) => user.id === sessionResult.userId);
 
-    const userResult = await getUserByIDDB(sessionResult.userId);
-    // console.log(`auth.js - validateSession - validated session id ${id}, for user ${userResult[0].first_name}`)
+//     const userResult = await getUserByIDDB(sessionResult.userId);
+//     // console.log(`auth.js - validateSession - validated session id ${id}, for user ${userResult[0].first_name}`)
 
-    if (!userResult) {
-        throw new Error("User does not exist");
-    }
+//     if (!userResult) {
+//         throw new Error("User does not exist");
+//     }
 
-    return {
-        sessionResult,
-        userResult,
-    };
-}
+//     return {
+//         sessionResult,
+//         userResult,
+//     };
+// }
 
 // export async function signOut(id) {
 //     const sessions = get(sessionsStore);

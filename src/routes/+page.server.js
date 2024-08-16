@@ -17,8 +17,9 @@ export const actions = {
 
 			cookies.set(SESSION_COOKIE_NAME, sessionCreationResult.id, {
 				path: "/",
-				httpOnly: true,
-                sameSite: "strict",
+				httpOnly: false,
+                sameSite: "lax",
+				secure: true,
                 maxAge: 60 * 60 * 12,
 			});
 
