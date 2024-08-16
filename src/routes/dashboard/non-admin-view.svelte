@@ -21,10 +21,10 @@
   <div class="flex flex-wrap w-full mb-12 align-center justify-center">
 
     <!-- First Card -->
-    <div class="sm:w-1/3 w-full mb-2 sm:mb-0 px-3">
-      <Card class="relative w-full max-w-full">
-        <h5 class="mb-2 text-lg font-bold tracking-tight text-gray-900 dark:text-white">Equipment</h5>
-        <p class="mb-3 text-sm text-gray-700 dark:text-gray-400 leading-tight">Borrow FLCD equipment. Printing available for FLCD students.</p>
+    <div class="sm:w-1/3 w-full mb-2 sm:mb-0 px-3 flex"> <!-- Add flex here -->
+      <Card class="relative w-full max-w-full h-full"> <!-- Add h-full here -->
+        <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">Equipment</h5>
+        <p class="mb-3 text-sm text-gray-700 dark:text-gray-400 leading-tight">Borrow the department's equipment. Printing available for FLCD students.</p>
         <div class="flex sm:flex-row flex-col sm:justify-end relative">
           <div class="sm:absolute sm:left-[-10px] sm:bottom-[-25px] mb-[-3px] sm:mb-0">
             <img src="/1.png" alt="Description" class="object-cover" style="width: 9.5rem; height: 9.5rem;" />
@@ -35,12 +35,12 @@
         </div>
       </Card>
     </div>
-
+  
     <!-- Second Card -->
-    <div class="sm:w-1/3 w-full mb-2 sm:mb-0 px-3">
-      <Card class="relative w-full max-w-full">
+    <div class="sm:w-1/3 w-full mb-2 sm:mb-0 px-3 flex"> <!-- Add flex here -->
+      <Card class="relative w-full max-w-full h-full"> <!-- Add h-full here -->
         <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">Venues</h5>
-        <p class="mb-3 text-sm text-gray-700 dark:text-gray-400 leading-tight">Reserve rooms in the UPCDC Building for activities & events.</p>
+        <p class="mb-3 text-sm text-gray-700 dark:text-gray-400 leading-tight">Reserve rooms in the UPCDC Building for your activities & events.</p>
         <div class="flex sm:flex-row flex-col sm:justify-end relative">
           <div class="sm:absolute sm:left-[-10px] sm:bottom-[-25px] mb-[-1px] sm:mb-0">
             <img src="/2.png" alt="Description" class="object-cover" style="width: 9.5rem; height: 9.5rem;" />
@@ -51,13 +51,13 @@
         </div>
       </Card>
     </div>
-
+  
     <!-- Third Card -->
-     {#if data.current_user.access_level != 7}
-    <div class="sm:w-1/3 w-full mb-2 sm:mb-0 px-3">
-      <Card class="relative w-full max-w-full">
+    {#if data.current_user.access_level != 7}
+    <div class="sm:w-1/3 w-full mb-2 sm:mb-0 px-3 flex"> <!-- Add flex here -->
+      <Card class="relative w-full max-w-full h-full"> <!-- Add h-full here -->
         <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">Observations</h5>
-        <p class="mb-3 text-sm text-gray-700 dark:text-gray-400 leading-tight">Book an available class observation schedule.</p>
+        <p class="mb-3 text-sm text-gray-700 dark:text-gray-400 leading-tight">Book an available class observation schedule for your research.</p>
         <div class="flex sm:flex-row flex-col sm:justify-end relative">
           <div class="sm:absolute sm:left-0 sm:bottom-[-25px] mb-[-13px] ml-2 sm:mb-0">
             <img src="/3.png" alt="Description" class="object-cover" style="width: 9.5rem; height: 9.5rem;" />
@@ -69,8 +69,9 @@
       </Card>
     </div>
     {/if}
-
+  
   </div>  
+
   {#if data.current_user.access_level != 7}
     <div class="flex items-center justify-between pb-3">
       <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{viewingPendingReqs ? 'Your Pending Requests' : 'History'}</h5>
