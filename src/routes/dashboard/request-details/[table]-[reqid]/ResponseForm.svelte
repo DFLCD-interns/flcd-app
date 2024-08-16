@@ -31,9 +31,9 @@
                             <input type="hidden" name="{data.requestType}_id_{requestRow?.req_id}" />
                         {/each} 
                     {/each}
-                {:else if data.requestType}
+                {:else}
                     {#each data.requestRows as requestRow}            
-                        <input name="{data.requestType}_id_{requestRow?.req_id}" />
+                        <input type="hidden" name="{data.requestType}_id_{requestRow?.req_id}" />
                     {/each} 
                 {/if}
 
