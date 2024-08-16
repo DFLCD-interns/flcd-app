@@ -6,7 +6,6 @@ export const actions = {
     createObservationRequest: async ({request, cookies}) => {
         // TODO: PARSE THE INPUTS HERE
         const formData = await request.formData();
-        const staff_assistant_id = formData.get("staff_assistant_id");
         const purpose = "Observation"
         //const office = formData.get("office");
         //const company = formData.get("company");
@@ -34,25 +33,24 @@ export const actions = {
         let instructor;
         let instructorEmail;
         
-            instructorEmail = formData.get('instructor_email');
-            if (!instructorEmail.endsWith('@up.edu.ph')) {
-                instructorEmail = `${instructorEmail}@up.edu.ph`;
-            }
-            instructor = await getUserWithMatchingEmail(instructorEmail);
+        instructorEmail = formData.get('instructor_email');
+        if (!instructorEmail.endsWith('@up.edu.ph')) {
+            instructorEmail = `${instructorEmail}@up.edu.ph`;
+        }
+        instructor = await getUserWithMatchingEmail(instructorEmail);
 
-            if (instructor.length < 1 || instructor[0].access_level !== 4) {
-                return {
-                    status: 409,
-                    body: {
-                        message: 'Email of coordinating faculty is not valid.',
-                        error: undefined
-                    }
-                };
-            }
-            instructor = instructor[0];
+        if (instructor.length < 1 || instructor[0].access_level !== 4) {
+            return {
+                status: 409,
+                body: {
+                    message: 'Email of coordinating faculty is not valid.',
+                    error: undefined
+                }
+            };
+        }
+        instructor = instructor[0];
         
-        
-        const server_req = await createObservationRequestServer(cookies.get(SESSION_COOKIE_NAME), staff_assistant_id, purpose, timeslots, instructor);
+        const server_req = await createObservationRequestServer(cookies.get(SESSION_COOKIE_NAME), purpose, timeslots, instructor);
         
         return { success: true ,
             base_request_uuid: server_req

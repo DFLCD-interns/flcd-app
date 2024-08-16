@@ -8,9 +8,9 @@ export const actions = {
 		const formData = await request.formData();
 		const password = formData.get("password");
 		let email = formData.get("email");
-		// if (!email.endsWith('@up.edu.ph')) {
-		// 	email = `${email}@up.edu.ph`;
-		// }
+		if (!email.endsWith('@up.edu.ph')) {
+			email = `${email}@up.edu.ph`;
+		}
 
 		try {
 			const sessionCreationResult = await createSessionByEmail(email, password);
@@ -24,7 +24,7 @@ export const actions = {
 			});
 
 		} catch (error) {
-			console.log("Error: ", error.message);
+			console.error("Error: ", error.message);
 			return fail(500, {
                 email,
                 password,

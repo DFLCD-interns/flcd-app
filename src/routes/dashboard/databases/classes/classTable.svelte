@@ -1,8 +1,9 @@
 <script>
+    export let access_level;
     export let classes;
   
     import { Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton } from 'flowbite-svelte';
-    import { EditOutline, TrashBinOutline } from 'flowbite-svelte-icons';
+    import { EditOutline, TrashBinOutline, ChevronSortOutline } from 'flowbite-svelte-icons';
 
     let tableHead = [];
     if (classes[0] != null){
@@ -15,6 +16,52 @@
     let currClass = classes[0];
 
     console.log(classes)
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+
+        // Get individual date components
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+        const day = String(date.getDate()).padStart(2, '0');
+        const year = String(date.getFullYear()).slice(-2); // Get last two digits of the year
+
+        // Get time components
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+
+        // Format date and time according to the desired format
+        return `${month}/${day}/${year}  ${hours}:${minutes}`;}
+
+        let sortDirection = 'asc'; // Default sort direction
+        let column='id';
+        function handleSort(column) {
+            classes = classes.sort((a, b) => {
+            let aValue = a[column];
+            let bValue = b[column];
+
+            if (typeof aValue === 'string' && typeof bValue === 'string') {
+            // Sort strings alphabetically
+            if (sortDirection === 'asc') {
+                return aValue.localeCompare(bValue);
+            } else {
+                return bValue.localeCompare(aValue);
+            }
+            } else if (column === 'dateString'){
+            if (sortDirection === 'asc') {
+                return a[date_created] - b[date_created];
+            } else {
+                return b[date_created] - a[date_created];
+            }
+            } else {
+            // Sort numbers numerically
+            if (sortDirection === 'asc') {
+                return aValue - bValue;
+            } else {
+                return bValue - aValue;
+            }}
+        });
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        }
   </script>
 
 <div class="pb-5">
@@ -22,31 +69,37 @@
 {#if classes != null }
 <Table shadow>
     <TableHead>
-    <TableHeadCell></TableHeadCell>
-    <TableHeadCell></TableHeadCell>
     {#each tableHead as head}
-    <TableHeadCell>{head}</TableHeadCell>
+    {#if head != 'batch_id' && head != 'handler_id'}
+    <TableHeadCell>
+        <button type='button' class="flex cursor-pointer" on:click={() => handleSort(head)}>
+          {head}
+          <ChevronSortOutline size='sm'/>
+        </button>
+    </TableHeadCell>
+    {/if}
     {/each}
+    {#if access_level != 4}
+    <TableHeadCell></TableHeadCell>
+    {/if}
     </TableHead>
     <TableBody tableBodyClass="divide-y">
     {#each classes as Class}
     <TableBodyRow>
-        <TableBodyCell>
-            <button on:click={() => {EditModal = true; currClass = Class}}><EditOutline  class="text-green-600"/></button>
-        </TableBodyCell>
-        <TableBodyCell>
-        <button on:click={() => {DeleteModal = true; currClass = Class}}><TrashBinOutline class="text-green-600"/></button>
-        </TableBodyCell>
         <TableBodyCell>{Class.class_id}</TableBodyCell>
         <TableBodyCell>{Class.class_name}</TableBodyCell>
-        <TableBodyCell>{Class.batch_id}</TableBodyCell>
         <TableBodyCell>{Class.batch}</TableBodyCell>
-        <TableBodyCell>{Class.handler_id}</TableBodyCell>
         <TableBodyCell>{Class.handler_firstname}</TableBodyCell>
         <TableBodyCell>{Class.handler_lastname}</TableBodyCell>
         <TableBodyCell>{Class.description}</TableBodyCell>
         <TableBodyCell>{Class.schedule}</TableBodyCell>
-        <TableBodyCell>{Class.created}</TableBodyCell>
+        <TableBodyCell>{formatDate(Class.created)}</TableBodyCell>
+        {#if access_level != 4}
+          <TableBodyCell>
+            <button on:click={() => {EditModal = true; currClass = Class}}><EditOutline class="text-green-700 mr-2"/></button>
+            <button on:click={() => {DeleteModal = true; currClass = Class}}><TrashBinOutline class="text-red-700"/></button>
+          </TableBodyCell>
+        {/if}
     </TableBodyRow>
     {/each}
     </TableBody>

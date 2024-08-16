@@ -1,6 +1,8 @@
 import pkg from 'pg';
 const { Pool } = pkg;
 import { format } from 'date-fns';
+import { postgresTimeToReadable } from '$lib';
+import { max } from 'date-fns/fp/max';
 
 const pool = new Pool({ //store this in an env file!
   user: 'postgres',
@@ -175,13 +177,18 @@ export async function getRequestDetailsDB(table, reqid) {
     ${table === 'equipment_requests' ? 
       `, t.location AS location, 
          t.actual_start_time AS actual_start_time,
-         t.promised_end_time AS promised_end_time`: ''}
+         t.promised_end_time AS promised_end_time,
+         e.name as equipment_name,
+         e.location as equipment_location`: ''}
     ${table === 'class_requests' ?
-      ', t.timeslot AS timeslot' : ''} 
+      `, t.timeslot AS timeslot,
+         c.name as child_name` : ''} 
     FROM base_requests br 
     LEFT JOIN ${table} t ON br.id = t.request_id
     LEFT JOIN users AS faculty ON br.instructor_id = faculty.id
     LEFT JOIN users AS requester ON br.requester_id = requester.id
+    ${table === 'class_requests' ? 'LEFT JOIN childs c ON t.assigned_child_id = c.id' : ''}
+    ${table === 'equipment_requests' ? 'LEFT JOIN equipments e ON t.equipment_id = e.id' : ''}
     WHERE br.id = ${reqid}`
   const res = await query(qText);
   // console.log(res.body.result.rows)
@@ -194,8 +201,8 @@ export async function createBaseRequestDB(staff_assistant_id, purpose, requester
   return res;
 }
 
-export async function createBaseRequestDB2(staff_assistant_id, purpose, requester_id, instructor_id) {
-  const res = await query('INSERT INTO base_requests (staff_assistant_id, purpose, requester_id, instructor_id) VALUES ($1, $2, $3, $4)', [staff_assistant_id, purpose, requester_id, instructor_id]);
+export async function createBaseRequestDB2(purpose, requester_id, instructor_id) {
+  const res = await query('INSERT INTO base_requests (purpose, requester_id, instructor_id) VALUES ($1, $2, $3)', [purpose, requester_id, instructor_id]);
   return res;
 }
 
@@ -203,11 +210,6 @@ export async function createClassRequestDB(class_id, request_id, timeslot, obser
   // console.log(class_id, request_id, timeslot, observe_date)
   const res = await query('INSERT INTO class_requests (timeslot, class_id, request_id, observe_date) VALUES ($1, $2, $3, $4)', [timeslot, class_id, request_id, observe_date])
 
-}
-
-export async function getNewestBaseRequest(){
-  const res = await query ('SELECT * FROM base_requests ORDER BY id DESC');
-  return res.body.result.rows[0];
 }
 
 export async function getLatestBaseRequestID(user_id) {
@@ -245,14 +247,14 @@ export async function getFromTableDB(table_name, searchFormData, limit = 100) {
   const values = [...searchFormData.values()].map((val) => val); // will be for parametrization
   values.forEach((val, i) => !val || val == 'undefined' || val == 'null' ? values[i] = 0 : ''); // sanitize
 
-  const whereText = attributes.map((attributeName, index) => `(${attributeName} = \$${index+1})`).join(' AND ')
+  const whereText = attributes.map((attributeName, index) => `(${attributeName} = \$${index+1})`).join(' AND ') || '';
   if (table_name == 'user_types'){
-    qText = `SELECT \* FROM ${table_name} WHERE ${whereText} ORDER BY (access_level) asc LIMIT \$${attributes.length+1}`;
+    qText = `SELECT \* FROM ${table_name} WHERE (1 = 1) ${whereText ? 'AND ' + whereText : ''} ORDER BY (access_level) asc LIMIT \$${attributes.length+1}`;
   }
   else{ 
-    // console.log("Table name:", {table_name})
-    qText = `SELECT \* FROM ${table_name} WHERE ${whereText} ORDER BY (id) asc LIMIT \$${attributes.length+1}`;
+    qText = `SELECT \* FROM ${table_name} WHERE (1 = 1) ${whereText ? 'AND ' + whereText : ''} ORDER BY (id) asc LIMIT \$${attributes.length+1}`;
 }
+
   // console.log(qText, values.concat(limit));
   const res = await query(qText, values.concat(limit));    
   // console.log(res);
@@ -323,65 +325,12 @@ export async function deleteRequest(request_table_name, request_id) {
   return result?.success && result2?.success && result3?.success;
 }
 
-// Formdata should contain approver_id to search
-export async function getApprovalsInfo(searchFormData) { 
-  const formsQuery = await getFromTableDB("approvals", searchFormData); 
-
-  const statuses = [], remarks = [], userIDs = [];
-  formsQuery.body.result.rows.map(async row => {
-    statuses.push(row?.status);
-    remarks.push(row?.remarks);
-    userIDs.push(row?.approver_id);
-  })
-
-  const displayNames = [];
-  searchFormData.delete('request_id');
-  const searchFormData2 = new FormData();
-  for (const row of formsQuery?.body.result.rows) {
-    let access_level = undefined;
-    if (row.approver_id) {
-      searchFormData.set('id', row.approver_id);
-      const approverQuery = await getFromTableDB("users", searchFormData);
-      if (!approverQuery?.body) throw new Error(`no appover matching the id ${searchFormData.get('id')}`);  
-      access_level = approverQuery?.body.result.rows[0]?.access_level;
-    }
-    else access_level = 3; // if null, this must be for all the possbile Admin Staffs, which is user level 3
-
-    searchFormData2.set('access_level', access_level);
-    const access_levelQuery = await getFromTableDB("user_types", searchFormData2);
-    const displayName = access_levelQuery.body.result.rows[0]?.description;
-
-    displayNames.push(displayName);
-  }
-  
-  return { 
-    statuses: statuses, 
-    remarks: remarks,
-    displayNames: displayNames,
-    userIDs: userIDs
-  };
-}
-
-// For requests
-function getTotalStatus(names, statuses) {
-  if (statuses.includes("declined"))
-      return "declined";
-  else if (statuses.includes("pending"))
-      return "pending with " + names[statuses.findIndex((status) => status === 'pending')];
-  else if (statuses.every((elem) => elem === "approved"))
-      return "approved";
-  else {
-      console.error("Total status of form cannot be determined.")
-      return "cannot be determined";
-  } 
-}
-
-async function getEquipmentRequestsDB() {
+export async function getEquipmentRequestsDB() {
   const res = await query(`SELECT equipment_requests.id AS req_id, * FROM base_requests JOIN equipment_requests ON equipment_requests.request_id = base_requests.id ORDER BY equipment_requests.id ASC`);
   return res.body.result.rows;
 }
 
-async function getVenueRequestsDB() {
+export async function getVenueRequestsDB() {
   const res = await query(`SELECT venue_requests.id AS req_id, * FROM base_requests JOIN venue_requests ON venue_requests.request_id = base_requests.id JOIN venues ON venue_requests.venue_id = venues.id ORDER BY venue_requests.id ASC`);
   // for those without venue_id:
   const res2 = await query(`SELECT venue_requests.id AS req_id, * FROM base_requests JOIN venue_requests ON venue_requests.request_id = base_requests.id ORDER BY venue_requests.id ASC`);
@@ -395,145 +344,20 @@ async function getVenueRequestsDB() {
   return ret;
 }
 
-async function getClassRequestsDB() {
+export async function getClassRequestsDB() {
   const res = await query(`SELECT class_requests.id AS req_id, * FROM base_requests JOIN class_requests ON class_requests.request_id = base_requests.id JOIN classes ON class_requests.class_id = classes.id ORDER BY class_requests.id ASC`);
   return res.body.result.rows;
 }
 
-// For dashboard, only supposed to get brief details
-export async function getRequestsInfo(user_id, user_access_level) {
-	
-  // Get all requests
-	const equipment_requests = await getEquipmentRequestsDB();
-	const venue_requests = await getVenueRequestsDB();
-	const class_requests = await getClassRequestsDB();
-
-	const equipReqsGroupedDict = {};
-	equipment_requests.forEach(row => {
-		if (Object.keys(equipReqsGroupedDict).includes(row.request_id.toString())) 
-			equipReqsGroupedDict[row.request_id].push(row); // add to existing key-value pair
-		else equipReqsGroupedDict[row.request_id] = [row]; // new key-value pair
-	});
-
-	const allRequests = [];
-	Object.values(equipReqsGroupedDict).forEach(function (groupedItem) {
-    const desiredEquipments = groupedItem.reduce((equipTypeDict, item) => {
-      if (Object.keys(equipTypeDict).includes(item?.equipment_type)) 
-        equipTypeDict[item?.equipment_type]++; // increment total
-      else equipTypeDict[item?.equipment_type] = 1; // else add to dict
-      return equipTypeDict;
-    }, {}) // key-value pair of each equip as key and the count as value
-    const requestName = Object.entries(desiredEquipments).map(entry => entry.join(' (') + ')').join(', ');
-    
-		allRequests.push ({
-			type: 'Equipment Request',
-			table:'equipment_requests',
-			id: groupedItem[0]?.request_id,
-			requester_id: groupedItem[0]?.requester_id,
-			name: requestName,
-      created: groupedItem[0]?.created,
-			date: groupedItem[0]?.promised_start_time,
-      actual_date_end: groupedItem[0]?.actual_end_time,
-			status: null,
-      approvalsInfo: null,
-      requestedItems: desiredEquipments, // these are equipment types
-      requestRows: equipment_requests,
-		})
-  });
-	
-  const venueReqsGroupedDict = {};
-	venue_requests.forEach(row => {
-		if (Object.keys(venueReqsGroupedDict).includes(row.request_id.toString())) 
-			venueReqsGroupedDict[row.request_id].push(row); // add to existing key-value pair
-		else venueReqsGroupedDict[row.request_id] = [row]; // new key-value pair
-	});
-
-  Object.values(venueReqsGroupedDict).forEach(function (groupedItem) {
-    const noAssignedCount = groupedItem.reduce((_noAssignedCount, item) => item.name ? _noAssignedCount : (++_noAssignedCount), 0);
-    const requestName = groupedItem.map(item => item.name).join(', ') + noAssignedCount !== 0 ? `(${noAssignedCount} unavailable venues)` : '';
-
-    const start_date = new Date(format(groupedItem[0].date_needed, 'yyyy-MM-dd') + 'T' + groupedItem[0].start_time)
-    const end_date = new Date(format(groupedItem[0].date_needed, 'yyyy-MM-dd') + 'T' + groupedItem[0].end_time)
-    const desiredVenues = groupedItem.reduce((venueDict, item) => {
-      if (!Object.keys(venueDict).includes(item?.venue_id)) 
-        venueDict[item?.venue_id] = item?.name; 
-      return venueDict;
-    }, {}) // key-value pair of each venue name as key and the id as value
-		allRequests.push({
-			type: 'Venue Request',
-			table:'venue_requests',
-			id: groupedItem[0].request_id,
-      requester_id: groupedItem[0]?.requester_id,
-			name: requestName,
-      created: groupedItem[0].created,
-			date: start_date,
-			actual_date_end: end_date,
-			status: null,
-      approvalsInfo: null,
-      requestedItems: desiredVenues, // these are the venues
-      requestRows: venue_requests,
-		})
-	});
-  
-	class_requests.forEach(function (item) {
-		allRequests.push({
-			type: 'Class Observation Request',
-			table:'class_requests',
-			id: item.request_id,
-      created: item.created,
-      requester_id: item?.requester_id,
-			name: item.name,
-      created: item.created,
-			date: item.observe_date,
-      timeslot: item.timeslot,
-			status: null,
-      approvalsInfo: null,
-		})
-	});
-	
-	const requestsInfo = [];
-	for (const req of allRequests) {
-		const formData = new FormData(); 
-		formData.append('request_id', req.id);
-		const approvalFormsQuery = await getFromTableDB('approvals', formData);
-		const forms = approvalFormsQuery.body.result.rows;
-		
-		const approvalsInfo = await getApprovalsInfo(formData);
-    
-    let valid;
-    if (user_access_level < 5) // if admin
-      valid = forms.some((form, i) =>	{
-        // valid if this user is the approver AND the previous approver has approved
-        const validIfApprover = form.approver_id === user_id && (i == 0 ? true : forms[i-1].status === 'approved');
-        // also valid if the approver is null AND the access level of this user is ADMIN STAFF (level 3) 
-        const validIfAdminStaff = (!form.approver_id) && user_access_level === 3;
-        return validIfApprover || validIfAdminStaff; 
-      });
-    else valid = req.requester_id === user_id;
-    
-    if (valid) {
-      req.status = getTotalStatus(approvalsInfo.displayNames, approvalsInfo.statuses);
-      req.approvalsInfo = approvalsInfo;
-      requestsInfo.push(req);
-    }
-	}
-
-	return requestsInfo;
-}
-
 export async function getAllClassesDB() {
-  const res = await query(`SELECT 
+  const res = await query(`SELECT
     batches.id AS batch_id,
     batches.name AS batch_name,
-    batches.description AS batch_description,
-    batches.created AS batch_created,
     classes.id AS class_id,
     classes.name AS class_name,
     users.first_name AS handler_firstname,
     users.last_name AS handler_lastname,
-    classes.description AS class_description,
     classes.schedule,
-    classes.created AS classes_created,
     childs.name AS child_name,
     childs.birthdate AS child_birthdate,
     childs.tracking_id AS child_trackingid,
@@ -550,8 +374,6 @@ export async function getBatchesDB() {
   // console.log(res);
   return res.body.result.rows;
 }
-
-
 
 export async function getClassesDB() {
   const res = await query(`SELECT * FROM classes`);
