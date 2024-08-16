@@ -149,16 +149,18 @@
                     {/if}
                 </td> 
 
-                <tr>
-                    <td class="py-3 px-4 font-semibold"> Assigned Equipment/s </td>
-                        {#if data.requestType === 'equipment' && data.requestDetails[0].equipment_name}
-                        <td class="py-3 px-4">
-                            {#each data.requestDetails as row}
-                                <p>{row.equipment_name ? `• ${row.equipment_name} (${row.equipment_location || 'no specified location'})` : ''}</p>   
-                            {/each}
-                        </td>
-                    {/if}
-                </tr>
+                {#if data.requestType === 'equipment'}
+                    <tr>
+                        <td class="py-3 px-4 font-semibold"> Assigned Equipment/s </td>
+                        {#if data.requestDetails[0].equipment_name}
+                            <td class="py-3 px-4">
+                                {#each data.requestDetails as row}
+                                    <p>{row.equipment_name ? `• ${row.equipment_name} (${row.equipment_location || 'no specified location'})` : ''}</p>   
+                                {/each}
+                            </td>
+                        {/if}
+                    </tr>
+                {/if}
 
 
                 </tbody>
