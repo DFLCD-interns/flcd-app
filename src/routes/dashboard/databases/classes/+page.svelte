@@ -102,7 +102,7 @@
             }
 
         } else {
-            console.log('in here')
+            // console.log('in here')
             batches = batches
             .filter(item => 
             selectedBatch.length === 0 || selectedBatch.includes(item.batch_id)
@@ -161,7 +161,7 @@
             }}
         });
         sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-        console.log(batches)
+        // console.log(batches)
         }
     
 

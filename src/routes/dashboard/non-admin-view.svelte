@@ -7,13 +7,13 @@
   let viewingPendingReqs = true;
   const pendingRequests = [], finishedRequests = [];
   data.requestsInfo.forEach(req => {
-    console.log(req)
+    // console.log(req)
     if (req.status.includes('pending') && ((req.table.includes('equipment') && !req.actual_date_end) || req.actual_date_end > new Date())) 
       pendingRequests.push(req) 
     else finishedRequests.push(req)
   });
 
-  console.log(data.current_user.access_level)
+  // console.log(data.current_user.access_level)
 
 </script>
 

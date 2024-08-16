@@ -75,7 +75,6 @@ export const actions = {
             const type = [...inputFormData.keys()][0]?.split('_')[0];
             
             let response2 = {success: true}; 
-            console.log('owo', assignedItemIDs)
             for (let i = 0; i < assignedItemIDs.length; i++) {
                 if (!assignedItemIDs[i]) continue;
 
