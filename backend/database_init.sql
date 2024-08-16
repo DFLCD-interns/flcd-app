@@ -27,7 +27,7 @@ CREATE TABLE user_types (
 INSERT INTO user_types (description, access_level)
 VALUES 
 ('Database Admin', 0),
-('Chair', 1),
+('FLCD Chair', 1),
 ('Faculty-in-Charge', 2),
 ('Admin Staff', 3),
 ('Course Instructor', 4),
@@ -152,8 +152,7 @@ VALUES
 ('Portable Speaker Bldg 1', 'Portable Speaker', 'Room XXX', 'available'),
 ('Portable Speaker Bldg 2', 'Portable Speaker', 'Room XXX', 'available'),
 ('Sony Camera', 'Digital Camera', 'Room XXX', 'available'),
-('RODE Lapel', 'Lapel Microphone', 'Room XXX', 'available'),
-(NULL, 'For Printing Only', NULL, 'available');
+('RODE Lapel', 'Lapel Microphone', 'Room XXX', 'available');
 
 
 CREATE TABLE class_requests (

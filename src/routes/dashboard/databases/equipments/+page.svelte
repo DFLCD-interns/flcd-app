@@ -2,21 +2,27 @@
   /** @type {import('./$types').PageData} */
 	export let data;
 
-  import { MultiSelect, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton } from 'flowbite-svelte';
+  import { MultiSelect, Select, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton } from 'flowbite-svelte';
   import { DownloadSolid, FilterSolid, EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid, ChevronSortOutline } from 'flowbite-svelte-icons';
   import { downloadCSV } from '../downloadcsv';
   import { enhance } from '$app/forms';
   import toast from 'svelte-french-toast';
 
+  let equipmentTypes = data.equipmentTypes;
   let equipments = data.equipments;
   let tableHead = []
   if (equipments != null){
     tableHead = Object.keys(equipments[0]);
   }
+  // Add a 'value' & 'name' property to each object in the array (for Svelte each behavior)
+  equipmentTypes = equipmentTypes.map((item) => ({ ...item, value: item.type, name: item.type }));
+  equipmentTypes.push({type: 'Other...', value: 'other', name: 'Other...'});
+
+  let addedEquipmentType = "";
+  $: isOther = addedEquipmentType == "other";
   
   let access_level=data.current_user.access_level;
   
-
   let equipmentName="equipment"
   let EditModal = false;
   let DeleteModal = false;
@@ -110,15 +116,12 @@
         return async ({ result, update }) => {
             switch (result.type) {
                 case 'success':
+                    toast.success("Equipment successfully added!");
                     await update();
                     break;
                 case 'failure':
-                    const errorMessage = result.data.message || 'Invalid credentials';
+                    const errorMessage = result.data.message || 'Failed to add equipment.';
                     toast.error(errorMessage);
-                    await update();
-                    break;
-                case 'error':
-                    toast.error(result.error.message);
                     break;
                 default:
                     await update();
@@ -126,7 +129,6 @@
             loading = false;
         }
     }
-
 </script>
   
 <div class="p-4 md:p-10">
@@ -190,49 +192,6 @@
     {:else}
     <p class="content-center text-gray-500">No equipments in database</p>
     {/if}
-  {#if equipments != null}
-  <Table shadow>
-    <TableHead>
-      {#if access_level != 4}
-      <TableHeadCell></TableHeadCell>
-      <TableHeadCell></TableHeadCell>
-      {/if}
-      {#each tableHead as head}
-      {#if head != 'dateString'}
-      <TableHeadCell>
-        <button type='button' class="flex cursor-pointer" on:click={() => handleSort(head)}>
-          {head}
-          <ChevronSortOutline size='sm'/>
-        </button>
-      </TableHeadCell>
-      {/if}
-      {/each}
-    </TableHead>
-    <TableBody tableBodyClass="divide-y">
-      {#each equipments as equipment}
-      <TableBodyRow>
-        {#if access_level != 4}
-        <TableBodyCell>
-          <button on:click={() => {EditModal = true; editEquipment = equipment}}><EditOutline  class="text-green-600"/></button>
-        </TableBodyCell>
-        <TableBodyCell>
-          <button on:click={() => {DeleteModal = true; equipmentName = equipment.name}}><TrashBinOutline class="text-green-600"/></button>
-        </TableBodyCell>
-        {/if}
-        <TableBodyCell>{equipment.id}</TableBodyCell>
-        <TableBodyCell>{equipment.name}</TableBodyCell>
-        <TableBodyCell>{equipment.type}</TableBodyCell>
-        <TableBodyCell>{equipment.location}</TableBodyCell>
-        <TableBodyCell>{equipment.status}</TableBodyCell>
-        <TableBodyCell>{equipment.notes}</TableBodyCell>
-        <TableBodyCell>{formatDate(equipment.date_registered).toString()}</TableBodyCell>
-      </TableBodyRow>
-      {/each}
-    </TableBody>
-  </Table>
-  {:else}
-  <p  class="content-center text-gray-500">No equipments in database</p>
-  {/if}
   </div>
 </div>
 
@@ -274,27 +233,69 @@
   </div>
 </Modal>
 
-<Modal title="Add Equipment" bind:open={AddModal} autoclose>
-  <form class="space-y-5 mb-2" method="POST" action="?/signin" use:enhance={submitEquipment}>
+<Modal title="Add Equipment" bind:open={AddModal} >
+  <form class="space-y-5 mb-2" method="POST" action="?/addEquipment" use:enhance={submitEquipment}>
     <div class="mb-3">
       <Label class="block mb-1">Name</Label>
-      <Input placeholder="" />
+      <Input 
+        name="name" 
+        type="text" 
+        id="name"
+        placeholder="Enter a descriptive name for the equipment." 
+        disabled={loading}
+        required
+      />
     </div>
     <div class="mb-3">
       <Label class="block mb-1">Type</Label>
-      <Input placeholder="" />
+      <Select
+          name="type"
+          id="type"
+          items={equipmentTypes}
+          bind:value={addedEquipmentType}
+          disabled={loading}
+          required
+      />
+    </div>
+    <div class="mb-3">
+        {#if isOther}
+            <Label class="space-y-2">
+                <span>New Equipment Type</span>
+                <Input
+                    disabled={!isOther}
+                    type="text"
+                    name="new_type"
+                    placeholder="Please make sure that the equipment type you want doesn't already exist."
+                    required
+                />
+            </Label>
+        {/if}
     </div>
     <div class="mb-3">
       <Label class="block mb-1">Location</Label>
-      <Input placeholder="Equipment location" />
-    </div>
+      <Input 
+        name="location" 
+        type="text" 
+        id="location"
+        placeholder="Enter the specific location/room of the equipment within the facility." 
+        disabled={loading}
+        required
+      />
+    </div>    
     <div class="mb-3">
       <Label class="block mb-1">Notes</Label>
-      <Input placeholder="Enter notes" />
+      <Input name="notes" type="text" id="notes" placeholder="Enter addtl. comments about the equipment. Can be empty." disabled={loading} />
     </div>
     <div class="flex gap-5 justify-center">
       <Button type="submit" class="w-full" disabled={loading}>Confirm</Button>
-      <Button type="button" class="bg-red-700 hover:bg-red-800">Cancel</Button>
+      <Button 
+        type="button" 
+        class="bg-red-700 hover:bg-red-800" 
+        disabled={loading} 
+        on:click={() => AddModal = false}
+      >
+        Cancel
+      </Button>
     </div>
   </form>
 </Modal>
