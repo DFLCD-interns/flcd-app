@@ -53,7 +53,7 @@ export const actions = {
             });
 
         } catch (error) {
-            console.log("Error: ", error.message);
+            console.error("Error: ", error.message);
             return fail(500, {
                 email,
                 password,
