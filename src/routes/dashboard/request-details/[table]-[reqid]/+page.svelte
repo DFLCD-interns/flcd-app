@@ -24,7 +24,7 @@
         <a href="/dashboard"><Button class="bg-white text-gray-500 hover:bg-white drop-shadow-md"><ArrowLeftOutline/></Button></a>
         <div class="w-full items-center justify-between flex">
             <div>    
-                <h2 class="pt-3 text-2xl font-semibold text-gray-600">{requestTypeDisplay}: {data.requestName}</h2>
+                <h2 class="pt-3 text-2xl font-semibold text-gray-600">{requestTypeDisplay}: {data.requestName} {#if data.request_type ="class_requests"}, {requestDetails.timeslot}{/if}</h2>
                 <Badge class="mt-2" large border color='{totalStatus === 'approved' ? statusColors.approved : totalStatus === 'declined' ? statusColors.declined : statusColors.pending}'>{totalStatus?.charAt(0)?.toUpperCase() + totalStatus?.slice(1)}</Badge>
             </div>
             {#if !isAdmin}

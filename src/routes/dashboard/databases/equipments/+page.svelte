@@ -11,6 +11,7 @@
     tableHead = Object.keys(equipments[0]);
   }
   
+  let access_level=data.current_user.access_level;
   
 
   let equipmentName="equipment"
@@ -118,15 +119,19 @@
     <p  class="font-semibold text-xl text-gray-700">Equipments Database</p>
     <div class = "flex gap-2">
     <GradientButton on:click={downloadCSV(equipments, 'equipment')} color="green" class="inline-flex text-center gap-2"><DownloadSolid/>Download Table</GradientButton>
+    {#if access_level !=4}
     <GradientButton on:click={() => {AddModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Equipment</GradientButton>
+    {/if}
   </div>
   </div>
   <div class="pb-5">
   {#if equipments != null}
   <Table shadow>
     <TableHead>
+      {#if access_level != 4}
       <TableHeadCell></TableHeadCell>
       <TableHeadCell></TableHeadCell>
+      {/if}
       {#each tableHead as head}
       {#if head != 'dateString'}
       <TableHeadCell>
@@ -141,12 +146,14 @@
     <TableBody tableBodyClass="divide-y">
       {#each equipments as equipment}
       <TableBodyRow>
+        {#if access_level != 4}
         <TableBodyCell>
           <button on:click={() => {EditModal = true; editEquipment = equipment}}><EditOutline  class="text-green-600"/></button>
         </TableBodyCell>
         <TableBodyCell>
           <button on:click={() => {DeleteModal = true; equipmentName = equipment.name}}><TrashBinOutline class="text-green-600"/></button>
         </TableBodyCell>
+        {/if}
         <TableBodyCell>{equipment.id}</TableBodyCell>
         <TableBodyCell>{equipment.name}</TableBodyCell>
         <TableBodyCell>{equipment.type}</TableBodyCell>

@@ -12,6 +12,8 @@
     else finishedRequests.push(req)
   });
 
+  console.log(data.current_user.access_level)
+
 </script>
 
 <div class="px-10 py-10">
@@ -51,6 +53,7 @@
     </div>
 
     <!-- Third Card -->
+     {#if data.current_user.access_level != 7}
     <div class="sm:w-1/3 w-full mb-2 sm:mb-0 px-3">
       <Card class="relative w-full max-w-full">
         <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">Observations</h5>
@@ -65,9 +68,10 @@
         </div>
       </Card>
     </div>
+    {/if}
 
   </div>  
-
+  {#if data.current_user.access_level != 7}
     <div class="flex items-center justify-between pb-3">
       <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{viewingPendingReqs ? 'Your Pending Requests' : 'History'}</h5>
       <button class="text-gray-500 flex" on:click={() => viewingPendingReqs = !viewingPendingReqs}> 
@@ -93,6 +97,7 @@
       <p class="text-gray-500 text-center mt-5">
         { viewingPendingReqs ? 'No Pending Requests' : 'No Finished Requests'}
       </p>
+    {/if}
     {/if}
 </div>
 

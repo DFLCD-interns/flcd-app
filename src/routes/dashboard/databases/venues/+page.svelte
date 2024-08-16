@@ -8,6 +8,8 @@
 
   // console.log('d:', data)
   // console.log('v:', data.venues)
+  let access_level = data.current_user.access_level;
+
 
   let venues = data.venues;
   let tableHead = []
@@ -47,7 +49,7 @@
 
   let searchQuery='';
 
-  $: venues = data.venue
+  $: venues = data.venues
     .filter(item =>
       searchQuery === '' || Object.values(item).some(value =>
         // Search all string fields
@@ -89,15 +91,19 @@
     <p  class="font-semibold text-xl text-gray-700">Venues Database</p>
     <div class = "flex gap-2">
     <GradientButton on:click={downloadCSV(venues, 'venue')} color="green" class="inline-flex text-center gap-2"><DownloadSolid/>Download Table</GradientButton>
+    {#if access_level !=4}
     <GradientButton on:click={() => {AddModal=true}} color="green" class="inline-flex text-center gap-2"><CirclePlusSolid/>Add Venue</GradientButton>
+    {/if}
     </div>
   </div>
   <div class="pb-5">
   {#if venues != null }
   <Table shadow>
     <TableHead>
+      {#if access_level !=4}
       <TableHeadCell></TableHeadCell>
       <TableHeadCell></TableHeadCell>
+      {/if}
       {#each tableHead as head}
       {#if head != 'dateString'}
       <TableHeadCell>
@@ -112,12 +118,14 @@
     <TableBody tableBodyClass="divide-y">
       {#each venues as venue}
       <TableBodyRow>
+        {#if access_level !=4}
         <TableBodyCell>
           <button on:click={() => {EditModal = true; editVenue = venue}}><EditOutline  class="text-green-600"/></button>
         </TableBodyCell>
         <TableBodyCell>
           <button on:click={() => {DeleteModal = true; venueName = venue.name}}><TrashBinOutline class="text-green-600"/></button>
         </TableBodyCell>
+        {/if}
         <TableBodyCell>{venue.id}</TableBodyCell>
         <TableBodyCell>{venue.name}</TableBodyCell>
         <TableBodyCell>{venue.description}</TableBodyCell>
