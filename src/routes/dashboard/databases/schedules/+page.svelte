@@ -87,7 +87,7 @@
       </TableBody>
     </Table>
     {:else}
-    <p  class="content-center text-gray-500">No users in database</p>
+    <p  class="content-center text-gray-500">No unavailable slots yet</p>
     {/if}
     </div>
     
