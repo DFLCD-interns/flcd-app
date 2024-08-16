@@ -379,18 +379,14 @@ export async function getClassRequestsDB() {
 }
 
 export async function getAllClassesDB() {
-  const res = await query(`SELECT 
+  const res = await query(`SELECT
     batches.id AS batch_id,
     batches.name AS batch_name,
-    batches.description AS batch_description,
-    batches.created AS batch_created,
     classes.id AS class_id,
     classes.name AS class_name,
     users.first_name AS handler_firstname,
     users.last_name AS handler_lastname,
-    classes.description AS class_description,
     classes.schedule,
-    classes.created AS classes_created,
     childs.name AS child_name,
     childs.birthdate AS child_birthdate,
     childs.tracking_id AS child_trackingid,
