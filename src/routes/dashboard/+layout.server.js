@@ -21,6 +21,7 @@ export async function load({ cookies }) {
 		venues: await db.getVenueDB(),
 		venuesStatuses: await db.getVenuesStatusesDB(),
 		childs: childQuery?.body.result.rows,
+		childsStatuses: await db.getChildsStatusesDB(),
 		current_user: user, 
 		user_access_level_label: user_access_level_label?.body.result.rows[0]?.description
 	};

@@ -141,6 +141,20 @@ export async function getVenuesStatusesDB() {
   return result.body.result.rows;
 }
 
+export async function getChildsStatusesDB() {
+  const result = await query(`
+    SELECT 
+      childs.id AS child_id,
+      class_requests.id AS subreq_id,
+      class_requests.request_id AS req_id,
+      class_requests.observe_date AS date,
+      class_requests.timeslot AS timeslot
+    FROM childs 
+    JOIN class_requests ON childs.id = class_requests.assigned_child_id
+    GROUP BY date, timeslot, childs.id, subreq_id`);
+  return result.body.result.rows;
+}
+
 export async function getUsersListDB() {
   const result = await query(`SELECT 
     id,

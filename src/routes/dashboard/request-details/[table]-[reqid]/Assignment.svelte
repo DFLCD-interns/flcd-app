@@ -45,6 +45,17 @@
         dropdownItems = data.childs;
         dropDownsStates = false;
         dropDownDataStates = false;
+
+        const reservedDates = data.childsStatuses.map((row) => {
+            const desiredDate = new Date(format(row.date, 'yyyy-MM-dd'));
+            const period = row.timeslot.split('-');
+            const desiredStartDate = new Date(desiredDate.setHours(period[0]));
+            const desiredEndDate = new Date(desiredDate.setHours(period[1]));
+            return [row.child_id, desiredStartDate, desiredEndDate]
+        })
+        getReservedDates = (item) => reservedDates.map(
+            row => (row[0] == item.id) && (row[2] > new Date()) ? 
+            [row[1], row[2]] : null).filter(notnull => notnull);
     }
 </script>
 
@@ -142,13 +153,19 @@
                 {dropDownItem.name}
                 <ChevronRightOutline class="{dropDownItem.id !== 'null' ? '' : 'hidden'}"/>
             </DropdownItem>
-            {#if dropDownItem.id !== 'null'  }<DropdownDivider />{/if}
+            {#if dropDownItem.id == 'null' }<DropdownDivider />{/if}
             {#if hoveredItem && hoveredItem === dropDownItem.id}
                 <Dropdown placement="right-start" class="w-80" open>
-                    <DropdownItem> Birth Date: { postgresTimeToReadable(dropDownItem?.birthdate, 'MMMM d, yyyy') || '-'} </DropdownItem>
-                    <DropdownItem> Tracking ID: {dropDownItem?.tracking_id || '-'} </DropdownItem>
-                    <DropdownItem> Class ID: {dropDownItem?.class_id || '-'} </DropdownItem>
-                    <DropdownItem slot="footer"> Reserved Dates: {'-'} </DropdownItem>
+                    {@const _reservedDates = getReservedDates(dropDownItem) || []} 
+                    <DropdownItem> Class: {dropDownItem?.class_id || 'None'} </DropdownItem>
+                    <DropdownItem> Birth Date: { postgresTimeToReadable(dropDownItem?.birthdate, 'MMMM d, yyyy') || 'None'} </DropdownItem>
+                    <DropdownItem> Tracking ID: {dropDownItem?.tracking_id || 'None'} </DropdownItem>
+                    <DropdownItem> 
+                        <p class="mb-2">Reserved Dates: {_reservedDates.length > 0 ? '' : 'None'}</p>
+                        {#each _reservedDates as date}
+                            <p> {'• ' + postgresTimeToTimeslot(date)}</p>
+                        {/each}
+                    </DropdownItem>
                 </Dropdown>    
             {/if}
         {/each}
