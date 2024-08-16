@@ -158,8 +158,7 @@
                 <Dropdown placement="right-start" class="w-80" open>
                     {@const _reservedDates = getReservedDates(dropDownItem) || []} 
                     <DropdownItem> Class: {dropDownItem?.class_id || 'None'} </DropdownItem>
-                    <DropdownItem> Birth Date: { postgresTimeToReadable(dropDownItem?.birthdate, 'MMMM d, yyyy') || 'None'} </DropdownItem>
-                    <DropdownItem> Tracking ID: {dropDownItem?.tracking_id || 'None'} </DropdownItem>
+                    <DropdownItem class="border-b border-blue-gray-200"> Birth Date: { postgresTimeToReadable(dropDownItem?.birthdate, 'MMMM d, yyyy') || 'None'} </DropdownItem>
                     <DropdownItem> 
                         <p class="mb-2">Reserved Dates: {_reservedDates.length > 0 ? '' : 'None'}</p>
                         {#each _reservedDates as date}
