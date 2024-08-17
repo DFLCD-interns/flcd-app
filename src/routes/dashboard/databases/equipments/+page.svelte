@@ -26,6 +26,7 @@
   let DeleteModal = false;
   let AddModal = false;
   let editEquipment;
+  let editingRowIndex = -1;
   let eq; // for deleting equipment
 
   function formatDate(dateString) {
@@ -145,6 +146,24 @@
             loading = false;
         }
     }
+    const saveChanges = () => {
+        loading = true;
+        return async ({ result, update }) => {
+            switch (result.type) {
+                case 'success':
+                    toast.success("Changes saved successfully!");
+                    await update();
+                    break;
+                case 'failure':
+                    const errorMessage = result.data.message || 'Failed to save changes.';
+                    toast.error(errorMessage);
+                    break;
+                default:
+                    await update();
+            }
+            loading = false;
+        }
+    }
   
 </script>
   
@@ -199,8 +218,14 @@
           <TableBodyCell>{equipment.notes}</TableBodyCell>
           <TableBodyCell>{formatDate(equipment.date_registered).toString()}</TableBodyCell>
           <TableBodyCell>
-            <button on:click={() => {EditModal = true; editEquipment = equipment}}><EditOutline class="text-green-700 mr-2"/></button>
-            <button on:click={() => {DeleteModal = true; eq = equipment}}><TrashBinOutline class="text-red-700"/></button>
+            {#if editingRowIndex === equipment.index}
+              <form method="POST" action="?/editEquipment" use:enhance={saveChanges}>
+                <input type="hidden" name="id" value={equipment.id}/>
+              </form>
+            {:else}
+              <button on:click={() => {editingRowIndex = equipment.id}}><EditOutline class="text-green-700 mr-2"/></button>
+              <button on:click={() => {DeleteModal = true; eq = equipment}}><TrashBinOutline class="text-red-700"/></button>
+            {/if}
           </TableBodyCell>
         </TableBodyRow>
         {/each}
