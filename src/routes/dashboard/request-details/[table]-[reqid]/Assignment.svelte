@@ -1,13 +1,14 @@
 <script>
-    import { Button, Dropdown, DropdownDivider, DropdownItem } from 'flowbite-svelte';
+    import { A, Button, Dropdown, DropdownDivider, DropdownItem } from 'flowbite-svelte';
     import { ChevronDownOutline, ChevronRightOutline } from 'flowbite-svelte-icons';
-    import { postgresTimeToReadable } from '$lib';
+    import { postgresTimeToReadable, postgresTimeToTimeslot } from '$lib';
+    import { format } from 'date-fns';
 
     export let data;
     export let form;
     
     let hoveredItem, dropDownsStates, dropDownDataStates;
-    let getRequestRows, getDisplayName, dropdownItems, getAssignedItemID, mustDisplayDropdown, getAssignedItemIdx;
+    let getRequestRows, getDisplayName, dropdownItems, getAssignedItemID, mustDisplayDropdown, getReservedDates;
     if (data.requestType === 'equipment') {
         getDisplayName = (item) => item[0];
         getRequestRows = (item) => data?.requestRows?.filter(row => row.equipment_type == getDisplayName(item)) || [];
@@ -16,6 +17,11 @@
         mustDisplayDropdown = (dropDownItem, item) => dropDownItem.type === getDisplayName(item);
         dropDownsStates = Object.entries(data.requestRows).map(item => getRequestRows(item)?.map(() => false));
         dropDownDataStates = Object.entries(data.requestRows).map(item => getRequestRows(item)?.map(() => false));
+        
+        const reservedDates = data.equipmentsStatuses;
+        getReservedDates = (item) => reservedDates.map(
+            row => (row.equip_id == item.id) && (row.promised_end_time > new Date()) ? 
+            [row.promised_start_time, row.promised_end_time] : null).filter(notnull => notnull);
     }
     else if (data.requestType === 'venue') {
         getDisplayName = (item) => item[1];
@@ -25,6 +31,13 @@
         mustDisplayDropdown = (dropDownItem, item) => true;
         dropDownsStates = Object.entries(data.requestRows).map(item => getRequestRows(item)?.map(() => false));
         dropDownDataStates = Object.entries(data.requestRows).map(item => getRequestRows(item)?.map(() => false));
+        
+        const reservedDates = data.venuesStatuses.map((row) => 
+            [row.venue_id, new Date(format(row.date, 'yyyy-MM-dd') + 'T' + row.start), new Date(format(row.date, 'yyyy-MM-dd') + 'T' + row.end)])
+
+        getReservedDates = (item) => reservedDates.map(
+            row => (row[0] == item.id) && (row[2] > new Date()) ? 
+            [row[1], row[2]] : null).filter(notnull => notnull);
     }
     else {
         getAssignedItemID = () => data.requestRows[0].assigned_child_id;
@@ -32,13 +45,22 @@
         dropdownItems = data.childs;
         dropDownsStates = false;
         dropDownDataStates = false;
+
+        const reservedDates = data.childsStatuses.map((row) => {
+            const desiredDate = new Date(format(row.date, 'yyyy-MM-dd'));
+            const period = row.timeslot.split('-');
+            const desiredStartDate = new Date(desiredDate.setHours(period[0]));
+            const desiredEndDate = new Date(desiredDate.setHours(period[1]));
+            return [row.child_id, desiredStartDate, desiredEndDate]
+        })
+        getReservedDates = (item) => reservedDates.map(
+            row => (row[0] == item.id) && (row[2] > new Date()) ? 
+            [row[1], row[2]] : null).filter(notnull => notnull);
     }
-    console.log(data.requestDetails);
 </script>
 
 {#if data.requestType !== 'class'}
     {#each Object.entries(data.requestedItems) as item, index1}
-    {@debug item}
         <p class="mb-0.5"> • {getDisplayName(item) || `(declined ${data.requestType}s)`}</p>
         {#each getRequestRows(item) as requestRow, index2}
             {#if requestRow?.equipment_type != 'For Printing Only'}
@@ -54,7 +76,7 @@
                             {#if mustDisplayDropdown(dropDownItem, item) }
                                 <DropdownItem 
                                     class="flex items-center" 
-                                    on:mouseenter={() => hoveredItem = dropDownItem.id ?? -1}
+                                    on:mouseenter={() => hoveredItem = dropDownItem.id ?? null}
                                     on:mouseleave={() => hoveredItem = null}
                                     on:click={() => { 
                                         dropDownsStates[index1][index2] = false; 
@@ -71,17 +93,28 @@
                                     <ChevronRightOutline class="{dropDownItem.id ? '' : 'hidden'}"/>
                                 </DropdownItem>
                                 {#if dropDownItem.id === null}<DropdownDivider />{/if}
-                                {#if hoveredItem === dropDownItem.id}
+                                {#if hoveredItem && hoveredItem === dropDownItem.id}
                                     <Dropdown placement="right-start" class="w-80" open>
                                         {#if data.requestType === 'equipment'}
-                                            <DropdownItem> Current Status: {dropDownItem?.status?.charAt(0).toUpperCase() + dropDownItem?.status?.slice(1)} </DropdownItem>
-                                            <DropdownItem> Location: {dropDownItem?.location || '-'} </DropdownItem>
-                                            <DropdownItem> Description: {dropDownItem?.notes || '-'} </DropdownItem>
-                                            <DropdownItem slot="footer"> Reserved Dates: {'-'} </DropdownItem>
+                                            {@const _reservedDates = getReservedDates(dropDownItem) || []} 
+                                            <DropdownItem> Current Status: {(dropDownItem?.status?.charAt(0).toUpperCase() + dropDownItem?.status?.slice(1)) || '???'} </DropdownItem>
+                                            <DropdownItem> Location: {dropDownItem?.location || 'Not specified'} </DropdownItem>
+                                            <DropdownItem class="border-b border-blue-gray-200"> Description: {dropDownItem?.notes || 'None'} </DropdownItem>
+                                            <DropdownItem> 
+                                                <p class="mb-2">Reserved Dates: {_reservedDates.length > 0 ? '' : 'None'}</p>
+                                                {#each _reservedDates as date}
+                                                    <p> {'• ' + postgresTimeToTimeslot(date)}</p>
+                                                {/each}
+                                            </DropdownItem>
                                         {:else if data.requestType === 'venue'}
-                                            <DropdownItem> Current Status: {'-'} </DropdownItem>
-                                            <DropdownItem> Description: {dropDownItem?.description || '-'} </DropdownItem>
-                                            <DropdownItem slot="footer"> Reserved Dates: {'-'} </DropdownItem>
+                                            {@const _reservedDates = getReservedDates(dropDownItem) || []} 
+                                            <DropdownItem class="border-b border-blue-gray-200"> Description: {dropDownItem?.description || 'None'} </DropdownItem>
+                                            <DropdownItem> 
+                                                <p class="mb-2">Reserved Dates: {_reservedDates.length > 0 ? '' : 'None'}</p>
+                                                {#each _reservedDates as date}
+                                                    <p> {'• ' + postgresTimeToTimeslot(date)}</p>
+                                                {/each}
+                                            </DropdownItem>
                                         {/if}
                                     </Dropdown>    
                                 {/if}
@@ -104,13 +137,12 @@
         {#each [{id: 'null', name:"No available child"}].concat(dropdownItems) as dropDownItem, index}
             <DropdownItem 
                 class="flex items-center" 
-                on:mouseenter={() => hoveredItem = dropDownItem.id ?? -1}
+                on:mouseenter={() => hoveredItem = dropDownItem.id ?? null}
                 on:mouseleave={() => hoveredItem = null}
                 on:click={() => { 
                     dropDownsStates = false; 
                     if ((dropDownItem.id == 'null' ? null : dropDownItem.id) !== getAssignedItemID()) {
                         dropDownDataStates = true;
-                        console.log(dropDownItem)
                         data.requestRows.forEach((_,_i) => form.querySelector(`input[name="${data.requestType}_id_${data.requestRows[_i].req_id}"]`).value = dropDownItem.id)
                     } 
                     else { 
@@ -121,13 +153,18 @@
                 {dropDownItem.name}
                 <ChevronRightOutline class="{dropDownItem.id !== 'null' ? '' : 'hidden'}"/>
             </DropdownItem>
-            {#if dropDownItem.id !== 'null'  }<DropdownDivider />{/if}
-            {#if hoveredItem === dropDownItem.id}
+            {#if dropDownItem.id == 'null' }<DropdownDivider />{/if}
+            {#if hoveredItem && hoveredItem === dropDownItem.id}
                 <Dropdown placement="right-start" class="w-80" open>
-                    <DropdownItem> Birth Date: { postgresTimeToReadable(dropDownItem?.birthdate, 'MMMM d, yyyy') || '-'} </DropdownItem>
-                    <DropdownItem> Tracking ID: {dropDownItem?.tracking_id || '-'} </DropdownItem>
-                    <DropdownItem> Class ID: {dropDownItem?.class_id || '-'} </DropdownItem>
-                    <DropdownItem slot="footer"> Reserved Dates: {'-'} </DropdownItem>
+                    {@const _reservedDates = getReservedDates(dropDownItem) || []} 
+                    <DropdownItem> Class: {dropDownItem?.class_id || 'None'} </DropdownItem>
+                    <DropdownItem class="border-b border-blue-gray-200"> Birth Date: { postgresTimeToReadable(dropDownItem?.birthdate, 'MMMM d, yyyy') || 'None'} </DropdownItem>
+                    <DropdownItem> 
+                        <p class="mb-2">Reserved Dates: {_reservedDates.length > 0 ? '' : 'None'}</p>
+                        {#each _reservedDates as date}
+                            <p> {'• ' + postgresTimeToTimeslot(date)}</p>
+                        {/each}
+                    </DropdownItem>
                 </Dropdown>    
             {/if}
         {/each}

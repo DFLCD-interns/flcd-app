@@ -75,7 +75,6 @@ export const actions = {
             const type = [...inputFormData.keys()][0]?.split('_')[0];
             
             let response2 = {success: true}; 
-            console.log('owo', assignedItemIDs)
             for (let i = 0; i < assignedItemIDs.length; i++) {
                 if (!assignedItemIDs[i]) continue;
 
@@ -91,7 +90,7 @@ export const actions = {
             // emailing
             await mailuser(
                 `[FLCD APP] New response to your request`,
-                `Hi, your request (ID #${params.reqid}) has a new response - ${status}. '${remarks}' - by [user with ID ${approverID}]. Kindly check the web app for the exact status of your request.`,
+                `Hi, your request has a new response - ${status}. '${remarks}'. Kindly check the web app for the exact status of your request.`,
                 `legara.cedric@gmail.com`) //TODO placeholder, change to student id
 
             return {success: response?.success && response2?.success}; 

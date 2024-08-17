@@ -112,6 +112,49 @@ export async function getEquipmentDB() {
   return result.body.result.rows;
 }
 
+export async function getEquipmentsStatusesDB() {
+  const result = await query(`
+    SELECT 
+      equipments.id AS equip_id,
+      equipment_requests.id AS subreq_id,
+      equipment_requests.request_id AS req_id,
+      equipment_requests.promised_start_time AS promised_start_time,
+      equipment_requests.promised_end_time AS promised_end_time
+    FROM equipments 
+    JOIN equipment_requests ON equipments.id = equipment_requests.equipment_id
+    GROUP BY promised_start_time, equip_id, subreq_id`);
+  return result.body.result.rows;
+}
+
+export async function getVenuesStatusesDB() {
+  const result = await query(`
+    SELECT 
+      venues.id AS venue_id,
+      venue_requests.id AS subreq_id,
+      venue_requests.request_id AS req_id,
+      venue_requests.date_needed AS date,
+      venue_requests.start_time AS start,
+      venue_requests.end_time AS end
+    FROM venues 
+    JOIN venue_requests ON venues.id = venue_requests.venue_id
+    GROUP BY date, start, venue_requests.end_time, venues.id, subreq_id`);
+  return result.body.result.rows;
+}
+
+export async function getChildsStatusesDB() {
+  const result = await query(`
+    SELECT 
+      childs.id AS child_id,
+      class_requests.id AS subreq_id,
+      class_requests.request_id AS req_id,
+      class_requests.observe_date AS date,
+      class_requests.timeslot AS timeslot
+    FROM childs 
+    JOIN class_requests ON childs.id = class_requests.assigned_child_id
+    GROUP BY date, timeslot, childs.id, subreq_id`);
+  return result.body.result.rows;
+}
+
 export async function getUsersListDB() {
   const result = await query(`SELECT 
     id,
@@ -350,18 +393,14 @@ export async function getClassRequestsDB() {
 }
 
 export async function getAllClassesDB() {
-  const res = await query(`SELECT 
+  const res = await query(`SELECT
     batches.id AS batch_id,
     batches.name AS batch_name,
-    batches.description AS batch_description,
-    batches.created AS batch_created,
     classes.id AS class_id,
     classes.name AS class_name,
     users.first_name AS handler_firstname,
     users.last_name AS handler_lastname,
-    classes.description AS class_description,
     classes.schedule,
-    classes.created AS classes_created,
     childs.name AS child_name,
     childs.birthdate AS child_birthdate,
     childs.tracking_id AS child_trackingid,

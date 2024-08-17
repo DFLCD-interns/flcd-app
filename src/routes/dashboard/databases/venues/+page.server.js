@@ -1,10 +1,10 @@
-import { insertIntoTableDB } from '$lib/server/db';
+import * as db from '$lib/server/db.js';
 
 export const actions = {
-    createEquipment: async ({cookies, request}) => {
+    addVenue: async ({request}) => {
         try {
             const data = await request.formData();
-            const response = await insertIntoTableDB("equipments", data);
+            const response = await db.insertIntoTableDB("venues", data);
             return {success: response.success}; 
         } catch (error) {   
             console.error("Action failed:", error.message);

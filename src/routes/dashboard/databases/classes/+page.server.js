@@ -12,9 +12,10 @@ export async function load() {
 
 export const actions = {
     createBatch: async ({cookies, request}) => {
+        console.log('hi')
         try {
             const data = await request.formData();
-            const response = await insertIntoTableDB("batches", data);
+            const response = await db.insertIntoTableDB("batches", data);
             return {success: response.success}; 
         } catch (error) {   
             console.error("Action failed:", error.message);
@@ -24,7 +25,17 @@ export const actions = {
     createClass: async ({cookies, request}) => {
         try {
             const data = await request.formData();
-            const response = await insertIntoTableDB("classes", data);
+            const response = await db.insertIntoTableDB("classes", data);
+            return {success: response.success}; 
+        } catch (error) {   
+            console.error("Action failed:", error.message);
+            return {success: response.success}; 
+        }
+    },
+    addChild: async ({cookies, request}) => {
+        try {
+            const data = await request.formData();
+            const response = await db.insertIntoTableDB("childs", data);
             return {success: response.success}; 
         } catch (error) {   
             console.error("Action failed:", error.message);
