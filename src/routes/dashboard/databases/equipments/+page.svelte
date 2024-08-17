@@ -3,48 +3,48 @@
 	export let data;
 
   import { MultiSelect, Select, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Search, Button, Input, Modal, Label, GradientButton } from 'flowbite-svelte';
-  import { DownloadSolid, FilterSolid, EditOutline, TrashBinOutline, SearchOutline, CirclePlusSolid, ChevronSortOutline } from 'flowbite-svelte-icons';
+  import { CheckOutline, CloseOutline, DownloadSolid, FilterSolid, EditOutline, TrashBinOutline, CirclePlusSolid, ChevronSortOutline } from 'flowbite-svelte-icons';
   import { downloadCSV } from '../downloadcsv';
   import { enhance } from '$app/forms';
   import toast from 'svelte-french-toast';
 
+  let access_level=data.current_user.access_level;
   let equipmentTypes = data.equipmentTypes;
   let equipments = data.equipments;
+
   let tableHead = []
   if (equipments != null){
     tableHead = Object.keys(equipments[0]);
+  }
+  const headerNames = {
+    name: 'Name',
+    type: 'Type',
+    location: 'Location',
+    status: 'Status',
+    notes: 'Notes',
+    date_registered: 'Date Registered'
   }
   
   equipmentTypes = equipmentTypes.map((item) => ({ ...item, value: item.type, name: item.type }));
   equipmentTypes.push({type: 'Other...', value: 'other', name: 'Other...'});
   let addedEquipmentType = "";
   $: isOther = addedEquipmentType == "other";
-  
-  let access_level=data.current_user.access_level;
 
-  let EditModal = false;
   let DeleteModal = false;
   let AddModal = false;
   let editEquipment;
   let editingRowIndex = -1;
-  let eq; // for deleting equipment
+  let eq; // deleteEquipment
 
   function formatDate(dateString) {
     const date = new Date(dateString);
-
-    // Get individual date components
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
     const day = String(date.getDate()).padStart(2, '0');
     const year = String(date.getFullYear()).slice(-2); // Get last two digits of the year
-
-    // Get time components
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-
-    // Format date and time according to the desired format
     return `${month}/${day}/${year}  ${hours}:${minutes}`;
   }
-  
   equipments.forEach(item => {
     item.dateString = formatDate(item.date_registered)
   });
@@ -57,9 +57,10 @@
   }));
 
   let selectedStatus = [];
-  let status = [
+  const status = [
     { value: 'available', name: 'available' }, 
-    { value: 'unavailable', name: 'unavailable' },
+    { value: 'in use', name: 'in use' },
+    { value: 'in repair', name: 'in repair' },
   ]
 
   $: equipments = data.equipments
@@ -77,7 +78,6 @@
     );
 
       let sortDirection = 'asc'; // Default sort direction
-      let column='id';
       function handleSort(column) {
         equipments = equipments.sort((a, b) => {
         let aValue = a[column];
@@ -105,6 +105,11 @@
           }}
       });
       sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    }
+
+    function editRow(row) {
+      editEquipment = {...row};
+      editingRowIndex = row.id;
     }
 
     /*-- toast logic --*/
@@ -151,12 +156,17 @@
         return async ({ result, update }) => {
             switch (result.type) {
                 case 'success':
+                    editingRowIndex = -1;
                     toast.success("Changes saved successfully!");
                     await update();
                     break;
                 case 'failure':
                     const errorMessage = result.data.message || 'Failed to save changes.';
-                    toast.error(errorMessage);
+                    if (errorMessage === "No changes made.") {
+                      editingRowIndex = -1;
+                    } else {
+                      toast.error(errorMessage);
+                    }
                     break;
                 default:
                     await update();
@@ -164,7 +174,6 @@
             loading = false;
         }
     }
-  
 </script>
   
 <div class="p-4 md:p-10">
@@ -199,7 +208,7 @@
         {#if head != 'dateString' && head != 'id'} <!-- Exclude id from table headers -->
         <TableHeadCell>
           <button type='button' class="flex cursor-pointer" on:click={() => handleSort(head)}>
-            {head}
+            {headerNames[head] || head}
             <ChevronSortOutline size='sm'/>
           </button>
         </TableHeadCell>
@@ -210,23 +219,75 @@
       <TableBody tableBodyClass="divide-y">
         {#each equipments as equipment}
         <TableBodyRow>
-          <!-- Remove ID cell -->
-          <TableBodyCell>{equipment.name}</TableBodyCell>
-          <TableBodyCell>{equipment.type}</TableBodyCell>
-          <TableBodyCell>{equipment.location}</TableBodyCell>
-          <TableBodyCell>{equipment.status}</TableBodyCell>
-          <TableBodyCell>{equipment.notes}</TableBodyCell>
-          <TableBodyCell>{formatDate(equipment.date_registered).toString()}</TableBodyCell>
+
           <TableBodyCell>
-            {#if editingRowIndex === equipment.index}
+            {#if editingRowIndex === equipment.id}
+              <Input type="text" bind:value={editEquipment.name} />  
+            {:else}
+              {equipment.name}
+            {/if}
+          </TableBodyCell>
+
+          <TableBodyCell>
+            {#if editingRowIndex === equipment.id}
+              <Select
+                items={equipmentTypes}
+                bind:value={editEquipment.type}
+                disabled={loading}
+              />
+            {:else}
+              {equipment.type}
+            {/if}
+          </TableBodyCell>
+
+          <TableBodyCell>
+            {#if editingRowIndex === equipment.id}
+              <Input type="text" bind:value={editEquipment.location} />  
+            {:else}
+              {equipment.location}
+            {/if}
+          </TableBodyCell>
+
+          <TableBodyCell>
+            {#if editingRowIndex === equipment.id}
+              <Select
+                items={status}
+                bind:value={editEquipment.status}
+                disabled={loading}
+              />
+            {:else}
+              {equipment.status}
+            {/if}
+          </TableBodyCell>
+
+          <TableBodyCell>
+            {#if editingRowIndex === equipment.id}
+              <Input type="text" bind:value={editEquipment.notes} />  
+            {:else}
+              {equipment.notes}
+            {/if}
+          </TableBodyCell>
+
+          <TableBodyCell>{formatDate(equipment.date_registered).toString()}</TableBodyCell>
+
+          <TableBodyCell>
+            {#if editingRowIndex === equipment.id}
               <form method="POST" action="?/editEquipment" use:enhance={saveChanges}>
-                <input type="hidden" name="id" value={equipment.id}/>
+                <input type="hidden" name="id" value={editEquipment.id}/>
+                <input type="hidden" name="name" value={editEquipment.name}/> <input type="hidden" name="old_name" value={equipment.name}/>
+                <input type="hidden" name="type" value={editEquipment.type}/> <input type="hidden" name="old_type" value={equipment.type}/>
+                <input type="hidden" name="location" value={editEquipment.location}/> <input type="hidden" name="old_location" value={equipment.location}/>
+                <input type="hidden" name="status" value={editEquipment.status}/> <input type="hidden" name="old_status" value={equipment.status}/>
+                <input type="hidden" name="notes" value={editEquipment.notes}/> <input type="hidden" name="old_notes" value={equipment.notes}/>
+                <button type="submit" disabled={loading} class="mr-2"><CheckOutline class="text-green-600 mr-2"/></button>
+                <button on:click={() => {editingRowIndex = -1}} disabled={loading}><CloseOutline class="text-red-600"/></button>
               </form>
             {:else}
-              <button on:click={() => {editingRowIndex = equipment.id}}><EditOutline class="text-green-700 mr-2"/></button>
+              <button on:click={() => editRow(equipment)}><EditOutline class="text-green-700 mr-2"/></button>
               <button on:click={() => {DeleteModal = true; eq = equipment}}><TrashBinOutline class="text-red-700"/></button>
             {/if}
           </TableBodyCell>
+
         </TableBodyRow>
         {/each}
       </TableBody>
@@ -236,37 +297,6 @@
     {/if}
   </div>
 </div>
-
-<Modal title="Edit Equipment Details" bind:open={EditModal} autoclose>
-  <div class="mb-6">
-      <Label class="block mb-2">Name</Label>
-      <Input value={editEquipment.name} />
-  </div>
-  <div class="mb-6">
-      <Label class="block mb-2">Type</Label>
-      <Input value={editEquipment.type} />
-  </div>
-  <div class="mb-6">
-    <Label class="block mb-2">Location</Label>
-    <Input value={editEquipment.location} />
-  </div>
-  <div class="mb-6">
-    <Label class="block mb-2">Status</Label>
-    <Input value={editEquipment.status} />
-  </div>
-  <div class="mb-6">
-    <Label class="block mb-2">Notes</Label>
-    <Input value={editEquipment.notes} />
-  </div>
-  <div class="mb-6">
-    <Label class="block mb-2">Date Registered</Label>
-    <Input value={editEquipment.date_registered} onfocus="(this.type='date')" onblur="(this.type='text')"/>
-  </div>
-  <div class="mb-6 flex gap-5 justify-center">
-      <GradientButton color="green">Confirm</GradientButton>
-      <GradientButton color="green">Cancel</GradientButton>
-  </div>
-</Modal>
 
 <Modal size="xs" bind:open={DeleteModal} outsideclose>
   <div class="text-center">

@@ -142,8 +142,7 @@ CREATE TABLE equipments (
     date_registered TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
--- OPTIONAL
-INSERT INTO equipments (name, type, location, status)
+INSERT INTO equipments (name, type, location, status, notes)
 VALUES 
 ('Laminating Machine 1', 'Laminating Machine', 'Room XXX', 'available', ''),
 ('Laminating Machine 2', 'Laminating Machine', 'Room XXX', 'available', ''),
