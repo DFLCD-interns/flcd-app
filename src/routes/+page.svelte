@@ -111,7 +111,7 @@
                 </form>
                 <p class="mt-3 text-center text-sm text-gray-500 mb-3">
                     Don't have an account?
-                    <a href="/register/student" class="font-semibold leading-6 text-emerald-600 hover:text-emerald-500">Sign Up</a>
+                    <a href="/register" class="font-semibold leading-6 text-emerald-600 hover:text-emerald-500">Sign Up</a>
                 </p>
 
                 <div class="mt-5 grid grid-cols-3 items-center mb-5">

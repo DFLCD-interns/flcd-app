@@ -1,7 +1,7 @@
 <script>
     import { page } from '$app/stores'; // Import page store to get the current path
     export let data;
-    import { GridSolid } from "flowbite-svelte-icons";
+    import { GridSolid, ExclamationCircleOutline } from "flowbite-svelte-icons";
     let userData = {
         firstName: data?.current_user?.first_name,
         lastName: data?.current_user?.last_name,
@@ -10,6 +10,7 @@
     let dropdownVisible = false;
 
     $: currentPath = $page.url.pathname;
+    $: isUnverified = data?.current_user?.student_number == null;
 </script>
 
 <div class="h-screen flex flex-col justify-between">
@@ -35,9 +36,16 @@
                 <h5 class="text-lg font-semibold text-gray-600 leading-tight">
                     {userData.firstName} {userData.lastName}
                 </h5>
-                <span class="text-gray-400">{userData.userType}</span>
+                {#if isUnverified}
+                    <span class="text-gray-400">Unverified Faculty</span>
+                {:else}
+                    <span class="text-gray-400">{userData.userType}</span>
+                {/if}
             </div>
-        </div>        
+        </div>      
+        <p class="text-xs flex items-center mt-4"><ExclamationCircleOutline class="mr-2 text-orange-400 inline-block"/> 
+            Please wait for FLCD to verify your account before you get admin access.
+        </p>  
         
         <!-- Navigation Section -->
         <ul class="space-y-2 mt-8">

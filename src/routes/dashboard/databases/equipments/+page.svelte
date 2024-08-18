@@ -324,7 +324,7 @@
         name="name" 
         type="text" 
         id="name"
-        placeholder="Enter a descriptive name for the equipment." 
+        placeholder="Enter the model/brand or any descriptive name for the equipment." 
         disabled={loading}
         required
       />
@@ -348,7 +348,7 @@
                     disabled={!isOther}
                     type="text"
                     name="new_type"
-                    placeholder="Please make sure that the equipment type you want doesn't already exist."
+                    placeholder="Enter new equipment type."
                     required
                 />
             </Label>
