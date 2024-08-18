@@ -4,7 +4,7 @@
     import { onMount } from 'svelte';
     import { browser } from "$app/environment";
     import { Button, Card, GradientButton, Input, Label, MultiSelect, Select, Textarea, Tabs, TabItem, } from "flowbite-svelte";
-    import { BuildingSolid, ChevronLeftOutline, ComputerSpeakerSolid } from "flowbite-svelte-icons";
+    import { PrinterSolid, ChevronLeftOutline, ComputerSpeakerSolid } from "flowbite-svelte-icons";
     import { enhance } from '$app/forms';
 
     let equipmentTypes = data.equipmentTypes;
@@ -156,7 +156,7 @@
 
 
         <TabItem>
-            <span slot="title" class="flex gap-2"><BuildingSolid/>Venue</span>
+            <span slot="title" class="flex gap-2"><PrinterSolid/>Printing Only</span>
             <Card class="max-w-full">
                 <form class="flex flex-col space-y-6" action="?/submitVenueRequest" method="post"
                 use:enhance={() => {return async ({result}) => { alert(result.data?.body?.message); }}}>
