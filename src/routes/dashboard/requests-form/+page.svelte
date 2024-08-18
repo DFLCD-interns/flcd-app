@@ -4,7 +4,7 @@
     import { onMount } from 'svelte';
     import { browser } from "$app/environment";
     import { Button, Card, GradientButton, Input, Label, MultiSelect, Select, Textarea, Tabs, TabItem, } from "flowbite-svelte";
-    import { AddressBookOutline, ArrowLeftOutline, BuildingSolid, ChevronLeftOutline, ComputerSpeakerSolid, UserAddSolid, } from "flowbite-svelte-icons";
+    import { BuildingSolid, ChevronLeftOutline, ComputerSpeakerSolid } from "flowbite-svelte-icons";
     import { enhance } from '$app/forms';
 
     let equipmentTypes = data.equipmentTypes;

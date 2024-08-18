@@ -42,10 +42,12 @@
                     <span class="text-gray-400">{userData.userType}</span>
                 {/if}
             </div>
-        </div>      
-        <p class="text-xs flex items-center mt-4"><ExclamationCircleOutline class="mr-2 text-orange-400 inline-block"/> 
-            Please wait for FLCD to verify your account before you get admin access.
-        </p>  
+        </div>    
+        {#if isUnverified}  
+            <p class="text-xs flex items-center mt-4"><ExclamationCircleOutline class="mr-2 text-orange-400 inline-block"/> 
+                Please wait for FLCD to verify your account before you get admin access.
+            </p>  
+        {/if}
         
         <!-- Navigation Section -->
         <ul class="space-y-2 mt-8">
