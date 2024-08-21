@@ -7,7 +7,8 @@ export async function load() {
 		batches: await db.getAllClassesDB(),
         batches_only_table: await db.getBatchesDB(),
         classes_only_table: await db.getClassesDB(),
-        classes_batch_table: await db.getBatchesAndClassesDB()
+        classes_batch_table: await db.getBatchesAndClassesDB(),
+        users: await db.getUsersDB()
 	};
 }
 
