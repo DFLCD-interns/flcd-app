@@ -141,6 +141,7 @@ CREATE TABLE equipments (
     date_registered TIMESTAMP DEFAULT NOW() NOT NULL
 );
 
+-- PLACEHOLDER
 INSERT INTO equipments (name, type, location, status, notes)
 VALUES 
 ('Laminating Machine 1', 'Laminating Machine', 'Room XXX', 'available', ''),

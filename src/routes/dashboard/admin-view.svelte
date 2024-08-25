@@ -77,7 +77,7 @@
     
     pendingRequests = [];
     otherRequests = [];
-    displayRequests.forEach(req => {
+    displayRequests?.forEach(req => {
     if (req.status.includes(data.user_access_level_label)) 
       pendingRequests.push(req)
     else otherRequests.push(req);
