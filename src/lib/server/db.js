@@ -277,6 +277,7 @@ export async function insertIntoTableDB(table_name, formData) {
 }
 
 // Finds the table entry where all values from searchFormData matches with the corresponding attribute values
+// Now accepts DICTIONARIES!!!
 export async function getFromTableDB(table_name, searchFormData, limit = 100) {
   // sanitize input; error detection
   if (!table_names.includes(table_name)) {
@@ -286,11 +287,13 @@ export async function getFromTableDB(table_name, searchFormData, limit = 100) {
     throw new Error('Trying to get negative or non-Integer number of rows (possibly mistyped/malicious injection)', limit);
   }
 
-  let qText = ""
-  const attributes = [...searchFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection
-  const values = [...searchFormData.values()].map((val) => val); // will be for parametrization
-  values.forEach((val, i) => !val || val == 'undefined' || val == 'null' ? values[i] = 0 : ''); // sanitize
+  const isFormData = Object.getPrototypeOf(searchFormData).append != undefined;
 
+  let qText = ""
+  const attributes = (isFormData ? [...searchFormData.keys()] : Object.keys(searchFormData)).map((val) => val); // not user input hence not vulnerable to SQL Injection
+  const values = (isFormData ? [...searchFormData.values()] : Object.values(searchFormData)).map((val) => val); // will be for parametrization
+  values.forEach((val, i) => !val || val == 'undefined' || val == 'null' ? values[i] = 0 : ''); // sanitize
+ 
   const whereText = attributes.map((attributeName, index) => `(${attributeName} = \$${index + 1})`).join(' AND ') || '';
   if (table_name == 'user_types') {
     qText = `SELECT \* FROM ${table_name} WHERE (1 = 1) ${whereText ? 'AND ' + whereText : ''} ORDER BY (access_level) asc LIMIT \$${attributes.length + 1}`;
