@@ -1,4 +1,4 @@
-import { createObservationRequestServer } from "./requests.server"
+import { createObservationRequestServer } from "./requests.server.js"
 import {SESSION_COOKIE_NAME} from "$lib/server/constants.js"
 import { getSections, getUnavailable, getUnavailableWSection, getUserWithMatchingEmail} from "../../../lib/server/db.js";
 
@@ -59,7 +59,7 @@ export const actions = {
 }
 
 
-/** @type {import('./$types').PageServerLoad} */
+/** @type {import('./$types.js').PageServerLoad} */
 export async function load() {
     return{
         amclasses: await getSections('AM'),

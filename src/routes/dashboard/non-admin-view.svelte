@@ -64,7 +64,7 @@
           <div class="sm:absolute sm:left-0 sm:bottom-[-25px] mb-[-13px] ml-2 sm:mb-0">
             <img src="/3.png" alt="Description" class="object-cover" style="width: 9.5rem; height: 9.5rem;" />
           </div>
-          <GradientButton color="green" shadow href="/dashboard/observationform" class="sm:mt-16 mt-0 sm:mb-4 ml-auto w-fit align-self-end">
+          <GradientButton color="green" shadow href="/dashboard/observation-form" class="sm:mt-16 mt-0 sm:mb-4 ml-auto w-fit align-self-end">
             Book <ArrowRightOutline class="w-6 h-6 ms-2 text-white" />
           </GradientButton>
         </div>

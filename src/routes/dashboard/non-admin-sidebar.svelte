@@ -84,7 +84,7 @@
                         </li>
                         {#if userData.userType != "Guest"}
                         <li>
-                            <a href="/dashboard/observationform" class="flex items-center w-full p-2 text-gray-600 hover:bg-gray-100 rounded-lg pl-12 group">
+                            <a href="/dashboard/observation-form" class="flex items-center w-full p-2 text-gray-600 hover:bg-gray-100 rounded-lg pl-12 group">
                                 Observation
                             </a>
                         </li>
