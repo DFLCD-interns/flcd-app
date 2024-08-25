@@ -1,5 +1,6 @@
 <script>
   export let data;
+  export let form;
   import { Card, GradientButton } from 'flowbite-svelte';
   import { ArrowRightOutline, UndoOutline } from 'flowbite-svelte-icons';
   import RequestsCard from './requests-card.svelte';
@@ -90,9 +91,9 @@
     {#if (viewingPendingReqs ? pendingRequests : finishedRequests).length > 0 && data.requestsInfo != undefined}
       <div class="space-y-3">
         {#if viewingPendingReqs} {#each pendingRequests as info}
-            <RequestsCard info={info} data={data}></RequestsCard>
+            <RequestsCard info={info} data={data} form={form}></RequestsCard>
         {/each} {:else} {#each finishedRequests as info}
-            <RequestsCard info={info} data={data}></RequestsCard>
+            <RequestsCard info={info} data={data} form={form}></RequestsCard>
         {/each} {/if}
       </div>
     {:else}

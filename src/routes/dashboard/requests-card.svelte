@@ -5,9 +5,8 @@
   import { statusColors, postgresTimeToReadable } from '$lib';
   export let info;
   export let data;
-  export let form;
+  export let form; // only used for non-admin (to delete own request)
   const isAdmin = data?.current_user?.access_level < 5; 
-  
 
 </script> 
 
@@ -24,16 +23,16 @@
         View
       </GradientButton>
       {#if !isAdmin}
-      <form bind:this={form} action="?/deleteRequest" method="POST">
-        <input hidden="true" id="request_table_name" name="request_table_name" />
-        <input hidden="true" id="request_id" name="request_id" />
-        <GradientButton color="red" type="submit" on:click={() => {
-              form.querySelector(`input[id="request_table_name"]`).value = info.table;
-              form.querySelector(`input[id="request_id"]`).value = info.id;
-            }} >
-          Delete
-        </GradientButton>
-      </form>
+        <form bind:this={form} action="?/deleteRequest" method="POST">
+          <input hidden="true" id="request_table_name" name="request_table_name" />
+          <input hidden="true" id="request_id" name="request_id" />
+          <GradientButton color="red" type="submit" on:click={() => {
+                form.querySelector(`input[id="request_table_name"]`).value = info.table;
+                form.querySelector(`input[id="request_id"]`).value = info.id;
+              }} >
+            Delete
+          </GradientButton>
+        </form>
       {/if}
     </div>
   </div>

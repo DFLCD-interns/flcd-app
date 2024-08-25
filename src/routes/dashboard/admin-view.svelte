@@ -1,6 +1,7 @@
 <script>
   /** @type {import('./$types').PageData} */
 	export let data;
+	export let form;
   import { Search, MultiSelect, Select} from 'flowbite-svelte';
   import { FilterSolid, UndoOutline } from 'flowbite-svelte-icons';
   import RequestsCard from './requests-card.svelte';
@@ -117,9 +118,9 @@
   {#if (viewingPendingReqs ? pendingRequests : otherRequests).length != 0 && data.requestsInfo != undefined}
     <div class="space-y-3">
       {#if viewingPendingReqs} {#each pendingRequests as info}
-          <RequestsCard info={info} data={data}></RequestsCard>
+          <RequestsCard info={info} data={data} form={form}></RequestsCard>
       {/each} {:else} {#each otherRequests as info}
-          <RequestsCard info={info} data={data}></RequestsCard>
+          <RequestsCard info={info} data={data} form={form}></RequestsCard>
       {/each} {/if}
     </div>
   {:else}
