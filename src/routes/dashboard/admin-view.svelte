@@ -24,8 +24,8 @@
   // Filter out all requests that are not for this user to see (invisible)
   let availableRequests = data.requestsInfo.filter(req => {
     const idIdx = req.approvalsInfo.userIDs.findIndex(id => data.current_user.access_level === 3 ? id == null : id === data.current_user.user_id );
-    const approvedIdx = req.approvalsInfo.statuses.findIndex(status => status === 'approved');
-    return idIdx <= (approvedIdx+1); // the only ones who can see are the pendng-approver and past-approver
+    const approvedIdx = req.approvalsInfo.statuses.findLastIndex(status => status === 'approved');
+    return idIdx <= (approvedIdx+1); // the only ones who can see are the pending-approver and past-approver
   });
   // console.log(data.requestsInfo)
   // console.log(allRequests)
