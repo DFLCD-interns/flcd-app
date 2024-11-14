@@ -92,12 +92,7 @@
                         </li>
                         {#if userData.userType != "Guest"}
                         <li>
-<<<<<<< HEAD
-                            <a href="/dashboard/observationform" class="flex items-center w-full p-2 text-gray-600 hover:bg-gray-100 rounded-lg pl-12 group
-                            {currentPath === '/dashboard/observationform' ? 'bg-gray-100 text-gray-600' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-600'}">
-=======
                             <a href="/dashboard/observation-form" class="flex items-center w-full p-2 text-gray-600 hover:bg-gray-100 rounded-lg pl-12 group">
->>>>>>> f6fbe65eccff6610e657973fb1edf77574e704a9
                                 Observation
                             </a>
                         </li>

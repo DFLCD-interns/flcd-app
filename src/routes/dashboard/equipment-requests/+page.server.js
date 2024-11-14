@@ -122,7 +122,7 @@ export const actions = {
         }
     },
     
-    submitVenueRequest: async ({ request, cookies }) => {
+    submitPrintingRequest: async ({ request, cookies }) => {
         const session = cookies.get("session_id");
         const user = await getUserFromSessionDB(session);
         const data = await request.formData();
@@ -130,8 +130,9 @@ export const actions = {
         const isFLCD = user?.access_level === 5;
 
         let instructor;
+        let instructorEmail;
         if (isFLCD) {
-            let instructorEmail = data.get('instructor_email');
+            instructorEmail = data.get('instructor_email');
             if (!instructorEmail.endsWith('@up.edu.ph')) {
                 instructorEmail = `${instructorEmail}@up.edu.ph`;
             }
@@ -152,27 +153,26 @@ export const actions = {
         try {
             const request_id = await insertBaseRequest(user, data, isFLCD, instructor);
             const fic = await getUsersWithAccessLevel(2);
-            const chair = await getUsersWithAccessLevel(1);
-            await insertApprovals(request_id, instructor, staff[0], fic[0], chair[0]);
+            await insertApprovals(request_id, instructor, staff[0], fic[0]);
 
-            // Insert venue request
-            const selectedVenue = data.getAll('selectedVenue');
-
-            for (let venueID of selectedVenue) {
-                const fd = {
-                    date_needed: data.get('date_needed'),
-                    start_time: data.get('start_time'),
-                    end_time: data.get('end_time'),
-                    venue_id: parseInt(venueID),
-                    request_id,
-                };
-                const form_data = new FormData();
-                for (let key in fd) {
-                    form_data.append(key, fd[key]);
-                }
-                await insertIntoTableDB('venue_requests', form_data);
-            }
+            // Insert equipment requests
+            const promised_start_time = data.get('promised_start_time');
             
+            const fd = {
+                promised_start_time,
+                equipment_type: 'Printing Only',
+                request_id,
+            };
+
+            const form_data = new FormData();
+            for (let key in fd) {
+                form_data.append(key, fd[key]);
+            }
+            await insertIntoTableDB('equipment_requests', form_data);
+
+            // const mailRes = await mailRequesterOnResponse(user.user_id, undefined); 
+            // console.log(mailRes);
+
             return {
                 status: 200,
                 body: {
@@ -181,11 +181,13 @@ export const actions = {
                 }
             };
         } catch (error) {
+            console.error('meow')
+            console.error(error.message)
             return {
                 status: 500,
                 body: {
                     message: error.message,
-                    error: error.message,
+                    error: error.message
                 }
             };
         }

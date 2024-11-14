@@ -8,9 +8,7 @@
     import { enhance } from '$app/forms';
 
     let equipmentTypes = data.equipmentTypes;
-    let venues = data.venues;
     let selectedEq = [];
-    let selectedVenue = [];
     let promised_start_time = "";
     let promised_end_time = "";
 
@@ -27,7 +25,6 @@
 
     // Add a 'value' & 'name' property to each object in the array (for Svelte each behavior)
     equipmentTypes = equipmentTypes.map((item) => ({ ...item, value: item.type, name: item.type }));
-    venues = venues.map((item) => ({ ...item, value: item.id, name: item.name }));
 
     // Function to ensure promised_end_time is always after promised_start_time
     $: promised_end_time_min = promised_start_time || currentDateTime;
@@ -158,40 +155,28 @@
         <TabItem>
             <span slot="title" class="flex gap-2"><PrinterSolid/>Printing Only</span>
             <Card class="max-w-full">
-                <form class="flex flex-col space-y-6" action="?/submitVenueRequest" method="post"
+                <form class="flex flex-col space-y-6" action="?/submitPrintingRequest" method="post"
                 use:enhance={() => {return async ({result}) => { alert(result.data?.body?.message); }}}>
-                    <h3 class="text-xl font-medium text-gray-900 dark:text-white">Venue Reservation</h3>
-                    <hr />
                     <div>
-                        <Label class="space-y-2">
-                            <span>Room/Area Requesting</span>
-                            <MultiSelect
-                            tabindex=0
-                                name="selectedVenue"
-                                class="mt-2"
-                                items={venues}
-                                bind:value={selectedVenue}
-                                required
-                            />
-                        </Label>
+                        <h3 class="text-xl font-medium text-gray-900 dark:text-white">Printing Only</h3>
+                        <h5 class="text-sm mt-1">available only for FLCD students</h5>
                     </div>
                     <hr />
+                    <Label class="space-y-2">
+                        <span>Purpose</span>
+                        <Input disabled={!isFLCD} type="text" name="purpose" required />
+                    </Label>
                     <div class="grid gap-6 mb-6 md:grid-cols-2">
                         <Label class="space-y-2">
-                            <span>Purpose/Activity</span>
-                            <Input type="text" name="purpose" required />
-                        </Label>
-                        <Label class="space-y-2">
-                            <span>Use Date</span>
-                            <Input type="date" name="date_needed" min={minDate} required />
-                        </Label>
-                        <Label class="space-y-2">
-                            <span>Activity Start Time</span>
-                            <Input type="time" name="start_time" required />
-                        </Label>
-                        <Label class="space-y-2">
-                            <span>Activity End Time</span>
-                            <Input type="time" name="end_time" required />
+                            <span>Printing Date & Time</span>
+                            <Input
+                                disabled={!isFLCD}
+                                type="datetime-local"
+                                name="promised_start_time"
+                                bind:value={promised_start_time}
+                                min={currentDateTime}
+                                required
+                            />
                         </Label>
                         <Label class="space-y-2">
                             <span>Email of Coordinating FLCD Teacher</span>
@@ -204,14 +189,6 @@
                                 />
                                 <span class="input-desc">@up.edu.ph</span>
                             </div>
-                        </Label>
-                        <Label class="space-y-2">
-                            <span>Affiliation (for non-FLCD students)</span>
-                            <Input 
-                                disabled={isFLCD}
-                                type="text" 
-                                name="affiliation" 
-                                required />
                         </Label>
                     </div>
                     <GradientButton shadow color="green" type="submit" style="margin-top: 40px; margin-bottom: 20px; padding: 13px;">
