@@ -1,6 +1,7 @@
 <script>
     /** @type {import('./$types').PageData} */
 	export let data;
+	export let form;
 
     import AdminView from "./admin-view.svelte";
     import NonAdminView from "./non-admin-view.svelte";
@@ -28,8 +29,8 @@
 </script>
 
 {#if isAdmin}
-    <AdminView {data}></AdminView>
+    <AdminView {data} {form}></AdminView>
 {:else} 
-    <NonAdminView {data}></NonAdminView>
+    <NonAdminView {data} {form}></NonAdminView>
 {/if}
 

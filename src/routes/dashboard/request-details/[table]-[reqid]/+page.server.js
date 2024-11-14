@@ -1,5 +1,5 @@
 import { getFromTableDB, updateTableDB, deleteRequest, deleteFromTableDB, getRequestDetailsDB, getUserFromSessionDB } from '$lib/server/db'; 
-import { mailuser } from '$lib/server/emails.js';
+import { mailRequesterOnResponse } from '$lib/server/emails.js';
 
 /** @type {import('./$types.js').LayoutServerLoad} */
 export const load = async ( {cookies, params, parent} ) => {
@@ -64,16 +64,16 @@ export const actions = {
             const response = await updateTableDB("approvals", searchFormData, updateFormData);
 
             // Updating assigned ids
-            
-            const status = inputFormData.get('status')
+            // const status = inputFormData.get('status')
             const remarks = inputFormData.get('remarks')
-            const approverID = searchFormData.get('approver_id')
+            // const approverID = searchFormData.get('approver_id')
             inputFormData.delete('remarks');
             inputFormData.delete('status');
             const assignedItemIDs = [...inputFormData.values()];
             const itemReqIDs = [...inputFormData.keys()].map(key => key.split('_')[2]);
             const type = [...inputFormData.keys()][0]?.split('_')[0];
             
+            // assigning item ids
             let response2 = {success: true}; 
             for (let i = 0; i < assignedItemIDs.length; i++) {
                 if (!assignedItemIDs[i]) continue;
@@ -88,15 +88,57 @@ export const actions = {
             }
            
             // emailing
-            await mailuser(
-                `[FLCD APP] New response to your request`,
-                `Hi, your request has a new response - ${status}. '${remarks}'. Kindly check the web app for the exact status of your request.`,
-                `legara.cedric@gmail.com`) //TODO placeholder, change to student id
 
-            return {success: response?.success && response2?.success}; 
+            const requesterID = (await getFromTableDB("base_requests", {'id': params.reqid})).body.result.rows[0]?.requester_id;
+            const requester = (await getFromTableDB("users", {'id': requesterID})).body.result.rows[0];
+            const requesterName = requester.first_name + ' ' + requester.last_name;
+            const requesterEmail = requester.email;
+
+            const requestName = type == 'class' ? 'observation' : type;
+            const approverName = user.first_name + ' ' + user.last_name;            
+            
+            const statuses = [];
+            const _approversIDs = [];
+            (await getFromTableDB("approvals", {'request_id' : params.reqid})).body.result.rows?.forEach(row => {
+                statuses.push(row.status)
+                _approversIDs.push(row.approver_id)
+            })
+
+            const approversEmails = [];
+            for (const _id of _approversIDs) {
+                approversEmails.push((await getFromTableDB("users", {'id': _id})).body.result.rows[0]?.email)
+            }
+            
+            const _assignedItemsID = (await getFromTableDB(`${type}_requests`, {'request_id': params.reqid})).body.result.rows.map(row => row.equipment_id || row.venue_id || row.assigned_child_id);
+            const _table_name = type == 'class' ? 'childs' : type + 's';
+            const assignedItems = [];
+            for (const _id of _assignedItemsID) {
+                if (type == 'class' && assignedItems[0]) break; // only 1 for class request
+                const _item = (await getFromTableDB(_table_name, {'id': _id})).body.result.rows[0];
+                assignedItems.push(_item?.name)
+            }
+
+            // console.log(requesterID)
+            // console.log(requester)
+            // console.log(requesterName)
+            // console.log(requesterEmail)
+            // console.log(requestName)
+            // console.log(approverName)
+            // console.log(statuses)
+            // console.log(_approversIDs)
+            // console.log(approversEmails)
+            // console.log(_assignedItemsID)
+            // console.log(_table_name)
+            // console.log(assignedItems)
+
+            // requesterName, requestName, approverName, remarks, statuses, approversEmails, assignedItems, requesterEmail
+            const mailRes = await mailRequesterOnResponse(requesterName, requestName, approverName, remarks, statuses, approversEmails, assignedItems, requesterEmail);
+            // const mailRes = await mailRequesterOnResponse(_requesterDetails, _requestDetails, _approverDetails); // plan to refactor
+
+            return {success: response?.success && response2?.success, mail_success: mailRes.ok || false}; 
         } catch (error) {   
             console.error("Action failed:", error.message);
-            return {success: response?.success && response2?.success}; 
+            return {success: response?.success && response2?.success, mail_success: false}; 
         }
     }
 }

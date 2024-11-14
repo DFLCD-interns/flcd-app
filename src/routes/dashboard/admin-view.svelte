@@ -1,6 +1,7 @@
 <script>
   /** @type {import('./$types').PageData} */
 	export let data;
+	export let form;
   import { Search, MultiSelect, Select} from 'flowbite-svelte';
   import { FilterSolid, UndoOutline } from 'flowbite-svelte-icons';
   import RequestsCard from './requests-card.svelte';
@@ -23,8 +24,8 @@
   // Filter out all requests that are not for this user to see (invisible)
   let availableRequests = data.requestsInfo.filter(req => {
     const idIdx = req.approvalsInfo.userIDs.findIndex(id => data.current_user.access_level === 3 ? id == null : id === data.current_user.user_id );
-    const approvedIdx = req.approvalsInfo.statuses.findIndex(status => status === 'approved');
-    return idIdx <= (approvedIdx+1); // the only ones who can see are the pendng-approver and past-approver
+    const approvedIdx = req.approvalsInfo.statuses.findLastIndex(status => status === 'approved');
+    return idIdx <= (approvedIdx+1); // the only ones who can see are the pending-approver and past-approver
   });
   // console.log(data.requestsInfo)
   // console.log(allRequests)
@@ -77,7 +78,7 @@
     
     pendingRequests = [];
     otherRequests = [];
-    displayRequests.forEach(req => {
+    displayRequests?.forEach(req => {
     if (req.status.includes(data.user_access_level_label)) 
       pendingRequests.push(req)
     else otherRequests.push(req);
@@ -117,9 +118,9 @@
   {#if (viewingPendingReqs ? pendingRequests : otherRequests).length != 0 && data.requestsInfo != undefined}
     <div class="space-y-3">
       {#if viewingPendingReqs} {#each pendingRequests as info}
-          <RequestsCard info={info} data={data}></RequestsCard>
+          <RequestsCard info={info} data={data} form={form}></RequestsCard>
       {/each} {:else} {#each otherRequests as info}
-          <RequestsCard info={info} data={data}></RequestsCard>
+          <RequestsCard info={info} data={data} form={form}></RequestsCard>
       {/each} {/if}
     </div>
   {:else}

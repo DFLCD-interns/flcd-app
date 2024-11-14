@@ -48,11 +48,12 @@ async function query(sqlQuery, args) {
     const client = await connectToDB();
     const result = await client.query(sqlQuery, args);
     client.release();
-    return { success: true,
-      body:{
+    return {
+      success: true,
+      body: {
         result: result,
       }
-     };
+    };
   } catch (error) {
     console.error('Error executing query:', error.message);
     throw error;
@@ -62,7 +63,7 @@ async function query(sqlQuery, args) {
 
 export async function getUsersDB() {
   const result = await query("SELECT * FROM users");
-  return result;
+  return result.body.result.rows;
 }
 
 export async function createUserDB(uuid, first_name, last_name, email, pw_hash, phone, student_number, course, department, access_level) {
@@ -72,24 +73,24 @@ export async function createUserDB(uuid, first_name, last_name, email, pw_hash, 
 }
 
 export async function getUserPriv(sessionID) { // returns the admin type of the user associated with this session.
-const res = await query('SELECT users.access_level FROM sessions JOIN users ON sessions.user_id = users.id WHERE sessions.session_id = $1', [sessionID]);
-return res.body.result.rows[0]?.access_level;
+  const res = await query('SELECT users.access_level FROM sessions JOIN users ON sessions.user_id = users.id WHERE sessions.session_id = $1', [sessionID]);
+  return res.body.result.rows[0]?.access_level;
 }
 
 export async function authUserDB(email) {
-const res = await query('SELECT * FROM users WHERE email = $1', [email]);
-return res.body.result.rows;
+  const res = await query('SELECT * FROM users WHERE email = $1', [email]);
+  return res.body.result.rows;
 }
 
-export async function createSessionDB(sessionid, userid){
-// console.log("db.js - sessionid, userid", sessionid, userid);
-const res = await query('INSERT INTO sessions (session_id, user_id, last_used) VALUES ($1, $2, NOW())', [sessionid, userid]);
-return res;
+export async function createSessionDB(sessionid, userid) {
+  // console.log("db.js - sessionid, userid", sessionid, userid);
+  const res = await query('INSERT INTO sessions (session_id, user_id, last_used) VALUES ($1, $2, NOW())', [sessionid, userid]);
+  return res;
 }
 
 export async function getUserFromSessionDB(sessionuuid) {
-const res = await query('SELECT * FROM users JOIN sessions ON sessions.user_id = users.id WHERE sessions.session_id = $1', [sessionuuid]);
-return res.body.result.rows[0];
+  const res = await query('SELECT * FROM users JOIN sessions ON sessions.user_id = users.id WHERE sessions.session_id = $1', [sessionuuid]);
+  return res.body.result.rows[0];
 }
 
 export async function getUserWithMatchingEmail(email) {
@@ -187,14 +188,14 @@ export async function getEquipmentTypesDB() {
   return result.body.result.rows;
 }
 
-export async function getUserBaseRequests(user){
+export async function getUserBaseRequests(user) {
   //console.log(`user ${user}`)
   const res = await query('SELECT * FROM base_requests WHERE base_requests.requester_id = $1', [user]);
   // console.log(`result from db: ${res.body.result.rows.length}`)
   return res.body.result.rows
 }
 
-export async function getUserEquipmentRequests(user){
+export async function getUserEquipmentRequests(user) {
   const res = await query(`SELECT base_requests.id AS br_id, equipment_requests.id AS eqr_id, equipments.name, base_requests.created
     FROM base_requests
     JOIN equipment_requests ON base_requests.id = equipment_requests.request_id
@@ -217,7 +218,7 @@ export async function getRequestDetailsDB(table, reqid) {
     faculty.first_name AS admin_firstname,
     faculty.last_name AS admin_lastname,
     faculty.email AS adminemail
-    ${table === 'equipment_requests' ? 
+    ${table === 'equipment_requests' ?
       `, t.location AS location, 
          t.actual_start_time AS actual_start_time,
          t.promised_end_time AS promised_end_time,
@@ -268,14 +269,15 @@ export async function insertIntoTableDB(table_name, formData) {
 
   const attributesText = [...formData.keys()].map((val) => val).join(', '); // not user input hence not vulnerable to SQL Injection
   const values = [...formData.values()].map((val) => val); // will be for parametrization
-  const qText = `INSERT INTO ${table_name} (${attributesText}) VALUES (${[...values.map((_, index) => '$' + (index+1))]})`; 
-  
+  const qText = `INSERT INTO ${table_name} (${attributesText}) VALUES (${[...values.map((_, index) => '$' + (index + 1))]})`;
+
   // console.log(qText, values);
   const res = await query(qText, values);
   return res;
 }
 
 // Finds the table entry where all values from searchFormData matches with the corresponding attribute values
+// Now accepts DICTIONARIES!!!
 export async function getFromTableDB(table_name, searchFormData, limit = 100) {
   // sanitize input; error detection
   if (!table_names.includes(table_name)) {
@@ -285,28 +287,30 @@ export async function getFromTableDB(table_name, searchFormData, limit = 100) {
     throw new Error('Trying to get negative or non-Integer number of rows (possibly mistyped/malicious injection)', limit);
   }
 
-  let qText = ""
-  const attributes = [...searchFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection
-  const values = [...searchFormData.values()].map((val) => val); // will be for parametrization
-  values.forEach((val, i) => !val || val == 'undefined' || val == 'null' ? values[i] = 0 : ''); // sanitize
+  const isFormData = Object.getPrototypeOf(searchFormData).append != undefined;
 
-  const whereText = attributes.map((attributeName, index) => `(${attributeName} = \$${index+1})`).join(' AND ') || '';
-  if (table_name == 'user_types'){
-    qText = `SELECT \* FROM ${table_name} WHERE (1 = 1) ${whereText ? 'AND ' + whereText : ''} ORDER BY (access_level) asc LIMIT \$${attributes.length+1}`;
+  let qText = ""
+  const attributes = (isFormData ? [...searchFormData.keys()] : Object.keys(searchFormData)).map((val) => val); // not user input hence not vulnerable to SQL Injection
+  const values = (isFormData ? [...searchFormData.values()] : Object.values(searchFormData)).map((val) => val); // will be for parametrization
+  values.forEach((val, i) => !val || val == 'undefined' || val == 'null' ? values[i] = 0 : ''); // sanitize
+ 
+  const whereText = attributes.map((attributeName, index) => `(${attributeName} = \$${index + 1})`).join(' AND ') || '';
+  if (table_name == 'user_types') {
+    qText = `SELECT \* FROM ${table_name} WHERE (1 = 1) ${whereText ? 'AND ' + whereText : ''} ORDER BY (access_level) asc LIMIT \$${attributes.length + 1}`;
   }
-  else{ 
-    qText = `SELECT \* FROM ${table_name} WHERE (1 = 1) ${whereText ? 'AND ' + whereText : ''} ORDER BY (id) asc LIMIT \$${attributes.length+1}`;
-}
+  else {
+    qText = `SELECT \* FROM ${table_name} WHERE (1 = 1) ${whereText ? 'AND ' + whereText : ''} ORDER BY (id) asc LIMIT \$${attributes.length + 1}`;
+  }
 
   // console.log(qText, values.concat(limit));
-  const res = await query(qText, values.concat(limit));    
+  const res = await query(qText, values.concat(limit));
   // console.log(res);
   return res;
 }
 
 // Provide updateFormData for all values that you want updating
 // Provide searchFormData for to specify which row/s you want updating
-export async function updateTableDB(table_name, searchFormData, updateFormData) { 
+export async function updateTableDB(table_name, searchFormData, updateFormData) {
   if (!table_names.includes(table_name)) {
     throw new Error('Trying to update non-existent table (possibly misidentified/mispelled/malicious injection):', table_name);
   }
@@ -316,22 +320,22 @@ export async function updateTableDB(table_name, searchFormData, updateFormData) 
   let searchValues = [...searchFormData.values()].map((val) => val === 'null' || val === 'undefined' ? null : val); // will be for parametrization
   const updateValues = [...updateFormData.values()].map((val) => val === 'null' || val === 'undefined' ? null : val); // will be for parametrization
 
-  const setText = updateAttributes.map((attributeName, index) => `${attributeName} = \$${index+1}`).join(', ')
-  const whereText = searchAttributes.map((attributeName, index) => `(${attributeName} ${searchValues[index] ? `= \$${updateAttributes.length + index+1}` : 'IS NULL'})`).join(' AND ')
+  const setText = updateAttributes.map((attributeName, index) => `${attributeName} = \$${index + 1}`).join(', ')
+  const whereText = searchAttributes.map((attributeName, index) => `(${attributeName} ${searchValues[index] ? `= \$${updateAttributes.length + index + 1}` : 'IS NULL'})`).join(' AND ')
   searchValues = searchValues.filter(val => val != null)
 
-  const qText = 
+  const qText =
     `UPDATE ${table_name}
     SET ${setText}
     WHERE ${whereText}`
 
   // console.log(qText, updateValues.concat(searchValues));
-  const res = await query(qText, updateValues.concat(searchValues));    
+  const res = await query(qText, updateValues.concat(searchValues));
   return res;
 }
 
 // Provide searchFormData for to specify which row/s you want deleting
-export async function deleteFromTableDB(table_name, searchFormData) { 
+export async function deleteFromTableDB(table_name, searchFormData) {
   if (!table_names.includes(table_name)) {
     throw new Error('Trying to update non-existent table (possibly misidentified/mispelled/malicious injection):', table_name);
   }
@@ -339,27 +343,27 @@ export async function deleteFromTableDB(table_name, searchFormData) {
   const searchAttributes = [...searchFormData.keys()].map((val) => val); // not user input hence not vulnerable to SQL Injection
   let searchValues = [...searchFormData.values()].map((val) => val === 'null' ? null : val); // will be for parametrization
 
-  const whereText = searchAttributes.map((attributeName, index) => `(${attributeName} ${searchValues[index] ? `= \$${index+1}` : 'IS NULL'})`).join(' AND ')
+  const whereText = searchAttributes.map((attributeName, index) => `(${attributeName} ${searchValues[index] ? `= \$${index + 1}` : 'IS NULL'})`).join(' AND ')
   searchValues = searchValues.filter(val => val != null)
 
-  const qText = 
+  const qText =
     `DELETE FROM ${table_name}
     WHERE ${whereText}`
 
-  const res = await query(qText, searchValues);    
+  const res = await query(qText, searchValues);
   return res;
 }
 
 export async function deleteRequest(request_table_name, request_id) {
   const searchFormData = new FormData();
   searchFormData.append('request_id', request_id)
-  
+
   // delete approval forms
   const result = await deleteFromTableDB("approvals", searchFormData);
-  
+
   // delete particular request entries
   const result2 = await deleteFromTableDB(request_table_name, searchFormData);
-  
+
   // delete base request
   searchFormData.delete('request_id')
   searchFormData.append('id', request_id)
@@ -408,7 +412,7 @@ export async function getAllClassesDB() {
     FROM batches JOIN classes ON batches.id = classes.batch_id 
     JOIN childs ON classes.id = childs.class_id 
     JOIN users ON classes.handler_id = users.id`);
-    //console.log(`testdb: ${res.body.result.rows}`);
+  //console.log(`testdb: ${res.body.result.rows}`);
   return res.body.result.rows;
 }
 
@@ -440,22 +444,23 @@ export async function getBatchesAndClassesDB() {
     JOIN batches 
     ON classes.batch_id = batches.id
     JOIN users
-    ON classes.handler_id = users.id`);
+    ON classes.handler_id = users.id
+    ORDER BY classes.id ASC`);
   // console.log(res);
   return res.body.result.rows;
 }
 
-export async function getSections(sched){
+export async function getSections(sched) {
   const result = await query('SELECT * FROM classes WHERE schedule = $1', [sched]);
   return result.body.result.rows;
 }
 
-export async function getUnavailable(){
+export async function getUnavailable() {
   const result = await query(`SELECT class_id, timeslot, TO_CHAR(observe_date, 'YYYY-MM-DD') AS observe_date FROM unavailable_slots`)
   return result.body.result.rows;
 }
 
-export async function getUnavailableWSection(){
+export async function getUnavailableWSection() {
   const result = await query(`SELECT unavailable_slots.id, class_id, timeslot, TO_CHAR(observe_date, 'YYYY-MM-DD') AS observe_date,
     classes.name AS name, classes.schedule AS schedule
     FROM unavailable_slots
@@ -464,10 +469,10 @@ export async function getUnavailableWSection(){
   return result.body.result.rows;
 }
 
-export async function addUnavailableSlot(class_id, observe_date, timeslot){
+export async function addUnavailableSlot(class_id, observe_date, timeslot) {
   const res = await query('INSERT INTO unavailable_slots (timeslot, observe_date, class_id) VALUES ($1, $2, $3)', [timeslot, observe_date, class_id])
 }
 
-export async function deleteUnavailableSlot(id){
+export async function deleteUnavailableSlot(id) {
   const res = await query('DELETE FROM unavailable_slots WHERE id = $1', [id])
 }

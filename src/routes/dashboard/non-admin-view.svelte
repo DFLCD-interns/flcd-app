@@ -1,12 +1,13 @@
 <script>
   export let data;
+  export let form;
   import { Card, GradientButton } from 'flowbite-svelte';
   import { ArrowRightOutline, UndoOutline } from 'flowbite-svelte-icons';
   import RequestsCard from './requests-card.svelte';
 
   let viewingPendingReqs = true;
   const pendingRequests = [], finishedRequests = [];
-  data.requestsInfo.forEach(req => {
+  data.requestsInfo?.forEach(req => {
     // console.log(req)
     if (req.status.includes('pending') && ((req.table.includes('equipment') && !req.actual_date_end) || req.actual_date_end > new Date())) 
       pendingRequests.push(req) 
@@ -63,7 +64,7 @@
           <div class="sm:absolute sm:left-0 sm:bottom-[-25px] mb-[-13px] ml-2 sm:mb-0">
             <img src="/3.png" alt="Description" class="object-cover" style="width: 9.5rem; height: 9.5rem;" />
           </div>
-          <GradientButton color="green" shadow href="/dashboard/observationform" class="sm:mt-16 mt-0 sm:mb-4 ml-auto w-fit align-self-end">
+          <GradientButton color="green" shadow href="/dashboard/observation-form" class="sm:mt-16 mt-0 sm:mb-4 ml-auto w-fit align-self-end">
             Book <ArrowRightOutline class="w-6 h-6 ms-2 text-white" />
           </GradientButton>
         </div>
@@ -90,9 +91,9 @@
     {#if (viewingPendingReqs ? pendingRequests : finishedRequests).length > 0 && data.requestsInfo != undefined}
       <div class="space-y-3">
         {#if viewingPendingReqs} {#each pendingRequests as info}
-            <RequestsCard info={info} data={data}></RequestsCard>
+            <RequestsCard info={info} data={data} form={form}></RequestsCard>
         {/each} {:else} {#each finishedRequests as info}
-            <RequestsCard info={info} data={data}></RequestsCard>
+            <RequestsCard info={info} data={data} form={form}></RequestsCard>
         {/each} {/if}
       </div>
     {:else}

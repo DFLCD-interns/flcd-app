@@ -7,8 +7,9 @@
     import { downloadCSV } from '../downloadcsv';
     import BatchTable from './batchTable.svelte';
     import ClassTable from './classTable.svelte';
+    import toast from 'svelte-french-toast';
+    import { enhance } from '$app/forms';
 
-    // console.log("v:", data.classes_only_table)
     let access_level=data.current_user.access_level;
   
     let batches = data.batches;
@@ -16,6 +17,22 @@
     if (batches[0] != null){
       tableHead = Object.keys(batches[0]);
     }
+
+    const handlersItem = data.users.map(user => {
+        return {
+            value: user.id,
+            name: `${user.id} (${user.first_name} ${user.last_name})`
+        };
+        });
+
+    console.log(data.batches)
+
+    const batchesItem = data.batches_only_table.map(batch => {
+        return {
+            value: batch.id,
+            name: `${batch.id} (${batch.name})`
+        };
+        });
   
     let EditBatchModal = false;
     let EditClassModal = false;
@@ -67,6 +84,8 @@
     
 
     $: {
+
+        
         
         sClass = data.classes_only_table.filter(classItem => {
             return selectedBatch.some(batch => batch === classItem.batch_id);
@@ -92,6 +111,7 @@
         if (showBatchOnly) {
             batches = data.batches_only_table;
         } else if (showClassOnly){
+
             batches = data.classes_batch_table
             .filter(item => 
             selectedBatch.length === 0 || selectedBatch.includes(item.batch_id)
@@ -101,6 +121,7 @@
                 batches =  data.classes_batch_table;
             }
 
+            
         } else {
             // console.log('in here')
             batches = batches
@@ -163,6 +184,47 @@
         sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
         // console.log(batches)
         }
+
+    /*-- toast logic --*/
+    let loading = false
+
+    const submitBatch = () => {
+        loading = true;
+        return async ({ result, update }) => {
+            switch (result.type) {
+                case 'success':
+                    toast.success("Batch successfully added!");
+                    await update();
+                    break;
+                case 'failure':
+                    const errorMessage = result.data.message || 'Failed to add batch.';
+                    toast.error(errorMessage);
+                    break;
+                default:
+                    await update();
+            }
+            loading = false;
+        }
+    }
+
+    const submitClass = () => {
+        loading = true;
+        return async ({ result, update }) => {
+            switch (result.type) {
+                case 'success':
+                    toast.success("Class successfully added!");
+                    await update();
+                    break;
+                case 'failure':
+                    const errorMessage = result.data.message || 'Failed to add class.';
+                    toast.error(errorMessage);
+                    break;
+                default:
+                    await update();
+            }
+            loading = false;
+        }
+    }
     
 
   </script>
@@ -332,49 +394,63 @@
     </form>
   </Modal>
   
-  <Modal title="Add Batch" bind:open={AddBatchModal}>
-    <form action="?/createBatch" method="POST">
+  <Modal title="Add Batch" bind:open={AddBatchModal} >
+    <form action="?/createBatch" method="POST" use:enhance={submitBatch}>
         <div class="mb-6">
             <Label class="block mb-2">Batch Name</Label>
-            <Input name="name" type="text" placeholder="(eg, 2023-2024 A)" required />
+            <Input name="name" type="text" placeholder="Enter batch name (eg, 2023-2024 A)." required />
         </div>
         <div class="mb-6">
             <Label class="block mb-2">Description</Label>
-            <Input name="description" type="text" placeholder="(eg, 1st semester, began July)" />
+            <Input name="description" type="text" placeholder="Enter description (eg, 1st semester, began July)." />
         </div>
-        <div class="mb-6 flex gap-2 justify-center">
-            <GradientButton type="submit" class="button-style" color="green">Confirm</GradientButton>
-            <GradientButton class="button-style" color="green">Cancel</GradientButton>
-        </div>
+        <div class="flex gap-5 justify-center">
+            <Button type="submit" class="w-full" disabled={loading}>Confirm</Button>
+            <Button 
+              type="button" 
+              class="bg-red-700 hover:bg-red-800" 
+              disabled={loading} 
+              on:click={() => AddBatchModal = false}
+            >
+              Cancel
+            </Button>
+          </div>
       </form>
   </Modal>
 
   <Modal title="Add Class" bind:open={AddClassModal}>
-    <form action="?/createClass" method="POST">
+    <form action="?/createClass" method="POST" use:enhance={submitClass}>
         <div class="mb-6">
             <Label class="block mb-2">Class Name</Label>
-            <Input name="name" type="text" placeholder="(eg, String Theory 101 - Section 1)" required/>
+            <Input name="name" type="text" placeholder="Enter class name(eg, String Theory 101 - Section 1)." required/>
         </div>
         <div class="mb-6">
             <Label class="block mb-2">Handler ID</Label>
-            <Input name="handler_id" type="number" placeholder="(eg, 12)"/>
+            <Select items={handlersItem} name="handler_id" type="number" placeholder="Select handler ID of the class" required/>
         </div>
         <div class="mb-6">
             <Label class="block mb-2">Batch ID</Label>
-            <Input name="batch_id" type="number" placeholder="(eg, 4)"/>
+            <Select items={batchesItem} name="batch_id" type="number" placeholder="Select block ID of the class" required/>
         </div>
         <div class="mb-6">
             <Label class="block mb-2">Description</Label>
-            <Input name="description" type="text" placeholder="(eg, Section 1)"/>
+            <Input name="description" type="text" placeholder="Enter description"/>
         </div>
         <div class="mb-6">
             <Label class="block mb-2">Schedule</Label>
-            <Input name="schedule" type="text" placeholder="" />
+            <Select items={[{value:"AM", name:"AM"}, {value:"PM", name:"PM"}]} placeholder="Select schedule of the class" name="schedule" type="text" required/>
         </div>
-        <div class="mb-6 flex gap-2 justify-center">
-            <GradientButton type="submit" class="button-style" color="green">Confirm</GradientButton>
-            <GradientButton  on:click={() => {AddClassModal = false}} color="green">Cancel</GradientButton>
-        </div>
+        <div class="flex gap-5 justify-center">
+            <Button type="submit" class="w-full" disabled={loading}>Confirm</Button>
+            <Button 
+              type="button" 
+              class="bg-red-700 hover:bg-red-800" 
+              disabled={loading} 
+              on:click={() => AddClassModal = false}
+            >
+              Cancel
+            </Button>
+          </div>
       </form>
   </Modal>
 
@@ -435,7 +511,7 @@
         </div>
         <div class="mb-6 flex gap-2 justify-center">
             <GradientButton type="submit" class="button-style" color="green">Confirm</GradientButton>
-            <GradientButton  on:click={() => {AddClassModal = false}} color="green">Cancel</GradientButton>
+            <GradientButton  on:click={() => {AddChildModal = false}} color="green">Cancel</GradientButton>
         </div>
       </form>
   </Modal>
