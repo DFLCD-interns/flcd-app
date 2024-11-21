@@ -70,7 +70,7 @@ export const actions = {
             // Updating assigned ids
             const curr_status = inputFormData.get('status')
             const curr_remarks = inputFormData.get('remarks')
-            const approverID = searchFormData.get('approver_id')
+            // const approverID = searchFormData.get('approver_id')
             inputFormData.delete('remarks');
             inputFormData.delete('status');
             const assignedItemIDs = [...inputFormData.values()];
@@ -90,37 +90,9 @@ export const actions = {
                 else _updateFormData.append(`${type}_id`, assignedItemIDs[i] == -1 ? null : assignedItemIDs[i]);
                 response2.success &&= (await updateTableDB(`${type}_requests`, _searchFormData, _updateFormData)).success;
             }
-           
-            // emailing
-            console.log('uwu3')
 
-            const emailDetails = JSON.parse(decodeURIComponent(url.searchParams.get('emailDetails')))
-            const approversEmails = [];
-            for (const row of (await getFromTableDB("approvals", {'request_id' : params.reqid})).body.result.rows) {
-                if (row.approver_id)
-                    approversEmails.push((await getFromTableDB("users", {'id': row.approver_id})).body.result.rows[0]?.email)
-                else approversEmails.push(null);
-            }
-
-            // refresh
-            console.log(emailDetails, approversEmails)
-            emailDetails.request['approversEmails'] = approversEmails;
-            const appr_idx = approversEmails.findIndex(x => x == emailDetails.approver.email);
-            emailDetails.request['remarks'][appr_idx] = curr_remarks;
-            emailDetails.request['statuses'][appr_idx] = curr_status;
-
-            const reqInfo = (await getRequestsInfo(emailDetails.requester.id, emailDetails.requester.user_access_level)).find(req => req.id == params.reqid && req.table === params.table)
-            emailDetails.request.requested = reqInfo?.requestedItems;
-            const assignedItemsIDs = reqInfo?.requestRows?.filter(row => row.request_id == params.reqid).map(row => row.equipment_id || row.venue_id || row.assigned_child_id);
-            emailDetails.request.assigned = []
-            for (const _id of assignedItemsIDs) {
-                emailDetails.request.assigned.push((await getFromTableDB(emailDetails.request.type == 'class' ? 'childs' : emailDetails.request.type + 's', {id: _id})).body.result.rows[0]?.name);
-            }
-            
-            console.log('uwu4')
-
-            const mailRes = await mailRequesterOnResponse(emailDetails.request, emailDetails.requester, emailDetails.approver); 
-            console.log('uwu5')
+            // EMAILING
+            const mailRes = await emailStudentOnNewResponse(params, url, curr_status, curr_remarks);
 
             return {success: response?.success && response2?.success, mail_success: mailRes.ok || false}; 
         } catch (error) {   
@@ -128,4 +100,31 @@ export const actions = {
             return {success: response?.success && response2?.success, mail_success: false}; 
         }
     }
+}
+
+// EMAILING
+async function emailStudentOnNewResponse(params, url, requestStatus, requestRemarks) {
+    const emailDetails = JSON.parse(decodeURIComponent(url.searchParams.get('emailDetails')))
+    const approversEmails = [];
+    for (const row of (await getFromTableDB("approvals", {'request_id' : params.reqid})).body.result.rows) {
+        if (row.approver_id)
+            approversEmails.push((await getFromTableDB("users", {'id': row.approver_id})).body.result.rows[0]?.email)
+        else approversEmails.push(null);
+    }
+
+    // refresh
+    emailDetails.request['approversEmails'] = approversEmails;
+    const appr_idx = approversEmails.findIndex(x => x == emailDetails.approver.email);
+    emailDetails.request['remarks'][appr_idx] = requestRemarks;
+    emailDetails.request['statuses'][appr_idx] = requestStatus;
+
+    const reqInfo = (await getRequestsInfo(emailDetails.requester.id, emailDetails.requester.user_access_level)).find(req => req.id == params.reqid && req.table === params.table)
+    emailDetails.request.requested = reqInfo?.requestedItems;
+    const assignedItemsIDs = reqInfo?.requestRows?.filter(row => row.request_id == params.reqid).map(row => row.equipment_id || row.venue_id || row.assigned_child_id);
+    emailDetails.request.assigned = []
+    for (const _id of assignedItemsIDs) {
+        emailDetails.request.assigned.push((await getFromTableDB(emailDetails.request.type == 'class' ? 'childs' : emailDetails.request.type + 's', {id: _id})).body.result.rows[0]?.name);
+    }
+    
+    return await mailRequesterOnResponse(emailDetails.request, emailDetails.requester, emailDetails.approver); 
 }

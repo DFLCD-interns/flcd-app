@@ -15,7 +15,6 @@ async function mailuser(subject, body, recipient) {
     }
 }
 
-// export async function mailRequesterOnResponse(requesterName, requestName, approverName, remarks, statuses, approversEmails, assignedItems, requesterEmail) {
 export async function mailRequesterOnResponse(request, requester, approver) {
     const subject = `[DFLCD eLaan] New response to your request!`;
     const recipient = requester.email;
@@ -40,7 +39,7 @@ export async function mailRequesterOnResponse(request, requester, approver) {
         '\n\t• ' + request.name.split(', ').join('\n\t• ') : 
         '\n\t• ' + Object.values(request.requested).join('\n\t• ')
     const assignedItems = request.type == 'equipment' ? 
-        '\n\t• ' + request.assigned?.filter(_item => _item.length != 0).map() : 
+        '\n\t• ' + request.assigned?.filter(_item => _item.length != 0).join('\n\t• ') : 
         '\n\t• ' + request.assigned?.filter(_item => _item != null).join('\n\t• ');
 
     const date_start = postgresTimeToReadable(request.date_start);
@@ -49,7 +48,7 @@ export async function mailRequesterOnResponse(request, requester, approver) {
     const body = 
 `Dear eLaan user ${requester.name},
 
-Your ${request.type} request for ${request.name} has a new response by ${approver.name}.
+Your ${request.type} request for "${request.name}" has a new response by ${approver.name}.
 
 -----------------------------------------------------------------------------------------
 
