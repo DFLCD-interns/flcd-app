@@ -1,16 +1,47 @@
 <script>
     import { InfoCircleOutline } from 'flowbite-svelte-icons';
-    import { enhance } from '$app/forms';
-    import { goto } from '$app/navigation';
 
     export let data;
     export let form;
+
+    console.log(data);
+
+    $: emailDetails = {
+        request: {
+            id: data.requestID,
+            name: data.requestName,
+            type: data.requestType, 
+            date_start: data.startDate,
+            date_end: data.requestDetails[0]?.promised_end_time || data.endDate,
+            location: data.requestDetails[0]?.location,
+            remarks: data.approvalForms.remarks,
+            statuses: data.approvalForms.statuses,
+            requested: data.requestedItems,
+            assigned: data.requestDetails[0]?.child_name || data.requestDetails.map(x => [x.equipment_name, x.location])
+        },
+        requester: {
+            id: data.requestDetails[0]?.requester_id,
+            name: data.requestDetails[0]?.requester_firstname + ' ' + data.requestDetails[0]?.requester_lastname,
+            email: data.requestDetails[0]?.email,
+            contactNum: data.requestDetails[0]?.contactno,
+            department: data.requestDetails[0]?.dept,
+            access_level: data.requestDetails[0]?.requester_access_level
+        },
+        approver: {
+            name: data.current_user?.first_name + ' ' + data.current_user?.last_name,
+            email: data.current_user?.email,
+            staffEmails: data.staffEmails
+        }
+    }
+
+    $: emailDetailsEncoded = encodeURIComponent(JSON.stringify(emailDetails));
+
 </script>
 
 <div class="pt-10 bg-white rounded-lg p-8 shadow-md">
     <h1 class="text-gray-600 text-lg mb-1 font-medium title-font">Response Form</h1>                    
     {#if data?.approvalForms.canRespond }
-        <form bind:this={form} action="?/approve" method="POST">
+        <form bind:this={form} action="?/approve&emailDetails={emailDetailsEncoded}" method="POST">
             <div class="relative mb-4">
                 <textarea 
                     id="remarks" 

@@ -209,6 +209,8 @@ export async function getUserEquipmentRequests(user) {
 // This is for a specific request; supposed to get extra details
 export async function getRequestDetailsDB(table, reqid) {
   const qText = `SELECT 
+    requester.id AS requester_id,
+    requester.access_level AS requester_access_level,
     requester.first_name AS requester_firstname,
     requester.last_name AS requester_lastname,
     requester.email,

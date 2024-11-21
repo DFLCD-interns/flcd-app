@@ -1,5 +1,6 @@
-import { getFromTableDB, updateTableDB, deleteRequest, deleteFromTableDB, getRequestDetailsDB, getUserFromSessionDB } from '$lib/server/db'; 
+import { getFromTableDB, updateTableDB, getRequestDetailsDB, getUserFromSessionDB } from '$lib/server/db'; 
 import { mailRequesterOnResponse } from '$lib/server/emails.js';
+import { getRequestsInfo } from '../../requests.server.js';
 
 /** @type {import('./$types.js').LayoutServerLoad} */
 export const load = async ( {cookies, params, parent} ) => {
@@ -32,6 +33,7 @@ export const load = async ( {cookies, params, parent} ) => {
             startDate: requestInfo?.date,
             endDate: requestInfo?.actual_date_end,
             requestRows: requestRows,
+            staffEmails: (await getFromTableDB("users", {access_level: 3})).body.result.rows.map(x => x.email)
         }
     } catch (error) {   
         console.error("Load failed:", error.message);
@@ -40,7 +42,7 @@ export const load = async ( {cookies, params, parent} ) => {
 }
 
 export const actions = {
-    approve: async ({cookies, request, params}) => {
+    approve: async ({cookies, request, params, url}) => {
         try {
             const session = cookies.get('session_id');
             const user = await getUserFromSessionDB(session);
@@ -61,12 +63,14 @@ export const actions = {
                 updateFormData.append('approver_id', user?.user_id); // save this user as the approver
             }
 
+            console.log('uwu')
             const response = await updateTableDB("approvals", searchFormData, updateFormData);
+            console.log('uwu2', response)
 
             // Updating assigned ids
-            // const status = inputFormData.get('status')
-            const remarks = inputFormData.get('remarks')
-            // const approverID = searchFormData.get('approver_id')
+            const curr_status = inputFormData.get('status')
+            const curr_remarks = inputFormData.get('remarks')
+            const approverID = searchFormData.get('approver_id')
             inputFormData.delete('remarks');
             inputFormData.delete('status');
             const assignedItemIDs = [...inputFormData.values()];
@@ -88,52 +92,35 @@ export const actions = {
             }
            
             // emailing
+            console.log('uwu3')
 
-            const requesterID = (await getFromTableDB("base_requests", {'id': params.reqid})).body.result.rows[0]?.requester_id;
-            const requester = (await getFromTableDB("users", {'id': requesterID})).body.result.rows[0];
-            const requesterName = requester.first_name + ' ' + requester.last_name;
-            const requesterEmail = requester.email;
-
-            const requestName = type == 'class' ? 'observation' : type;
-            const approverName = user.first_name + ' ' + user.last_name;            
-            
-            const statuses = [];
-            const _approversIDs = [];
-            (await getFromTableDB("approvals", {'request_id' : params.reqid})).body.result.rows?.forEach(row => {
-                statuses.push(row.status)
-                _approversIDs.push(row.approver_id)
-            })
-
+            const emailDetails = JSON.parse(decodeURIComponent(url.searchParams.get('emailDetails')))
             const approversEmails = [];
-            for (const _id of _approversIDs) {
-                approversEmails.push((await getFromTableDB("users", {'id': _id})).body.result.rows[0]?.email)
+            for (const row of (await getFromTableDB("approvals", {'request_id' : params.reqid})).body.result.rows) {
+                if (row.approver_id)
+                    approversEmails.push((await getFromTableDB("users", {'id': row.approver_id})).body.result.rows[0]?.email)
+                else approversEmails.push(null);
+            }
+
+            // refresh
+            console.log(emailDetails, approversEmails)
+            emailDetails.request['approversEmails'] = approversEmails;
+            const appr_idx = approversEmails.findIndex(x => x == emailDetails.approver.email);
+            emailDetails.request['remarks'][appr_idx] = curr_remarks;
+            emailDetails.request['statuses'][appr_idx] = curr_status;
+
+            const reqInfo = (await getRequestsInfo(emailDetails.requester.id, emailDetails.requester.user_access_level)).find(req => req.id == params.reqid && req.table === params.table)
+            emailDetails.request.requested = reqInfo?.requestedItems;
+            const assignedItemsIDs = reqInfo?.requestRows?.filter(row => row.request_id == params.reqid).map(row => row.equipment_id || row.venue_id || row.assigned_child_id);
+            emailDetails.request.assigned = []
+            for (const _id of assignedItemsIDs) {
+                emailDetails.request.assigned.push((await getFromTableDB(emailDetails.request.type == 'class' ? 'childs' : emailDetails.request.type + 's', {id: _id})).body.result.rows[0]?.name);
             }
             
-            const _assignedItemsID = (await getFromTableDB(`${type}_requests`, {'request_id': params.reqid})).body.result.rows.map(row => row.equipment_id || row.venue_id || row.assigned_child_id);
-            const _table_name = type == 'class' ? 'childs' : type + 's';
-            const assignedItems = [];
-            for (const _id of _assignedItemsID) {
-                if (type == 'class' && assignedItems[0]) break; // only 1 for class request
-                const _item = (await getFromTableDB(_table_name, {'id': _id})).body.result.rows[0];
-                assignedItems.push(_item?.name)
-            }
+            console.log('uwu4')
 
-            // console.log(requesterID)
-            // console.log(requester)
-            // console.log(requesterName)
-            // console.log(requesterEmail)
-            // console.log(requestName)
-            // console.log(approverName)
-            // console.log(statuses)
-            // console.log(_approversIDs)
-            // console.log(approversEmails)
-            // console.log(_assignedItemsID)
-            // console.log(_table_name)
-            // console.log(assignedItems)
-
-            // requesterName, requestName, approverName, remarks, statuses, approversEmails, assignedItems, requesterEmail
-            const mailRes = await mailRequesterOnResponse(requesterName, requestName, approverName, remarks, statuses, approversEmails, assignedItems, requesterEmail);
-            // const mailRes = await mailRequesterOnResponse(_requesterDetails, _requestDetails, _approverDetails); // plan to refactor
+            const mailRes = await mailRequesterOnResponse(emailDetails.request, emailDetails.requester, emailDetails.approver); 
+            console.log('uwu5')
 
             return {success: response?.success && response2?.success, mail_success: mailRes.ok || false}; 
         } catch (error) {   
