@@ -23,6 +23,8 @@ export async function load({ cookies }) {
 		childs: childQuery?.body.result.rows,
 		childsStatuses: await db.getChildsStatusesDB(),
 		current_user: user, 
-		user_access_level_label: user_access_level_label?.body.result.rows[0]?.description
+		user_access_level_label: user_access_level_label?.body.result.rows[0]?.description,
+		user: await db.getUsersListDB(),
+		userTypes: await db.getUserTypesDB()
 	};
 }

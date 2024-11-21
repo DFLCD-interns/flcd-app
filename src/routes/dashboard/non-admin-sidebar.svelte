@@ -7,7 +7,7 @@
         lastName: data?.current_user?.last_name,
         userType: data?.user_access_level_label.charAt(0).toUpperCase() + data.user_access_level_label.slice(1)
     }
-    let dropdownVisible = false;
+    let dropdownVisible = true;
 
     $: currentPath = $page.url.pathname;
     $: isUnverified = data?.current_user?.student_number == null;
@@ -45,7 +45,7 @@
         </div>    
         {#if isUnverified}  
             <p class="text-xs flex items-center mt-4"><ExclamationCircleOutline class="mr-2 text-orange-400 inline-block"/> 
-                Please wait for FLCD to verify your account before you get admin access.
+                Please wait for FLCD to verify your account to get admin access.
             </p>  
         {/if}
         
@@ -78,8 +78,16 @@
                 <div class:hidden={!dropdownVisible} class="mt-2 space-y-2">
                     <ul class="space-y-2">
                         <li>
-                            <a href="/dashboard/requests-form" class="flex items-center w-full p-2 text-gray-600 hover:bg-gray-100 rounded-lg pl-12 group">
-                                Equipments or Venues
+                            <a href="/dashboard/equipment-requests" 
+                            class="flex items-center w-full p-2 text-gray-600 hover:bg-gray-100 rounded-lg pl-12 group
+                            {currentPath === '/dashboard/equipment-requests' ? 'bg-gray-100 text-gray-600' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-600'}">
+                                Equipment
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/dashboard/venue-requests" class="flex items-center w-full p-2 text-gray-600 hover:bg-gray-100 rounded-lg pl-12 group
+                            {currentPath === '/dashboard/venue-requests' ? 'bg-gray-100 text-gray-600' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-600'}">
+                                Venue
                             </a>
                         </li>
                         {#if userData.userType != "Guest"}

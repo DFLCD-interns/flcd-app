@@ -119,11 +119,14 @@
                     <p class="text-center text-sm text-gray-500">or
                     <hr>
                 </div>
-                <div>
-                    <Button on:click={() => {handleClick()}} color="light" class="w-full">
-                        Login as Guest
-                    </Button>
-                </div>
+
+                <form method="POST" action="?/signin" use:enhance={submitLogin}>
+                    <!-- Hidden fields with fixed data -->
+                    <input type="hidden" name="email" value="guest@gmail.com">
+                    <input type="hidden" name="password" value="password">
+                    
+                    <Button type="submit" class="w-full" color="light" disabled={loading}>Login as Guest</Button>
+                </form>
                 
             </div>
         </div>
@@ -138,7 +141,7 @@
         </div>
     </div>
 </section>
-
+Version: 112024-0717
 
 <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
 
