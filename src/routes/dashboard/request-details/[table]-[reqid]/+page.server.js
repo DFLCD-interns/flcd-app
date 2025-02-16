@@ -1,6 +1,6 @@
 import { getFromTableDB, updateTableDB, getRequestDetailsDB, getUserFromSessionDB } from '$lib/server/db'; 
-import { mailRequesterOnResponse } from '$lib/server/emails.js';
-import { getRequestsInfo } from '../../requests.server.js';
+import { emailRequester } from '../../emailWrapper.server.js';
+import { emailTypes } from '$lib/server/emails.js';
 
 /** @type {import('./$types.js').LayoutServerLoad} */
 export const load = async ( {cookies, params, parent} ) => {
@@ -48,7 +48,7 @@ export const actions = {
             const user = await getUserFromSessionDB(session);
             
             const inputFormData = await request.formData(); // the user input (remarks, approve/decline)
-
+            
             const updateFormData = new FormData();
             updateFormData.append('status', inputFormData.get('status'));
             if (inputFormData.get('remarks')) updateFormData.append('remarks', inputFormData.get('remarks'));
@@ -58,18 +58,18 @@ export const actions = {
             searchFormData.append('approver_id', user?.user_id);
             
             // check if this form is for admin staff AND no admin staff has yet to respond
-            if (user?.access_level === 3 && !(await getFromTableDB('approvals', searchFormData)).body.result.rows[0]) {
+            const _approvalsQuery = await getFromTableDB('approvals', searchFormData);
+            if (user?.access_level === 3 && !(_approvalsQuery).body.result.rows[0]) {
                 searchFormData.set('approver_id', null); // look for the no-approver approval form
                 updateFormData.append('approver_id', user?.user_id); // save this user as the approver
             }
-
-            console.log('uwu')
+            
             const response = await updateTableDB("approvals", searchFormData, updateFormData);
-            console.log('uwu2', response)
 
             // Updating assigned ids
-            const curr_status = inputFormData.get('status')
-            const curr_remarks = inputFormData.get('remarks')
+            const curr_status = inputFormData.get('status');
+            const curr_remarks = inputFormData.get('remarks');
+
             // const approverID = searchFormData.get('approver_id')
             inputFormData.delete('remarks');
             inputFormData.delete('status');
@@ -92,39 +92,12 @@ export const actions = {
             }
 
             // EMAILING
-            const mailRes = await emailStudentOnNewResponse(params, url, curr_status, curr_remarks);
+            await emailRequester(params.table, JSON.parse(decodeURIComponent(url.searchParams.get('emailDetails'))), curr_status, curr_remarks, emailTypes.RESPONSE);
 
-            return {success: response?.success && response2?.success, mail_success: mailRes.ok || false}; 
+            return {success: response?.success && response2?.success}; 
         } catch (error) {   
             console.error("Action failed:", error.message);
-            return {success: response?.success && response2?.success, mail_success: false}; 
+            return {success: response?.success && response2?.success}; 
         }
     }
-}
-
-// EMAILING
-async function emailStudentOnNewResponse(params, url, requestStatus, requestRemarks) {
-    const emailDetails = JSON.parse(decodeURIComponent(url.searchParams.get('emailDetails')))
-    const approversEmails = [];
-    for (const row of (await getFromTableDB("approvals", {'request_id' : params.reqid})).body.result.rows) {
-        if (row.approver_id)
-            approversEmails.push((await getFromTableDB("users", {'id': row.approver_id})).body.result.rows[0]?.email)
-        else approversEmails.push(null);
-    }
-
-    // refresh
-    emailDetails.request['approversEmails'] = approversEmails;
-    const appr_idx = approversEmails.findIndex(x => x == emailDetails.approver.email);
-    emailDetails.request['remarks'][appr_idx] = requestRemarks;
-    emailDetails.request['statuses'][appr_idx] = requestStatus;
-
-    const reqInfo = (await getRequestsInfo(emailDetails.requester.id, emailDetails.requester.user_access_level)).find(req => req.id == params.reqid && req.table === params.table)
-    emailDetails.request.requested = reqInfo?.requestedItems;
-    const assignedItemsIDs = reqInfo?.requestRows?.filter(row => row.request_id == params.reqid).map(row => row.equipment_id || row.venue_id || row.assigned_child_id);
-    emailDetails.request.assigned = []
-    for (const _id of assignedItemsIDs) {
-        emailDetails.request.assigned.push((await getFromTableDB(emailDetails.request.type == 'class' ? 'childs' : emailDetails.request.type + 's', {id: _id})).body.result.rows[0]?.name);
-    }
-    
-    return await mailRequesterOnResponse(emailDetails.request, emailDetails.requester, emailDetails.approver); 
 }

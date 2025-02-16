@@ -14,7 +14,6 @@ export async function load() {
 
 export const actions = {
     createBatch: async ({cookies, request}) => {
-        console.log('hi')
         try {
             const data = await request.formData();
 

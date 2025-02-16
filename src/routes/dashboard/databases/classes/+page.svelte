@@ -25,7 +25,7 @@
         };
         });
 
-    console.log(data.batches)
+    // console.log(data.batches)
 
     const batchesItem = data.batches_only_table.map(batch => {
         return {

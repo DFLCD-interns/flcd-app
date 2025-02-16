@@ -4,7 +4,7 @@
     export let data;
     export let form;
 
-    console.log(data);
+    // console.log(data);
 
     $: emailDetails = {
         request: {

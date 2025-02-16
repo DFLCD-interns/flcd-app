@@ -313,7 +313,7 @@
 </Modal>
 
 <Modal title="Edit User Details" bind:open={EditModal} autoclose>
-  {console.log(editUser)}
+  <!-- {console.log(editUser)} -->
   <div class="mb-6">
       <Label class="block mb-2">First Name</Label>
       <Input value={editUser.first_name} />

@@ -62,7 +62,7 @@ export const actions = {
         }
 
         let userEmails = users.map((item) => (item.email));
-		console.log(old_email)
+		// console.log(old_email)
         if (email !== old_email) {
             if (userEmails.includes(email)) {
                 return fail(500, {

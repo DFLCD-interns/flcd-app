@@ -76,13 +76,15 @@
                 </tr>
                 {#if data.requestType === 'equipment'}
                     <tr>
-                        <td class="py-3 px-4 font-semibold">Promised Date of Borrowing</td>
+                        <td class="py-3 px-4 font-semibold">Scheduled Date of Borrowing</td>
                         <td class="py-3 px-4">{postgresTimeToReadable(data.startDate)}</td>
                     </tr>
+                    <!-- {#if data.requestedItems !== 'Printing Only'} -->
                     <tr>
-                        <td class="py-3 px-4 font-semibold">Promised Date of Return</td>
+                        <td class="py-3 px-4 font-semibold">Scheduled Date of Return</td>
                         <td class="py-3 px-4">{postgresTimeToReadable(requestDetails.promised_end_time)}</td>
                     </tr>
+                    <!-- {/if} -->
                     <!-- <tr>
                         <td class="py-3 px-4 font-semibold">Actual Date of Borrowing</td>
                         <td class="py-3 px-4">{postgresTimeToReadable(requestDetails.actual_start_time)}</td>

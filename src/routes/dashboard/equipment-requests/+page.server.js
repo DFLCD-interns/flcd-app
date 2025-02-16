@@ -1,5 +1,5 @@
 import { insertIntoTableDB, getLatestBaseRequestID, getUserFromSessionDB, getUserWithMatchingEmail, getUsersWithAccessLevel } from '$lib/server/db.js';
-import { mailRequesterOnResponse } from '$lib/server/emails.js'
+import { emailRequester_submit } from './emailWrapper.server.js';
 
 async function insertBaseRequest(user, data, isFLCD, instructor = null) {
     const base_fd = new FormData();
@@ -99,8 +99,7 @@ export const actions = {
                 }
             }
 
-            // const mailRes = await mailRequesterOnResponse(user.user_id, undefined); 
-            // console.log(mailRes);
+            await emailRequester_submit(user, "equipment_requests", request_id);
 
             return {
                 status: 200,
@@ -170,8 +169,8 @@ export const actions = {
             }
             await insertIntoTableDB('equipment_requests', form_data);
 
-            // const mailRes = await mailRequesterOnResponse(user.user_id, undefined); 
-            // console.log(mailRes);
+            const mailRes = await emailRequester_submit(user, 'equipment_requests', request_id);
+            console.log("mailres:", mailRes);
 
             return {
                 status: 200,
@@ -181,8 +180,8 @@ export const actions = {
                 }
             };
         } catch (error) {
-            console.error('meow')
-            console.error(error.message)
+            console.error('meow2')
+            console.error(error)
             return {
                 status: 500,
                 body: {
