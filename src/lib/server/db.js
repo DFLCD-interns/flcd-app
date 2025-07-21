@@ -5,11 +5,11 @@ import { postgresTimeToReadable } from '$lib';
 import { max } from 'date-fns/fp/max';
 
 const pool = new Pool({ //store this in an env file!
-  user: 'postgres',
-  host: 'localhost',
-  database: 'flcdtest',
-  password: 'password',
-  port: 5432, // Default PostgreSQL port
+  user: process.env.DBUSER,
+  host: process.env.DBHOST,
+  database: process.env.DBNAME,
+  password: process.env.DBPASSWORD,
+  port: process.env.DBPORT,
 });
 
 const table_names = [

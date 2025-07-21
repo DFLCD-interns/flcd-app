@@ -1,0 +1,36 @@
+services:
+  web: 
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+      - emailer
+    environment:
+      NODE_ENV: production
+      DATABSE_URL: postgres://postgres:password@db:5432/flcdtest
+      EMAIL_API_URL: http://emailer:5000/mailer
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: flcdtest
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/database_init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+  emailer:
+    build:
+      context: ./backend/gmailing
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000
+
+volumes:
+  postgres_data:
