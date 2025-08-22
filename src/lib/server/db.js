@@ -3,13 +3,10 @@ const { Pool } = pkg;
 import { format } from 'date-fns';
 import { postgresTimeToReadable } from '$lib';
 import { max } from 'date-fns/fp/max';
+import { env } from '$env/dynamic/private';
 
-const pool = new Pool({ //store this in an env file!
-  user: 'postgres',
-  host: 'localhost',
-  database: 'flcdtest',
-  password: 'password',
-  port: 5432, // Default PostgreSQL port
+const pool = new Pool({ 
+  connectionString: env.DB_URL
 });
 
 const table_names = [
