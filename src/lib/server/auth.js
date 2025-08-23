@@ -1,4 +1,4 @@
-//THINGS IN THIS FILE IS RUN ON THE SERVER
+//THINGS IN THIS FILE RUN ON THE SERVER
 
 import { writable, get } from "svelte/store";
 import { v4 as uuid } from "uuid";

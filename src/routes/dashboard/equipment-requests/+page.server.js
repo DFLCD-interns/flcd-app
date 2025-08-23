@@ -1,5 +1,6 @@
 import { insertIntoTableDB, getLatestBaseRequestID, getUserFromSessionDB, getUserWithMatchingEmail, getUsersWithAccessLevel } from '$lib/server/db.js';
 import { emailRequester_submit } from './emailWrapper.server.js';
+import { ADMIN_EMAIL } from '$lib/server/constants.js';
 
 async function insertBaseRequest(user, data, isFLCD, instructor = null) {
     const base_fd = new FormData();
@@ -53,7 +54,7 @@ export const actions = {
         let instructorEmail;
         if (isFLCD) {
             instructorEmail = data.get('instructor_email');
-            if (!instructorEmail.endsWith('@up.edu.ph')) {
+            if (!instructorEmail.endsWith('@up.edu.ph') && instructorEmail != ADMIN_EMAIL) {
                 instructorEmail = `${instructorEmail}@up.edu.ph`;
             }
             instructor = await getUserWithMatchingEmail(instructorEmail);
@@ -132,7 +133,7 @@ export const actions = {
         let instructorEmail;
         if (isFLCD) {
             instructorEmail = data.get('instructor_email');
-            if (!instructorEmail.endsWith('@up.edu.ph')) {
+            if (!instructorEmail.endsWith('@up.edu.ph') && instructorEmail != ADMIN_EMAIL) {
                 instructorEmail = `${instructorEmail}@up.edu.ph`;
             }
             instructor = await getUserWithMatchingEmail(instructorEmail);

@@ -1,5 +1,6 @@
 import { insertIntoTableDB, getLatestBaseRequestID, getUserFromSessionDB, getUserWithMatchingEmail, getUsersWithAccessLevel } from '$lib/server/db.js';
-import { mailuser } from '$lib/server/emails.js'
+import { mailuser } from '$lib/server/emails.js';
+import { ADMIN_EMAIL } from '$lib/server/constants';
 
 async function insertBaseRequest(user, data, isFLCD, instructor = null) {
     const base_fd = new FormData();
@@ -52,7 +53,7 @@ export const actions = {
         let instructor;
         if (isFLCD) {
             let instructorEmail = data.get('instructor_email');
-            if (!instructorEmail.endsWith('@up.edu.ph')) {
+            if (!instructorEmail.endsWith('@up.edu.ph') && instructorEmail != ADMIN_EMAIL) {
                 instructorEmail = `${instructorEmail}@up.edu.ph`;
             }
             instructor = await getUserWithMatchingEmail(instructorEmail);

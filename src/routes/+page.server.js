@@ -8,7 +8,7 @@ export const actions = {
 		const formData = await request.formData();
 		const password = formData.get("password");
 		let email = formData.get("email");
-		if (email != 'guest@gmail.com' && !email.endsWith('@up.edu.ph')) {
+		if (email != 'guest@gmail.com' && !email.endsWith('@up.edu.ph') && email != ADMIN_EMAIL) {
 			email = `${email}@up.edu.ph`;
 		}
 

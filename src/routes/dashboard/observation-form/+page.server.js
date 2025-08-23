@@ -1,5 +1,5 @@
 import { createObservationRequestServer } from "./requests.server.js"
-import {SESSION_COOKIE_NAME} from "$lib/server/constants.js"
+import { SESSION_COOKIE_NAME, ADMIN_EMAIL } from "$lib/server/constants.js"
 import { getSections, getUnavailable, getUnavailableWSection, getUserWithMatchingEmail} from "../../../lib/server/db.js";
 
 export const actions = {
@@ -34,7 +34,7 @@ export const actions = {
         let instructorEmail;
         
         instructorEmail = formData.get('instructor_email');
-        if (!instructorEmail.endsWith('@up.edu.ph')) {
+        if (!instructorEmail.endsWith('@up.edu.ph') && instructorEmail != ADMIN_EMAIL) {
             instructorEmail = `${instructorEmail}@up.edu.ph`;
         }
         instructor = await getUserWithMatchingEmail(instructorEmail);
