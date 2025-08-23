@@ -1,4 +1,4 @@
-import { SESSION_COOKIE_NAME, ADMIN_EMAIL } from '$lib/server/constants.js';
+import { SESSION_COOKIE_NAME } from '$lib/server/constants.js';
 import { createUser, createSessionByEmail } from '$lib/server/auth.js';
 import { fail, redirect } from "@sveltejs/kit";
 
@@ -16,7 +16,7 @@ export const actions = {
         const course = formData.get("course");
         let department = formData.get("department");
 
-        if (!email.endsWith('@up.edu.ph') && email != ADMIN_EMAIL) {
+        if (!email.endsWith('@up.edu.ph')) {
             return fail(500, {
                 email,
                 password,
